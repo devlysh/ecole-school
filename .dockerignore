@@ -1,0 +1,9 @@
+infrastructure
+cdk.out
+node_modules
+.git
+.gitignore
+Dockerfile
+README.md
+*.log
+*.md
