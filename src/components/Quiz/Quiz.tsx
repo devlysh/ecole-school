@@ -37,6 +37,7 @@ const Quiz = () => {
   return (
     <div>
       <div>Progress: {percent}%</div>
+      <div className="text-sm">{questions[currentStep].title}</div>
       <div>{questions[currentStep].text}</div>
       <div>
         {currentQuestion.image && (
