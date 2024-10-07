@@ -1,7 +1,7 @@
 import UnderConstruction from "@/components/UnderConstruction";
 
-const Home = () => {
+const HomePage = () => {
   return <UnderConstruction />;
 };
 
-export default Home;
+export default HomePage;

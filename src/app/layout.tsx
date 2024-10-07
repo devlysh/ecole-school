@@ -2,6 +2,7 @@ import { Poppins } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/theme";
+import "./globals.css";
 
 const pippin = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
