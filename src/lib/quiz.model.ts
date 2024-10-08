@@ -35,7 +35,7 @@ export const steps: Step[] = [
       "I need it for my job or career growth",
       "I live in a country where the language is spoken",
       "I’m learning it for personal development and fun",
-      "Other",
+      "%TEXT%",
     ],
   },
   {
@@ -90,5 +90,15 @@ export const steps: Step[] = [
       width: 180,
       height: 180,
     },
+  },
+  {
+    id: 10,
+    text: "What is your name?",
+    answers: ["%TEXT%"],
+  },
+  {
+    id: 10,
+    text: "What is your email?",
+    answers: ["%EMAIL%"],
   },
 ];

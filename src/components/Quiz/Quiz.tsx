@@ -8,12 +8,14 @@ import { Progress } from "@nextui-org/progress";
 import { Button } from "@nextui-org/button";
 import { Card } from "@nextui-org/card";
 import { QuizState, Step } from "@/lib/types";
+import { Input } from "@nextui-org/input";
 
 const Quiz = () => {
   const router = useRouter();
   const [quizState, setQuizState] = useState<QuizState>(
     QuizService.initializeQuiz(steps)
   );
+  const [customAnswer, setCustomAnswer] = useState("");
 
   const currentQuestion = useMemo<Step>(
     () => steps[quizState.currentStep],
@@ -55,6 +57,7 @@ const Quiz = () => {
       state = QuizService.goToNextStep(state);
       return state;
     });
+    setCustomAnswer("");
   }, []);
 
   useEffect(() => {
@@ -92,13 +95,38 @@ const Quiz = () => {
         )}
         {currentQuestion.answers &&
           currentQuestion.answers.map((answer) => (
-            <Card key={answer} className="m-4 w-full">
-              <div
-                className="cursor-pointer p-4"
-                onClick={() => handleAnswer(answer)}
-              >
-                {answer}
-              </div>
+            <Card key={answer} className="w-full m-4">
+              {answer === "%TEXT%" || answer === "%EMAIL%" ? (
+                <div className="p-4">
+                  <Input
+                    type={answer === "%EMAIL%" ? "email" : "text"}
+                    placeholder={
+                      answer === "%EMAIL%"
+                        ? "Enter your email"
+                        : "Enter your answer"
+                    }
+                    value={customAnswer}
+                    onChange={(e) => setCustomAnswer(e.target.value)}
+                    className="w-full mb-4"
+                  />
+                  <Button
+                    className="w-full"
+                    variant="solid"
+                    color="secondary"
+                    onClick={() => handleAnswer(customAnswer)}
+                    disabled={!customAnswer.trim()}
+                  >
+                    Submit
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  className="cursor-pointer p-4"
+                  onClick={() => handleAnswer(answer)}
+                >
+                  {answer}
+                </div>
+              )}
             </Card>
           ))}
         <div className="mt-8">
