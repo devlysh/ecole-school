@@ -8,7 +8,8 @@ export interface Step {
 
 export interface Answer {
   id: number;
-  text: string | null;
+  text: string;
+  question: string;
 }
 
 export interface QuizState {

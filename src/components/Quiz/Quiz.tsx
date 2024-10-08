@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { questions } from "@/lib/quiz.model";
 import QuizService from "@/lib/quiz.service";
 import Image from "next/image";
@@ -7,52 +7,71 @@ import { useRouter } from "next/navigation";
 import { Progress } from "@nextui-org/progress";
 import { Button } from "@nextui-org/button";
 import { Card } from "@nextui-org/card";
+import { QuizState, Step } from "@/lib/types";
 
 const Quiz = () => {
   const router = useRouter();
-  const [quizState, setQuizState] = useState(
+  const [quizState, setQuizState] = useState<QuizState>(
     QuizService.initializeQuiz(questions)
   );
 
-  const currentQuestion = useMemo(
+  const currentQuestion = useMemo<Step>(
     () => questions[quizState.currentStep],
     [quizState.currentStep]
   );
 
-  const isFirstStep = useMemo(
+  const isFirstStep = useMemo<boolean>(
     () => QuizService.isFirstStep(quizState),
     [quizState]
   );
 
-  const isLastStep = useMemo(
-    () => QuizService.isLastStep(quizState),
+  const isQuizComplete = useMemo<boolean>(
+    () => QuizService.isQuizComplete(quizState),
     [quizState]
   );
 
-  const percent = useMemo(
+  const percent = useMemo<number>(
     () => QuizService.calculateProgress(quizState, questions),
-    [quizState, questions]
+    [quizState]
   );
 
   const handleNext = useCallback(() => {
-    if (isLastStep) {
-      router.push("/");
-      return;
-    }
-    setQuizState(QuizService.goToNextStep(quizState));
-  }, [isLastStep, quizState, router]);
+    setQuizState((prevState) => {
+      let state: QuizState;
+      state = QuizService.submitAnswer(
+        prevState,
+        questions[prevState.currentStep].text,
+        "Ok"
+      );
+      state = QuizService.goToNextStep(state);
+      return state;
+    });
+  }, []);
 
   const handlePrevious = useCallback(() => {
-    setQuizState(QuizService.goToPreviousStep(quizState));
-  }, [quizState]);
+    setQuizState((prevState) => QuizService.goToPreviousStep(prevState));
+  }, []);
 
-  const handleAnswer = useCallback(
-    (answer: string) => {
-      setQuizState(QuizService.submitAnswer(quizState, answer));
-      setQuizState(QuizService.goToNextStep(quizState));
-    },
-    [quizState]
-  );
+  const handleAnswer = useCallback((answer: string) => {
+    setQuizState((prevState) => {
+      let state: QuizState;
+      state = QuizService.submitAnswer(
+        prevState,
+        questions[prevState.currentStep].text,
+        answer
+      );
+      state = QuizService.goToNextStep(state);
+      return state;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isQuizComplete) {
+      router.push("/");
+      console.log(quizState);
+      localStorage.setItem("quizAnswers", JSON.stringify(quizState.answers));
+    }
+  }, [quizState, isQuizComplete, router]);
 
   return (
     <div className="flex flex-col justify-center items-center mt-12">
@@ -73,14 +92,15 @@ const Quiz = () => {
             alt={currentQuestion.text}
             width={currentQuestion.image.width}
             height={currentQuestion.image.height}
+            priority
           />
         )}
         {currentQuestion.answers &&
-          currentQuestion.answers.map((answer, i) => (
+          currentQuestion.answers.map((answer) => (
             <Card key={answer} className="m-4 w-full">
               <div
                 className="cursor-pointer p-4"
-                onClick={() => handleAnswer(`${i + 1}`)}
+                onClick={() => handleAnswer(answer)}
               >
                 {answer}
               </div>

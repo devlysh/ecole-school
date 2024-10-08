@@ -16,9 +16,17 @@ export const QuizService = {
       ? { ...state, currentStep: state.currentStep - 1 }
       : state,
 
-  submitAnswer: (state: QuizState, text: string): QuizState => {
+  submitAnswer: (
+    state: QuizState,
+    questionText: string,
+    answerText: string
+  ): QuizState => {
     const updatedAnswers: Answer[] = [...state.answers];
-    updatedAnswers[state.currentStep] = { id: state.currentStep, text };
+    updatedAnswers[state.currentStep] = {
+      id: state.currentStep,
+      text: answerText,
+      question: questionText,
+    };
     return { ...state, answers: updatedAnswers };
   },
 
