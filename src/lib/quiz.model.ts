@@ -4,7 +4,7 @@ export const steps: Step[] = [
   {
     id: 1,
     title: "Perfect Teacher Match",
-    text: "We match you with a native-level teacher to fit your goals and schedule",
+    text: "We match you with a native - level teacher to fit your goals and schedule",
     image: { url: "hands-puzzle.png", width: 217, height: 265 },
   },
   {
@@ -63,7 +63,7 @@ export const steps: Step[] = [
   {
     id: 7,
     title: "Your Goals First",
-    text: "Our program adapts to your goals—learn what matters most, from work vocabulary to conversation!",
+    text: "Our program adapts to your goals — learn what matters most, from work vocabulary to conversation!",
     image: {
       url: "notebook.png",
       width: 180,
