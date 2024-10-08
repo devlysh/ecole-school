@@ -84,7 +84,7 @@ export const questions: Step[] = [
   {
     id: 9,
     title: "Flexible Subscription",
-    text: "Change or cancel your subscription anytime—your plan, your control",
+    text: "Change or cancel your subscription anytime — your plan, your control",
     image: {
       url: "handshake.png",
       width: 180,

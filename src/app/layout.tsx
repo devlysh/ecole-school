@@ -1,7 +1,5 @@
 import { Poppins } from "next/font/google";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
-import { ThemeProvider } from "@mui/material/styles";
-import theme from "@/theme";
+import { NextUIProvider } from "@nextui-org/react";
 import "./globals.css";
 
 const pippin = Poppins({
@@ -19,9 +17,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
       <body className={pippin.className}>
-        <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>{children}</ThemeProvider>
-        </AppRouterCacheProvider>
+        <NextUIProvider>{children}</NextUIProvider>
       </body>
     </html>
   );

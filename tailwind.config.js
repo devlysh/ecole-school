@@ -4,7 +4,7 @@ import { nextui } from "@nextui-org/theme";
 export const content = [
   "./src/app/**/*.{js,ts,jsx,tsx}",
   "./src/components/**/*.{js,ts,jsx,tsx}",
-  "./node_modules/@nextui-org/theme/dist/components/(button|ripple|spinner).js",
+  "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
 ];
 export const theme = {
   extend: {},
