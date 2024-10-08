@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { questions } from "@/lib/quiz.model";
 import QuizService from "@/lib/quiz.service";
 import Image from "next/image";
@@ -14,27 +14,45 @@ const Quiz = () => {
     QuizService.initializeQuiz(questions)
   );
 
-  const currentStep = quizState.currentStep;
-  const currentQuestion = questions[quizState.currentStep];
-  const firstStep = currentStep === 0;
-  const lastStep = currentStep === questions.length - 1;
-  const percent = (currentStep / (questions.length - 1)) * 100;
+  const currentQuestion = useMemo(
+    () => questions[quizState.currentStep],
+    [quizState.currentStep]
+  );
 
-  const handleNext = () => {
-    if (lastStep) {
+  const isFirstStep = useMemo(
+    () => QuizService.isFirstStep(quizState),
+    [quizState]
+  );
+
+  const isLastStep = useMemo(
+    () => QuizService.isLastStep(quizState),
+    [quizState]
+  );
+
+  const percent = useMemo(
+    () => QuizService.calculateProgress(quizState, questions),
+    [quizState, questions]
+  );
+
+  const handleNext = useCallback(() => {
+    if (isLastStep) {
       router.push("/");
+      return;
     }
-
     setQuizState(QuizService.goToNextStep(quizState));
-  };
+  }, [isLastStep, quizState, router]);
 
-  const handlePrevious = () =>
+  const handlePrevious = useCallback(() => {
     setQuizState(QuizService.goToPreviousStep(quizState));
+  }, [quizState]);
 
-  const handleAnswer = (answer: string) => {
-    setQuizState(QuizService.submitAnswer(quizState, answer));
-    setQuizState(QuizService.goToNextStep(quizState));
-  };
+  const handleAnswer = useCallback(
+    (answer: string) => {
+      setQuizState(QuizService.submitAnswer(quizState, answer));
+      setQuizState(QuizService.goToNextStep(quizState));
+    },
+    [quizState]
+  );
 
   return (
     <div className="flex flex-col justify-center items-center mt-12">
@@ -46,9 +64,9 @@ const Quiz = () => {
           className="mb-8"
         />
         <div className="text-sm mb-8 text-secondary">
-          {questions[currentStep].title}
+          {currentQuestion.title}
         </div>
-        <div className="text-3xl mb-8">{questions[currentStep].text}</div>
+        <div className="text-3xl mb-8">{currentQuestion.text}</div>
         {currentQuestion.image && (
           <Image
             src={`/${currentQuestion.image.url}`}
@@ -71,12 +89,17 @@ const Quiz = () => {
         <div className="mt-8">
           {!currentQuestion.answers && (
             <div>
-              <Button className="mb-4" variant="solid" color="secondary" onClick={handleNext}>
+              <Button
+                className="mb-4"
+                variant="solid"
+                color="secondary"
+                onClick={handleNext}
+              >
                 Got it &gt;
               </Button>
             </div>
           )}
-          {!firstStep && (
+          {!isFirstStep && (
             <div>
               <Button size="sm" variant="light" onClick={handlePrevious}>
                 &lt; Back
