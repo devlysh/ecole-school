@@ -14,5 +14,6 @@ export interface Answer {
 
 export interface QuizState {
   currentStep: number;
+  steps: Step[];
   answers: Answer[];
 }

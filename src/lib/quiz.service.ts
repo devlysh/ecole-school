@@ -1,9 +1,10 @@
 import { Answer, Step, QuizState } from "./types";
 
 export const QuizService = {
-  initializeQuiz: (questions: Step[]): QuizState => ({
+  initializeQuiz: (steps: Step[]): QuizState => ({
     currentStep: 0,
-    answers: Array(questions.length).fill(null),
+    steps,
+    answers: Array(steps.length).fill(null),
   }),
 
   goToNextStep: (state: QuizState): QuizState =>
@@ -16,16 +17,12 @@ export const QuizService = {
       ? { ...state, currentStep: state.currentStep - 1 }
       : state,
 
-  submitAnswer: (
-    state: QuizState,
-    questionText: string,
-    answerText: string
-  ): QuizState => {
+  submitAnswer: (state: QuizState, answerText: string): QuizState => {
     const updatedAnswers: Answer[] = [...state.answers];
     updatedAnswers[state.currentStep] = {
       id: state.currentStep,
       text: answerText,
-      question: questionText,
+      question: state.steps[state.currentStep].text,
     };
     return { ...state, answers: updatedAnswers };
   },
@@ -34,16 +31,16 @@ export const QuizService = {
     state.currentStep === state.answers.length - 1 &&
     state.answers.every((answer) => answer !== null),
 
-  resetQuiz: (questions: Step[]): QuizState =>
-    QuizService.initializeQuiz(questions),
+  resetQuiz: (steps: Step[]): QuizState =>
+    QuizService.initializeQuiz(steps),
 
   isFirstStep: (state: QuizState): boolean => state.currentStep === 0,
 
   isLastStep: (state: QuizState): boolean =>
     state.currentStep === state.answers.length - 1,
 
-  calculateProgress: (state: QuizState, questions: Step[]): number =>
-    (state.currentStep / (questions.length - 1)) * 100,
+  calculateProgress: (state: QuizState): number =>
+    (state.currentStep / (state.steps.length - 1)) * 100,
 };
 
 export default QuizService;

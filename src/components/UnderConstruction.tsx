@@ -41,15 +41,19 @@ const UnderConstruction = () => {
         Want to be the first to know when we launch? Follow the updates!
       </h3>
       <Card className="p-8 m-8">
-        {quizAnswers?.map((answer, i) => (
-          <div key={answer.id}>
-            <div className="p-4">
-              <div className="italic">{answer.question}</div>
-              <div className="font-bold">{answer.text}</div>
+        {quizAnswers ? (
+          quizAnswers?.map((answer, i) => (
+            <div key={answer.id}>
+              <div className="p-4">
+                <div className="italic">{answer.question}</div>
+                <div className="font-bold">{answer.text}</div>
+              </div>
+              {i < quizAnswers.length - 1 && <hr />}
             </div>
-            {i < quizAnswers.length - 1 && <hr />}
-          </div>
-        ))}
+          ))
+        ) : (
+          <div>Loading...</div>
+        )}
       </Card>
     </main>
   );

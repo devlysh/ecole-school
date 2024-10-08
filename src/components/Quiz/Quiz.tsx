@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { questions } from "@/lib/quiz.model";
+import { steps } from "@/lib/quiz.model";
 import QuizService from "@/lib/quiz.service";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,11 +12,11 @@ import { QuizState, Step } from "@/lib/types";
 const Quiz = () => {
   const router = useRouter();
   const [quizState, setQuizState] = useState<QuizState>(
-    QuizService.initializeQuiz(questions)
+    QuizService.initializeQuiz(steps)
   );
 
   const currentQuestion = useMemo<Step>(
-    () => questions[quizState.currentStep],
+    () => steps[quizState.currentStep],
     [quizState.currentStep]
   );
 
@@ -31,18 +31,14 @@ const Quiz = () => {
   );
 
   const percent = useMemo<number>(
-    () => QuizService.calculateProgress(quizState, questions),
+    () => QuizService.calculateProgress(quizState),
     [quizState]
   );
 
   const handleNext = useCallback(() => {
     setQuizState((prevState) => {
       let state: QuizState;
-      state = QuizService.submitAnswer(
-        prevState,
-        questions[prevState.currentStep].text,
-        "Ok"
-      );
+      state = QuizService.submitAnswer(prevState, "Ok");
       state = QuizService.goToNextStep(state);
       return state;
     });
@@ -55,11 +51,7 @@ const Quiz = () => {
   const handleAnswer = useCallback((answer: string) => {
     setQuizState((prevState) => {
       let state: QuizState;
-      state = QuizService.submitAnswer(
-        prevState,
-        questions[prevState.currentStep].text,
-        answer
-      );
+      state = QuizService.submitAnswer(prevState, answer);
       state = QuizService.goToNextStep(state);
       return state;
     });
@@ -69,7 +61,10 @@ const Quiz = () => {
     if (isQuizComplete) {
       router.push("/");
       console.log(quizState);
-      localStorage.setItem("quizAnswers", JSON.stringify(quizState.answers));
+      localStorage.setItem(
+        "quizAnswers",
+        JSON.stringify(quizState.answers.filter((_, i) => steps[i].answers))
+      );
     }
   }, [quizState, isQuizComplete, router]);
 

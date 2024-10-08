@@ -1,6 +1,6 @@
 import { Step } from "./types";
 
-export const questions: Step[] = [
+export const steps: Step[] = [
   {
     id: 1,
     title: "Perfect Teacher Match",
