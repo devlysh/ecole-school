@@ -94,7 +94,7 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       this,
       "EcoleSchoolApp",
       {
-        directory: "../",
+        directory: "../../",
         platform: ecr_assets.Platform.LINUX_AMD64,
       }
     );
@@ -119,12 +119,8 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       source: apprunner.Source.fromAsset({
         imageConfiguration: {
           port: 3000,
-          environment: {
-            DATABASE_URL: `postgresql://${dbCredentialsSecret.secretValueFromJson(
-              "username"
-            )}:${dbCredentialsSecret.secretValueFromJson("password")}@${
-              dbInstance.instanceEndpoint.hostname
-            }:5432/ecoleschool`,
+          environmentVariables: {
+            DATABASE_SECRET_ARN: dbCredentialsSecret.secretArn,
             COGNITO_USER_POOL_ID: userPool.userPoolId,
             COGNITO_USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
           },
