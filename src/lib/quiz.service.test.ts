@@ -1,5 +1,5 @@
 import { QuizService } from "./quiz.service";
-import { Answer, Step, QuizState } from "./types";
+import { Step, QuizState } from "./types";
 
 const steps: Step[] = [
   { id: 1, text: "Question 1" },
@@ -71,7 +71,6 @@ describe("QuizService", () => {
   });
 
   test("resetQuiz should reinitialize the quiz to the initial state", () => {
-    const answeredState = QuizService.submitAnswer(initialState, "Answer 1");
     const resetState = QuizService.resetQuiz(steps);
     expect(resetState).toEqual(initialState);
   });
