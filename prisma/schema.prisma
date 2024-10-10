@@ -1,0 +1,252 @@
+// schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  dateJoined   DateTime @default(now()) @map("date_joined")
+  isActive     Boolean  @default(true) @map("is_active")
+
+  roles         UserRole[]
+  subscriptions Subscription[]
+  credits       Credit[]
+  notifications Notification[]
+  payments      Payment[]
+  lessonNotes   LessonNote[]
+  student       Student?
+  teacher       Teacher?
+
+  @@index([email], name: "idx_user_email")
+  @@index([isActive], name: "idx_user_is_active")
+  @@map("users")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  users UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  userId Int @map("user_id")
+  roleId Int @map("role_id")
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+  @@index([userId], name: "idx_user_roles_user_id")
+  @@index([roleId], name: "idx_user_roles_role_id")
+  @@map("user_roles")
+}
+
+model SubscriptionPlan {
+  id              Int     @id @default(autoincrement())
+  name            String
+  cost            Float
+  durationMonths  Int     @map("duration_months")
+  credits         Int
+  description     String?
+  stripeProductId String? @map("stripe_product_id")
+  stripePriceId   String? @map("stripe_price_id")
+
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id                   Int       @id @default(autoincrement())
+  userId               Int       @map("user_id")
+  planId               Int       @map("plan_id")
+  startDate            DateTime  @map("start_date")
+  endDate              DateTime  @map("end_date")
+  status               String
+  stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
+  autoRenew            Boolean   @default(true) @map("auto_renew")
+  nextBillingDate      DateTime? @map("next_billing_date")
+  cancellationDate     DateTime? @map("cancellation_date")
+
+  user User             @relation(fields: [userId], references: [id])
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@index([userId], name: "idx_subscription_user_id")
+  @@index([status], name: "idx_subscription_status")
+  @@map("subscriptions")
+}
+
+model Credit {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  issuedDate     DateTime  @default(now()) @map("issued_date")
+  expirationDate DateTime  @map("expiration_date")
+  usedDate       DateTime?
+  status         String
+  lessonId       Int?      @unique @map("lesson_id")
+
+  user   User          @relation(fields: [userId], references: [id])
+  lesson BookedLesson? @relation("LessonCredit")
+
+  @@index([userId], name: "idx_credit_user_id")
+  @@index([status], name: "idx_credit_status")
+  @@index([issuedDate], name: "idx_credit_issued_date")
+  @@index([expirationDate], name: "idx_credit_expiration_date")
+  @@map("credits")
+}
+
+model Language {
+  id   Int     @id @default(autoincrement())
+  name String  @unique
+  code String? @unique
+
+  teacherLanguages TeacherLanguage[]
+
+  @@map("languages")
+}
+
+model Teacher {
+  userId   Int   @id @map("user_id")
+  settings Json?
+
+  user           User              @relation(fields: [userId], references: [id])
+  availableHours AvailableHour[]
+  students       Student[]
+  languages      TeacherLanguage[]
+  BookedLesson   BookedLesson[]
+
+  @@map("teachers")
+}
+
+model Student {
+  userId            Int   @id @map("user_id")
+  assignedTeacherId Int?  @map("assigned_teacher_id")
+  settings          Json?
+
+  user    User           @relation(fields: [userId], references: [id])
+  teacher Teacher?       @relation(fields: [assignedTeacherId], references: [userId])
+  lessons BookedLesson[]
+
+  @@index([assignedTeacherId], name: "idx_student_assigned_teacher_id")
+  @@map("students")
+}
+
+model TeacherLanguage {
+  teacherId  Int @map("teacher_id")
+  languageId Int @map("language_id")
+
+  teacher  Teacher  @relation(fields: [teacherId], references: [userId])
+  language Language @relation(fields: [languageId], references: [id])
+
+  @@id([teacherId, languageId])
+  @@map("teacher_languages")
+}
+
+model AvailableHour {
+  id             Int      @id @default(autoincrement())
+  teacherId      Int      @map("teacher_id")
+  startTime      DateTime @map("start_time")
+  endTime        DateTime @map("end_time")
+  recurrenceRule String?
+  timezone       String?
+
+  teacher Teacher @relation(fields: [teacherId], references: [userId])
+
+  @@index([teacherId], name: "idx_available_hours_teacher_id")
+  @@index([startTime], name: "idx_available_hours_start_time")
+  @@index([endTime], name: "idx_available_hours_end_time")
+  @@map("available_hours")
+}
+
+model BookedLesson {
+  id            Int      @id @default(autoincrement())
+  studentId     Int      @map("student_id")
+  teacherId     Int      @map("teacher_id")
+  scheduledTime DateTime @map("scheduled_time")
+  duration      Int
+  status        String
+  zoomLink      String?
+  creditId      Int?     @unique @map("credit_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [userId])
+  teacher Teacher @relation(fields: [teacherId], references: [userId])
+  credit  Credit? @relation("LessonCredit", fields: [creditId], references: [id])
+
+  notes LessonNote[]
+
+  @@index([studentId], name: "idx_booked_lessons_student_id")
+  @@index([teacherId], name: "idx_booked_lessons_teacher_id")
+  @@index([scheduledTime], name: "idx_booked_lessons_scheduled_time")
+  @@map("booked_lessons")
+}
+
+model Notification {
+  id               Int       @id @default(autoincrement())
+  userId           Int       @map("user_id")
+  message          String
+  notificationType String    @map("notification_type")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  readAt           DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "idx_notifications_user_id")
+  @@index([notificationType], name: "idx_notifications_type")
+  @@map("notifications")
+}
+
+model LessonNote {
+  id        Int      @id @default(autoincrement())
+  lessonId  Int      @map("lesson_id")
+  userId    Int      @map("user_id")
+  noteText  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  lesson BookedLesson @relation(fields: [lessonId], references: [id])
+  user   User         @relation(fields: [userId], references: [id])
+
+  @@index([lessonId], name: "idx_lesson_notes_lesson_id")
+  @@index([userId], name: "idx_lesson_notes_user_id")
+  @@map("lesson_notes")
+}
+
+model Payment {
+  id                    Int      @id @default(autoincrement())
+  userId                Int      @map("user_id")
+  amount                Float
+  currency              String
+  paymentDate           DateTime @default(now()) @map("payment_date")
+  paymentMethod         String   @map("payment_method")
+  stripePaymentIntentId String?  @unique @map("stripe_payment_intent_id")
+  status                String
+  description           String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "idx_payments_user_id")
+  @@index([paymentDate], name: "idx_payments_payment_date")
+  @@map("payments")
+}
+
+model SystemSetting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+
+  @@map("system_settings")
+}
