@@ -20,10 +20,10 @@
     "typescript": "~5.6.2"
   },
   "dependencies": {
-    "@aws-cdk/aws-apprunner": "^1.204.0",
+    "@aws-cdk/aws-apprunner": "^1.157.0",
     "@aws-cdk/aws-apprunner-alpha": "^2.161.1-alpha.0",
-    "@aws-cdk/aws-ecr": "^1.204.0",
-    "@aws-cdk/aws-ecr-assets": "^1.204.0",
+    "@aws-cdk/aws-ecr": "^1.142.0",
+    "@aws-cdk/aws-ecr-assets": "^1.19.0",
     "aws-cdk-lib": "2.161.1",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
