@@ -10,15 +10,8 @@ RUN npm install
 # Copy the application files
 COPY . .
 
-# DB
-## Generate Prisma client
+# Generate Prisma client
 RUN npx prisma generate
-
-## Run Prisma migrations
-RUN npx prisma migrate deploy
-
-## Run Prisma seed
-RUN npm run prisma:seed
 
 # Build the application
 RUN npm run build

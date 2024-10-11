@@ -41,8 +41,8 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       vpc,
       credentials: rds.Credentials.fromSecret(dbCredentialsSecret),
       instanceType: ec2.InstanceType.of(
-        ec2.InstanceClass.BURSTABLE2,
-        ec2.InstanceSize.MICRO
+        ec2.InstanceClass.BURSTABLE3,
+        ec2.InstanceSize.MEDIUM
       ),
       allocatedStorage: 20,
       maxAllocatedStorage: 100,
@@ -114,7 +114,10 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       }
     );
 
-    // 7. App Runner service with environment variables for Prisma and Cognito
+    // Grant instance role read access to the database secret
+    dbCredentialsSecret.grantRead(instanceRole);
+
+    // 7. App Runner service configuration without DATABASE_URL
     const service = new apprunner.Service(this, "EcoleSchoolAppRunnerService", {
       source: apprunner.Source.fromAsset({
         imageConfiguration: {
