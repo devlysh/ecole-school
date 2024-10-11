@@ -4,6 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
+  // Seed languages
   const languages = [
     { code: "en", name: "English" },
     { code: "es", name: "Spanish" },
@@ -22,6 +23,48 @@ async function main() {
   }
 
   console.log("Languages table populated!");
+
+  // Seed subscription plans
+  const plans = [
+    {
+      name: "5 Classes",
+      cost: 185,
+      durationMonths: 1,
+      credits: 5,
+      description: null,
+    },
+    {
+      name: "12 Classes",
+      cost: 372,
+      durationMonths: 1,
+      credits: 12,
+      description: "16% discount",
+    },
+    {
+      name: "20 Classes",
+      cost: 518,
+      durationMonths: 1,
+      credits: 20,
+      description: "30% discount",
+    },
+    {
+      name: "40 Classes",
+      cost: 888,
+      durationMonths: 1,
+      credits: 40,
+      description: "40% discount",
+    },
+  ];
+
+  for (const plan of plans) {
+    await prisma.subscriptionPlan.upsert({
+      where: { name: plan.name },
+      update: {},
+      create: plan,
+    });
+  }
+
+  console.log("Subscription plans table populated!");
 }
 
 main()

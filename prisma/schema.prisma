@@ -56,13 +56,14 @@ model UserRole {
 
 model SubscriptionPlan {
   id              Int     @id @default(autoincrement())
-  name            String
+  name            String  @unique
   cost            Float
+  currency        String  @default("usd")
   durationMonths  Int     @map("duration_months")
   credits         Int
   description     String?
   stripeProductId String? @map("stripe_product_id")
-  stripePriceId   String? @map("stripe_price_id")
+  stripePlanId    String? @map("stripe_plan_id")
 
   subscriptions Subscription[]
 

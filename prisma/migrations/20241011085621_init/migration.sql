@@ -33,11 +33,12 @@ CREATE TABLE "subscription_plans" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "cost" DOUBLE PRECISION NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'usd',
     "duration_months" INTEGER NOT NULL,
     "credits" INTEGER NOT NULL,
     "description" TEXT,
     "stripe_product_id" TEXT,
-    "stripe_price_id" TEXT,
+    "stripe_plan_id" TEXT,
 
     CONSTRAINT "subscription_plans_pkey" PRIMARY KEY ("id")
 );
@@ -197,6 +198,9 @@ CREATE INDEX "idx_user_roles_user_id" ON "user_roles"("user_id");
 
 -- CreateIndex
 CREATE INDEX "idx_user_roles_role_id" ON "user_roles"("role_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "subscription_plans_name_key" ON "subscription_plans"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "subscriptions_stripe_subscription_id_key" ON "subscriptions"("stripe_subscription_id");
