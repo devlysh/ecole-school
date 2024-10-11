@@ -54,11 +54,22 @@ model UserRole {
   @@map("user_roles")
 }
 
+model Currency {
+  id   Int    @id @default(autoincrement())
+  code String @unique
+  name String @unique
+
+  subscriptionPlans SubscriptionPlan[]
+  payments          Payment[]
+
+  @@map("currencies")
+}
+
 model SubscriptionPlan {
   id              Int     @id @default(autoincrement())
   name            String  @unique
   cost            Float
-  currency        String  @default("usd")
+  currencyId      Int     @map("currency_id")
   durationMonths  Int     @map("duration_months")
   credits         Int
   description     String?
@@ -66,6 +77,7 @@ model SubscriptionPlan {
   stripePlanId    String? @map("stripe_plan_id")
 
   subscriptions Subscription[]
+  currency      Currency       @relation(fields: [currencyId], references: [id])
 
   @@map("subscription_plans")
 }
@@ -230,14 +242,15 @@ model Payment {
   id                    Int      @id @default(autoincrement())
   userId                Int      @map("user_id")
   amount                Float
-  currency              String
+  currencyId            Int      @map("currency_id")
   paymentDate           DateTime @default(now()) @map("payment_date")
   paymentMethod         String   @map("payment_method")
   stripePaymentIntentId String?  @unique @map("stripe_payment_intent_id")
   status                String
   description           String?
 
-  user User @relation(fields: [userId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  currency Currency @relation(fields: [currencyId], references: [id])
 
   @@index([userId], name: "idx_payments_user_id")
   @@index([paymentDate], name: "idx_payments_payment_date")

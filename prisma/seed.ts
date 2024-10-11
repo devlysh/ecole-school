@@ -4,6 +4,25 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
+  // Seed currencies
+  const currencies = [
+    { code: "USD", name: "US Dollar" },
+    { code: "EUR", name: "Euro" },
+    { code: "GBP", name: "British Pound" },
+    { code: "CAD", name: "Canadian Dollar" },
+    { code: "AUD", name: "Australian Dollar" },
+  ];
+
+  for (const currency of currencies) {
+    await prisma.currency.upsert({
+      where: { code: currency.code },
+      update: {},
+      create: currency,
+    });
+  }
+
+  console.log("Currencies table populated!");
+
   // Seed languages
   const languages = [
     { code: "en", name: "English" },
@@ -32,6 +51,8 @@ async function main() {
       durationMonths: 1,
       credits: 5,
       description: null,
+      currencyId: (await prisma.currency.findUnique({ where: { code: "USD" } }))
+        .id,
     },
     {
       name: "12 Classes",
@@ -39,6 +60,8 @@ async function main() {
       durationMonths: 1,
       credits: 12,
       description: "16% discount",
+      currencyId: (await prisma.currency.findUnique({ where: { code: "USD" } }))
+        .id,
     },
     {
       name: "20 Classes",
@@ -46,6 +69,8 @@ async function main() {
       durationMonths: 1,
       credits: 20,
       description: "30% discount",
+      currencyId: (await prisma.currency.findUnique({ where: { code: "USD" } }))
+        .id,
     },
     {
       name: "40 Classes",
@@ -53,6 +78,8 @@ async function main() {
       durationMonths: 1,
       credits: 40,
       description: "40% discount",
+      currencyId: (await prisma.currency.findUnique({ where: { code: "USD" } }))
+        .id,
     },
   ];
 
