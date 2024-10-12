@@ -1,24 +1,37 @@
 "use client";
 
 import logger from "@/lib/logger";
-import { Answer } from "@/lib/types";
+import { Answer, Language } from "@/lib/types";
 import { Card } from "@nextui-org/card";
 import { Spinner } from "@nextui-org/react";
+import { Currency } from "@prisma/client";
 import { useState, useEffect } from "react";
 
 const UnderConstruction = () => {
   const [quizAnswers, setQuizAnswers] = useState<Answer[]>();
+  const [language, setLanguage] = useState<Language["code"]>();
+  const [currency, setCurrency] = useState<Currency["code"]>();
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("quizAnswers");
-      if (raw) {
-        setQuizAnswers(JSON.parse(raw));
+      const rawQuizAnswers = localStorage.getItem("quizAnswers");
+      if (rawQuizAnswers) {
+        setQuizAnswers(JSON.parse(rawQuizAnswers));
+      }
+
+      const rawLanguage = localStorage.getItem("language");
+      if (rawLanguage) {
+        setLanguage(rawLanguage);
+      }
+
+      const rawCurrency = localStorage.getItem("currency");
+      if (rawCurrency) {
+        setCurrency(rawCurrency);
       }
     } catch (e) {
       logger.error("Failed to parse quiz answers from localStorage", e);
     }
-  }, []); // Empty dependency array to ensure it only runs once on mount
+  }, []);
 
   return (
     <main className="text-center px-5 py-12 text-gray-800">
@@ -44,15 +57,27 @@ const UnderConstruction = () => {
       </h3>
       <Card className="p-8 m-8">
         {quizAnswers ? (
-          quizAnswers?.map((answer, i) => (
-            <div key={answer.id}>
-              <div className="p-4">
-                <div className="italic">{answer.question}</div>
-                <div className="font-bold">{answer.text}</div>
+          <>
+            {quizAnswers?.map((answer, i) => (
+              <div key={answer.id}>
+                <div className="p-4">
+                  <div className="italic">{answer.question}</div>
+                  <div className="font-bold">{answer.text}</div>
+                </div>
+                {i < quizAnswers.length - 1 && <hr />}
               </div>
-              {i < quizAnswers.length - 1 && <hr />}
+            ))}
+            <hr />
+            <div className="p-4">
+              <div className="italic">Language</div>
+              <div className="font-bold">{language}</div>
             </div>
-          ))
+            <hr />
+            <div className="p-4">
+              <div className="italic">Currency</div>
+              <div className="font-bold">{currency}</div>
+            </div>
+          </>
         ) : (
           <Spinner size="sm" color="secondary" />
         )}
