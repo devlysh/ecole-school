@@ -62,8 +62,7 @@ const Quiz = () => {
 
   useEffect(() => {
     if (isQuizComplete) {
-      router.push("/");
-      console.log(quizState);
+      router.push("/choose-plan");
       localStorage.setItem(
         "quizAnswers",
         JSON.stringify(quizState.answers.filter((_, i) => steps[i].answers))
@@ -74,12 +73,7 @@ const Quiz = () => {
   return (
     <div className="flex flex-col justify-center items-center mt-12">
       <div className="w-1/2 text-center flex flex-col items-center">
-        <Progress
-          color="secondary"
-          aria-label="Loading..."
-          value={percent}
-          className="mb-8"
-        />
+        <Progress color="secondary" value={percent} className="mb-8" />
         <div className="text-sm mb-8 text-secondary">
           {currentQuestion.title}
         </div>

@@ -2,6 +2,7 @@
 
 import { Answer } from "@/lib/types";
 import { Card } from "@nextui-org/card";
+import { Spinner } from "@nextui-org/react";
 import { useState, useEffect } from "react";
 
 const UnderConstruction = () => {
@@ -52,7 +53,7 @@ const UnderConstruction = () => {
             </div>
           ))
         ) : (
-          <div>Loading...</div>
+          <Spinner size="sm" color="secondary" />
         )}
       </Card>
     </main>
