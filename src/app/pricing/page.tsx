@@ -1,7 +1,7 @@
 import Pricing from "@/components/Pricing";
 
-const ChoosePlanPage = () => {
+const PricingPage = () => {
   return <Pricing />;
 };
 
-export default ChoosePlanPage;
+export default PricingPage;
