@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 
-export async function GET() {
+export const GET = async () => {
   try {
     const languages = await prisma.language.findMany();
     return Response.json(languages);
@@ -8,4 +8,4 @@ export async function GET() {
     console.error("Error fetching languages:", error);
     return Response.json("Failed to fetch languages", { status: 500 });
   }
-}
+};
