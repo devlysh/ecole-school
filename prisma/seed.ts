@@ -3,14 +3,14 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-async function main() {
+const main = async () => {
   // Seed currencies
   const currencies = [
-    { code: "USD", name: "US Dollar" },
-    { code: "EUR", name: "Euro" },
-    { code: "GBP", name: "British Pound" },
-    { code: "CAD", name: "Canadian Dollar" },
-    { code: "AUD", name: "Australian Dollar" },
+    { code: "USD", name: "$ USD" },
+    { code: "EUR", name: "€ EUR" },
+    { code: "GBP", name: "£ GBP" },
+    { code: "CAD", name: "$ CAD" },
+    { code: "AUD", name: "$ AUD" },
   ];
 
   for (const currency of currencies) {
@@ -92,7 +92,7 @@ async function main() {
   }
 
   console.log("Subscription plans table populated!");
-}
+};
 
 main()
   .catch((e) => console.error(e))

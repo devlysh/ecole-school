@@ -29,11 +29,20 @@ CREATE TABLE "user_roles" (
 );
 
 -- CreateTable
+CREATE TABLE "currencies" (
+    "id" SERIAL NOT NULL,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "currencies_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "subscription_plans" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "cost" DOUBLE PRECISION NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'usd',
+    "currency_id" INTEGER NOT NULL,
     "duration_months" INTEGER NOT NULL,
     "credits" INTEGER NOT NULL,
     "description" TEXT,
@@ -162,7 +171,7 @@ CREATE TABLE "payments" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "amount" DOUBLE PRECISION NOT NULL,
-    "currency" TEXT NOT NULL,
+    "currency_id" INTEGER NOT NULL,
     "payment_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "payment_method" TEXT NOT NULL,
     "stripe_payment_intent_id" TEXT,
@@ -198,6 +207,12 @@ CREATE INDEX "idx_user_roles_user_id" ON "user_roles"("user_id");
 
 -- CreateIndex
 CREATE INDEX "idx_user_roles_role_id" ON "user_roles"("role_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "currencies_code_key" ON "currencies"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "currencies_name_key" ON "currencies"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "subscription_plans_name_key" ON "subscription_plans"("name");
@@ -287,6 +302,9 @@ ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_user_id_fkey" FOREIGN KEY ("
 ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "subscription_plans" ADD CONSTRAINT "subscription_plans_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "currencies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -333,3 +351,6 @@ ALTER TABLE "lesson_notes" ADD CONSTRAINT "lesson_notes_user_id_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "payments" ADD CONSTRAINT "payments_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payments" ADD CONSTRAINT "payments_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "currencies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
