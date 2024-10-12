@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import { Plan } from "@/lib/types";
 import Stripe from "stripe";
 
@@ -21,7 +22,7 @@ export const GET = async () => {
 
     return Response.json(plans);
   } catch (error) {
-    console.error("Error fetching plans:", error);
+    logger.error("Error fetching plans:", error);
     return Response.json("Failed to load subscription plans", { status: 500 });
   }
 };

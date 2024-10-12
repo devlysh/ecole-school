@@ -1,5 +1,6 @@
 "use client";
 
+import logger from "@/lib/logger";
 import { Answer } from "@/lib/types";
 import { Card } from "@nextui-org/card";
 import { Spinner } from "@nextui-org/react";
@@ -15,7 +16,7 @@ const UnderConstruction = () => {
         setQuizAnswers(JSON.parse(raw));
       }
     } catch (e) {
-      console.error("Failed to parse quiz answers from localStorage", e);
+      logger.error("Failed to parse quiz answers from localStorage", e);
     }
   }, []); // Empty dependency array to ensure it only runs once on mount
 
