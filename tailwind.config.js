@@ -1,4 +1,5 @@
-import { nextui } from "@nextui-org/theme";
+/* eslint-disable @typescript-eslint/no-require-imports */
+const { nextui } = require("@nextui-org/theme");
 
 /** @type {import('tailwindcss').Config} */
 export const content = [
