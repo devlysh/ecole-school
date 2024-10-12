@@ -5,17 +5,17 @@ export interface SubscriptionPlanProps {
   id: string;
   className?: string;
   currency: string;
-  description: string;
-  discount?: string;
-  price: string;
-  pricePerClass: string;
+  name: string;
+  discount?: number;
+  price: number;
+  numberOfClasses: number;
   onClick?: (id: string) => void;
   isSelected: boolean;
 }
 
-const DiscountBadge = ({ discount }: { discount: string }) => (
+const DiscountBadge = ({ discount }: { discount: number }) => (
   <div className="absolute z-10 border border-black rounded bg-white -top-2 left-1/3 px-3">
-    {discount}
+    Get {discount}% off
   </div>
 );
 
@@ -23,10 +23,10 @@ export const SubscriptionPlan = ({
   id,
   className,
   currency,
-  description,
+  name,
   discount,
   price,
-  pricePerClass,
+  numberOfClasses,
   onClick,
   isSelected,
 }: SubscriptionPlanProps) => {
@@ -40,7 +40,7 @@ export const SubscriptionPlan = ({
       aria-pressed={isSelected}
       tabIndex={0}
     >
-      {discount && <DiscountBadge discount={discount} />}
+      {discount && !isNaN(discount) && <DiscountBadge discount={discount} />}
       <Card
         className={clsx(
           "border-2 p-4 flex flex-row justify-between items-center z-0 box-content cursor-pointer",
@@ -48,17 +48,20 @@ export const SubscriptionPlan = ({
         )}
       >
         <div className="flex flex-col">
-          <div className="text-lg">{description}</div>
+          <div className="text-lg">{name}</div>
           <div className="text-xs text-gray-400">
-            {price} {currency}
+            {(price / 100).toFixed(2)} {currency.toUpperCase()}
           </div>
         </div>
-        <div>
-          <span className="text-xl font-bold">
-            {pricePerClass} {currency}
-          </span>
-          <span> / class</span>
-        </div>
+        {numberOfClasses && (
+          <div>
+            <span className="text-xl font-bold">
+              {(price / 100 / numberOfClasses).toFixed(2)}{" "}
+              {currency.toUpperCase()}
+            </span>
+            <span> / class</span>
+          </div>
+        )}
       </Card>
     </div>
   );

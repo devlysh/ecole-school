@@ -9,15 +9,20 @@ export const GET = async () => {
     const prices = await stripe.prices.list({
       active: true,
       limit: 20,
-      expand: ["data"],
     });
 
     const plans: Plan[] = prices.data.map((price) => ({
       id: price.id,
       name: price.nickname as string,
       product: price.product as string,
-      amount: price.unit_amount as number,
+      amount: Number(price.unit_amount),
       currency: price.currency,
+      metadata: {
+        numberOfClasses: Number(price.metadata.numberOfClasses),
+        ...(price.metadata.discount && {
+          discount: Number(price.metadata.discount),
+        }),
+      },
     }));
 
     return Response.json(plans);

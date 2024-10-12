@@ -13,11 +13,13 @@ import { useRouter } from "next/navigation";
 const LanguageSelect = ({
   languages,
   languagesLoading,
-  defaultLanguage = "en",
+  selectedLanguage,
+  onLanguageChange,
 }: {
   languages: Language[];
   languagesLoading: boolean;
-  defaultLanguage?: string;
+  selectedLanguage: string;
+  onLanguageChange: (event: ChangeEvent<HTMLSelectElement>) => void;
 }) =>
   languagesLoading ? (
     <Spinner size="sm" color="secondary" />
@@ -25,7 +27,8 @@ const LanguageSelect = ({
     <Select
       label="Learning language"
       labelPlacement="outside"
-      defaultSelectedKeys={[defaultLanguage]}
+      defaultSelectedKeys={[selectedLanguage]}
+      onChange={onLanguageChange}
     >
       {languages.map((language) => (
         <SelectItem key={language.code}>{language.name}</SelectItem>
@@ -61,11 +64,17 @@ const CurrencySelect = ({
 
 const Pricing = () => {
   const router = useRouter();
-  const { languages, languagesLoading } = useLanguages();
-  const { currencies, currenciesLoading } = useCurrencies();
-  const { plans, plansLoading } = usePlans();
+  const { languages, languagesLoading, languagesError } = useLanguages();
+  const { currencies, currenciesLoading, currenciesError } = useCurrencies();
+  const { plans, plansLoading, plansError } = usePlans();
+
+  if (languagesError || currenciesError || plansError) {
+    throw new Error("Something went wrong...");
+  }
 
   const [selectedPlanId, setSelectedPlanId] = useState<string>();
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<Language["code"]>("en");
   const [selectedCurrency, setSelectedCurrency] =
     useState<Currency["code"]>("USD");
 
@@ -74,6 +83,13 @@ const Pricing = () => {
     const filteredPlans = map.get(selectedCurrency.toLowerCase()) || [];
     return filteredPlans.sort((a, b) => a.amount - b.amount);
   }, [plans, selectedCurrency]);
+
+  const handleLanguageChange = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      setSelectedLanguage(event.target.value);
+    },
+    []
+  );
 
   const handleCurrencyChange = useCallback(
     (event: ChangeEvent<HTMLSelectElement>) => {
@@ -89,15 +105,17 @@ const Pricing = () => {
   const handleSubmit = useCallback(() => {
     if (selectedPlanId) {
       localStorage.setItem("priceId", selectedPlanId);
+      localStorage.setItem("language", selectedLanguage);
+      localStorage.setItem("currency", selectedCurrency);
       router.push("/checkout");
     } else {
       throw new Error("Selected pan ID should be defined");
     }
-  }, [router, selectedPlanId]);
+  }, [router, selectedCurrency, selectedLanguage, selectedPlanId]);
 
   return (
-    <div className="flex p-8">
-      <div className="w-1/2 p-8">
+    <div className="grid md:grid-cols-2 gap-8">
+      <div className="">
         <div className="text-lg">
           Get ready for flexible and convenient language learning
         </div>
@@ -110,6 +128,8 @@ const Pricing = () => {
             <LanguageSelect
               languages={languages}
               languagesLoading={languagesLoading}
+              selectedLanguage={selectedLanguage}
+              onLanguageChange={handleLanguageChange}
             />
           </div>
           <div className="w-1/3">
@@ -129,7 +149,7 @@ const Pricing = () => {
           <li>Individual program</li>
         </ul>
       </div>
-      <div className="w-1/2 p-8">
+      <div className="">
         <div className="text-2xl">Recurring number of classes:</div>
         <div className="text-base my-8">Total changes every 4 weeks</div>
         <div className="flex flex-col">
@@ -141,15 +161,14 @@ const Pricing = () => {
                 <SubscriptionPlan
                   id={plan.id}
                   key={plan.name}
-                  description={plan.name}
-                  currency={plan.currency.toUpperCase()}
-                  price={(plan.amount / 100).toFixed(2).toString()}
-                  pricePerClass={(plan.amount / 100 / parseInt(plan.name, 10))
-                    .toFixed(2)
-                    .toString()}
+                  name={plan.name}
+                  currency={plan.currency}
+                  price={plan.amount}
+                  numberOfClasses={plan.metadata.numberOfClasses}
                   className="mb-8"
                   isSelected={selectedPlanId === plan.id}
                   onClick={handleSubscriptionPlanClick}
+                  discount={plan.metadata.discount}
                 />
               ))}
               <Button
