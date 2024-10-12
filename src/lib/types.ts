@@ -17,3 +17,23 @@ export interface QuizState {
   steps: Step[];
   answers: Answer[];
 }
+
+export interface Language {
+  code: string;
+  name: string;
+}
+
+export interface Currency {
+  code: string;
+  name: string;
+}
+
+export interface Plan {
+  id: string;
+  name: string;
+  product: string;
+  amount: number;
+  currency: string;
+}
+
+export type PlansMap = Map<string, Plan[]>;
