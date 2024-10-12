@@ -31,8 +31,7 @@ export const QuizService = {
     state.currentStep === state.answers.length - 1 &&
     state.answers.every((answer) => answer !== null),
 
-  resetQuiz: (steps: Step[]): QuizState =>
-    QuizService.initializeQuiz(steps),
+  resetQuiz: (steps: Step[]): QuizState => QuizService.initializeQuiz(steps),
 
   isFirstStep: (state: QuizState): boolean => state.currentStep === 0,
 
