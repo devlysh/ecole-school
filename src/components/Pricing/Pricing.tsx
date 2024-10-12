@@ -8,6 +8,7 @@ import usePlans from "@/hooks/usePlans";
 import { SubscriptionPlan } from "./SubscriptionPlan";
 import { groupByCurrency } from "@/lib/utils";
 import { Currency, Language } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 const LanguageSelect = ({
   languages,
@@ -59,6 +60,7 @@ const CurrencySelect = ({
   );
 
 const Pricing = () => {
+  const router = useRouter();
   const { languages, languagesLoading } = useLanguages();
   const { currencies, currenciesLoading } = useCurrencies();
   const { plans, plansLoading } = usePlans();
@@ -83,6 +85,15 @@ const Pricing = () => {
   const handleSubscriptionPlanClick = useCallback((id: string) => {
     setSelectedPlanId(id);
   }, []);
+
+  const handleSubmit = useCallback(() => {
+    if (selectedPlanId) {
+      localStorage.setItem("priceId", selectedPlanId);
+      router.push("/checkout");
+    } else {
+      throw new Error("Selected pan ID should be defined");
+    }
+  }, [router, selectedPlanId]);
 
   return (
     <div className="flex p-8">
@@ -145,6 +156,7 @@ const Pricing = () => {
                 isDisabled={!selectedPlanId}
                 color="secondary"
                 className="w-1/2 self-end"
+                onClick={handleSubmit}
               >
                 Continue
               </Button>

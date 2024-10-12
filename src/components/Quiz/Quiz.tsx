@@ -62,7 +62,7 @@ const Quiz = () => {
 
   useEffect(() => {
     if (isQuizComplete) {
-      router.push("/choose-plan");
+      router.push("/pricing");
       localStorage.setItem(
         "quizAnswers",
         JSON.stringify(quizState.answers.filter((_, i) => steps[i].answers))
