@@ -34,6 +34,7 @@ export interface Plan {
   product: string;
   amount: number;
   currency: string;
+  metadata: { discount?: number; numberOfClasses: number };
 }
 
 export type PlansMap = Map<string, Plan[]>;

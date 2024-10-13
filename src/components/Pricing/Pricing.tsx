@@ -22,7 +22,9 @@ const LanguageSelect = ({
   onLanguageChange: (event: ChangeEvent<HTMLSelectElement>) => void;
 }) =>
   languagesLoading ? (
-    <Spinner size="sm" color="secondary" />
+    <div className="w-full text-center">
+      <Spinner size="sm" color="secondary" />
+    </div>
   ) : (
     <Select
       label="Learning language"
@@ -48,7 +50,9 @@ const CurrencySelect = ({
   onCurrencyChange: (event: ChangeEvent<HTMLSelectElement>) => void;
 }) =>
   currenciesLoading ? (
-    <Spinner size="sm" color="secondary" />
+    <div className="w-full text-center">
+      <Spinner size="sm" color="secondary" />
+    </div>
   ) : (
     <Select
       label="Currency"
@@ -156,7 +160,9 @@ const Pricing = () => {
         <div className="text-base my-8">Total changes every 4 weeks</div>
         <div className="flex flex-col">
           {plansLoading || !plans.length ? (
-            <Spinner size="sm" color="secondary" />
+            <div className="w-full text-center">
+              <Spinner size="sm" color="secondary" />
+            </div>
           ) : (
             <>
               {plansByCurrency.map((plan) => (
