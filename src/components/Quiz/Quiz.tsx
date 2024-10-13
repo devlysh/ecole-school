@@ -143,6 +143,9 @@ const Quiz = () => {
               </Button>
             </div>
           )}
+          {currentQuestion.footerText && (
+            <div className="text-xs mt-8">{currentQuestion.footerText}</div>
+          )}
         </div>
       </div>
     </div>
