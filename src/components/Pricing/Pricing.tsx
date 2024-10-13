@@ -104,6 +104,8 @@ const Pricing = () => {
 
   const handleSubmit = useCallback(() => {
     if (selectedPlanId) {
+      const selectedPlan = plans.find((plan) => plan.id === selectedPlanId);
+      localStorage.setItem("selectedPlan", JSON.stringify(selectedPlan));
       localStorage.setItem("priceId", selectedPlanId);
       localStorage.setItem("language", selectedLanguage);
       localStorage.setItem("currency", selectedCurrency);
@@ -111,7 +113,7 @@ const Pricing = () => {
     } else {
       throw new Error("Selected pan ID should be defined");
     }
-  }, [router, selectedCurrency, selectedLanguage, selectedPlanId]);
+  }, [plans, router, selectedCurrency, selectedLanguage, selectedPlanId]);
 
   return (
     <div className="grid md:grid-cols-2 gap-8">
