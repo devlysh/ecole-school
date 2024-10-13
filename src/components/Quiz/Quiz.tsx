@@ -1,25 +1,24 @@
 "use client";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { steps } from "@/lib/quiz.model";
 import QuizService from "@/lib/quiz.service";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Progress } from "@nextui-org/progress";
 import { Button } from "@nextui-org/button";
-import { Card } from "@nextui-org/card";
-import { QuizState, Step } from "@/lib/types";
-import { Input } from "@nextui-org/input";
+import { QuizState, QuizStep, StepType } from "@/lib/types";
+import InfoStep from "./InfoStep";
+import QuestionStep from "./QuestionStep";
+import FormStep from "./FormStep";
 
 const Quiz = () => {
   const router = useRouter();
   const [quizState, setQuizState] = useState<QuizState>(
     QuizService.initializeQuiz(steps)
   );
-  const [customAnswer, setCustomAnswer] = useState("");
 
-  const currentQuestion = useMemo<Step>(
-    () => steps[quizState.currentStep],
-    [quizState.currentStep]
+  const currentStep = useMemo<QuizStep>(
+    () => quizState.steps[quizState.currentStep],
+    [quizState.currentStep, quizState.steps]
   );
 
   const isFirstStep = useMemo<boolean>(
@@ -27,8 +26,8 @@ const Quiz = () => {
     [quizState]
   );
 
-  const isQuizComplete = useMemo<boolean>(
-    () => QuizService.isQuizComplete(quizState),
+  const isLastStep = useMemo<boolean>(
+    () => quizState.currentStep === quizState.steps.length - 1,
     [quizState]
   );
 
@@ -37,116 +36,58 @@ const Quiz = () => {
     [quizState]
   );
 
-  const handleNext = useCallback(() => {
-    setQuizState((prevState) => {
-      let state: QuizState;
-      state = QuizService.submitAnswer(prevState, "Ok");
-      state = QuizService.goToNextStep(state);
-      return state;
-    });
-  }, []);
+  const handleAnswer = useCallback(
+    (answer?: string) => {
+      if (answer) {
+        localStorage.setItem(currentStep.id, answer);
+      }
+
+      setQuizState((prevState) => {
+        const nextState = QuizService.goToNextStep(
+          answer ? QuizService.submitAnswer(prevState, answer) : prevState
+        );
+        return nextState;
+      });
+
+      if (isLastStep) {
+        router.push("/pricing");
+      }
+    },
+    [currentStep.id, isLastStep, router]
+  );
 
   const handlePrevious = useCallback(() => {
     setQuizState((prevState) => QuizService.goToPreviousStep(prevState));
   }, []);
 
-  const handleAnswer = useCallback((answer: string) => {
-    setQuizState((prevState) => {
-      let state: QuizState;
-      state = QuizService.submitAnswer(prevState, answer);
-      state = QuizService.goToNextStep(state);
-      return state;
-    });
-    setCustomAnswer("");
-  }, []);
-
-  useEffect(() => {
-    if (isQuizComplete) {
-      router.push("/pricing");
-      localStorage.setItem(
-        "quizAnswers",
-        JSON.stringify(quizState.answers.filter((_, i) => steps[i].answers))
-      );
+  const renderStep = () => {
+    switch (currentStep.type) {
+      case StepType.INFO:
+        return <InfoStep step={currentStep} onNext={handleAnswer} />;
+      case StepType.QUESTION:
+        return <QuestionStep step={currentStep} onAnswer={handleAnswer} />;
+      case StepType.FORM:
+        return <FormStep step={currentStep} onSubmit={handleAnswer} />;
+      default:
+        return null;
     }
-  }, [quizState, isQuizComplete, router]);
+  };
 
   return (
     <div className="flex flex-col justify-center items-center mt-12">
       <div className="w-1/2 text-center flex flex-col items-center">
         <Progress color="secondary" value={percent} className="mb-8" />
-        <div className="text-sm mb-8 text-secondary">
-          {currentQuestion.title}
-        </div>
-        <div className="text-3xl mb-8">{currentQuestion.text}</div>
-        {currentQuestion.image && (
-          <Image
-            src={`/${currentQuestion.image.url}`}
-            alt={currentQuestion.text}
-            width={currentQuestion.image.width}
-            height={currentQuestion.image.height}
-            priority
-          />
+        {renderStep()}
+        {!isFirstStep && (
+          <Button
+            size="sm"
+            variant="light"
+            onClick={handlePrevious}
+            className="mt-4"
+          >
+            &lt; Back
+          </Button>
         )}
-        {currentQuestion.answers &&
-          currentQuestion.answers.map((answer) => (
-            <Card key={answer} className="w-full m-4">
-              {answer === "%TEXT%" || answer === "%EMAIL%" ? (
-                <div className="p-4">
-                  <Input
-                    type={answer === "%EMAIL%" ? "email" : "text"}
-                    placeholder={
-                      answer === "%EMAIL%"
-                        ? "Enter your email"
-                        : "Enter your answer"
-                    }
-                    value={customAnswer}
-                    onChange={(e) => setCustomAnswer(e.target.value)}
-                    className="w-full mb-4"
-                  />
-                  <Button
-                    className="w-full"
-                    variant="solid"
-                    color="secondary"
-                    onClick={() => handleAnswer(customAnswer)}
-                    disabled={!customAnswer.trim()}
-                  >
-                    Submit
-                  </Button>
-                </div>
-              ) : (
-                <div
-                  className="cursor-pointer p-4"
-                  onClick={() => handleAnswer(answer)}
-                >
-                  {answer}
-                </div>
-              )}
-            </Card>
-          ))}
-        <div className="mt-8">
-          {!currentQuestion.answers && (
-            <div>
-              <Button
-                className="mb-4"
-                variant="solid"
-                color="secondary"
-                onClick={handleNext}
-              >
-                Got it &gt;
-              </Button>
-            </div>
-          )}
-          {!isFirstStep && (
-            <div>
-              <Button size="sm" variant="light" onClick={handlePrevious}>
-                &lt; Back
-              </Button>
-            </div>
-          )}
-          {currentQuestion.footerText && (
-            <div className="text-xs mt-8">{currentQuestion.footerText}</div>
-          )}
-        </div>
       </div>
     </div>
   );

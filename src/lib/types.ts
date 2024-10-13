@@ -1,10 +1,39 @@
+export enum StepType {
+  INFO,
+  QUESTION,
+  FORM,
+}
+
+export enum FormFieldType {
+  TEXT,
+  EMAIL,
+}
+
 export interface Step {
-  id: number;
+  id: string;
+  type: StepType;
   title?: string;
   text: string;
   image?: { url: string; width: number; height: number };
-  answers?: string[];
+  footerText?: string;
 }
+
+export interface InfoStep extends Step {
+  type: StepType.INFO;
+}
+
+export interface QuestionStep extends Step {
+  type: StepType.QUESTION;
+  allowCustomAnswer: boolean;
+  answers: string[];
+}
+
+export interface FormStep extends Step {
+  type: StepType.FORM;
+  fields: FormFieldType[];
+}
+
+export type QuizStep = InfoStep | QuestionStep | FormStep;
 
 export interface Answer {
   id: number;
@@ -14,7 +43,7 @@ export interface Answer {
 
 export interface QuizState {
   currentStep: number;
-  steps: Step[];
+  steps: QuizStep[];
   answers: Answer[];
 }
 

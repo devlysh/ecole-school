@@ -1,14 +1,17 @@
-import { Step } from "./types";
+import { FormFieldType, QuizStep, StepType } from "./types";
 
-export const steps: Step[] = [
+export const steps: QuizStep[] = [
   {
-    id: 1,
+    id: "info-1",
+    type: StepType.INFO,
     title: "Perfect Teacher Match",
     text: "We match you with a native - level teacher to fit your goals and schedule",
     image: { url: "hands-puzzle.png", width: 217, height: 265 },
   },
   {
-    id: 2,
+    id: "currentLevel",
+    type: StepType.QUESTION,
+    allowCustomAnswer: false,
     text: "What is your current level?",
     answers: [
       "From scratch (no prior knowledge)",
@@ -18,7 +21,8 @@ export const steps: Step[] = [
     ],
   },
   {
-    id: 3,
+    id: "info-2",
+    type: StepType.INFO,
     title: "Any Level Welcome",
     text: "From beginners to advanced learners, we provide the tailored support you need to succeed",
     image: {
@@ -28,18 +32,20 @@ export const steps: Step[] = [
     },
   },
   {
-    id: 4,
+    id: "motivatesYou",
+    type: StepType.QUESTION,
+    allowCustomAnswer: true,
     text: "What motivates you to learn this language?",
     answers: [
       "I want to travel and communicate with locals",
       "I need it for my job or career growth",
       "I live in a country where the language is spoken",
       "I’m learning it for personal development and fun",
-      "%TEXT%",
     ],
   },
   {
-    id: 5,
+    id: "infog-3",
+    type: StepType.INFO,
     title: "Adaptable Class Times",
     text: "You can reschedule or cancel classes to fit your busy life",
     image: {
@@ -49,7 +55,9 @@ export const steps: Step[] = [
     },
   },
   {
-    id: 6,
+    id: "areasToFocus",
+    type: StepType.QUESTION,
+    allowCustomAnswer: false,
     text: "Which areas do you want to focus on the most?",
     answers: [
       "Speaking",
@@ -61,7 +69,8 @@ export const steps: Step[] = [
     ],
   },
   {
-    id: 7,
+    id: "info-4",
+    type: StepType.INFO,
     title: "Your Goals First",
     text: "Our program adapts to your goals — learn what matters most, from work vocabulary to conversation!",
     image: {
@@ -71,7 +80,9 @@ export const steps: Step[] = [
     },
   },
   {
-    id: 8,
+    id: "studyTimePerWeek",
+    type: StepType.QUESTION,
+    allowCustomAnswer: false,
     text: "How much time do you want to study each week?",
     answers: [
       "1 hour",
@@ -82,7 +93,8 @@ export const steps: Step[] = [
     ],
   },
   {
-    id: 9,
+    id: "into-5",
+    type: StepType.INFO,
     title: "Flexible Subscription",
     text: "Change or cancel your subscription anytime — your plan, your control",
     image: {
@@ -92,14 +104,16 @@ export const steps: Step[] = [
     },
   },
   {
-    id: 10,
+    id: "name",
+    type: StepType.FORM,
     text: "What is your name?",
-    answers: ["%TEXT%"],
+    fields: [FormFieldType.TEXT],
   },
   {
-    id: 10,
+    id: "email",
+    type: StepType.FORM,
     text: "What is your email?",
-    answers: ["%EMAIL%"],
+    fields: [FormFieldType.EMAIL],
     footerText:
       "By providing your email, you acknowledge that you are at least 18 years old and agree to EcoleFamily's Terms and Conditions and Privacy Policy. You also consent to receive emails and updates regarding our services. You can unsubscribe at any time.",
   },

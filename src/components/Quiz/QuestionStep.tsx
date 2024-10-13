@@ -1,0 +1,60 @@
+import { Card } from "@nextui-org/card";
+import { Input } from "@nextui-org/input";
+import { Button } from "@nextui-org/button";
+import { useState } from "react";
+import { QuestionStep as QuestionStepType } from "@/lib/types";
+
+interface QuestionStepProps {
+  step: QuestionStepType;
+  onAnswer: (answer: string) => void;
+}
+
+const QuestionStep: React.FC<QuestionStepProps> = ({ step, onAnswer }) => {
+  const [customAnswer, setCustomAnswer] = useState("");
+
+  const handleCustomAnswerChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setCustomAnswer(event.target.value);
+  };
+
+  const handleCustomAnswerSubmit = () => {
+    if (customAnswer.trim()) {
+      onAnswer(customAnswer.trim());
+      setCustomAnswer("");
+    }
+  };
+
+  return (
+    <div>
+      <div className="text-3xl mb-8">{step.text}</div>
+      {step.answers.map((answer) => (
+        <Card key={answer} className="w-full my-4">
+          <div className="cursor-pointer p-4" onClick={() => onAnswer(answer)}>
+            {answer}
+          </div>
+        </Card>
+      ))}
+      {step.allowCustomAnswer && (
+        <Card className="w-full my-4 p-4">
+          <Input
+            type="text"
+            placeholder="Enter your answer"
+            value={customAnswer}
+            onChange={handleCustomAnswerChange}
+            className="w-full mb-4"
+          />
+          <Button
+            color="secondary"
+            onClick={handleCustomAnswerSubmit}
+            disabled={!customAnswer.trim()}
+          >
+            Submit
+          </Button>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default QuestionStep;

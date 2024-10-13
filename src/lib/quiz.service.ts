@@ -1,7 +1,7 @@
-import { Answer, Step, QuizState } from "./types";
+import { Answer, QuizState, QuizStep } from "./types";
 
 export const QuizService = {
-  initializeQuiz: (steps: Step[]): QuizState => ({
+  initializeQuiz: (steps: QuizStep[]): QuizState => ({
     currentStep: 0,
     steps,
     answers: Array(steps.length).fill(null),
@@ -31,7 +31,8 @@ export const QuizService = {
     state.currentStep === state.answers.length - 1 &&
     state.answers.every((answer) => answer !== null),
 
-  resetQuiz: (steps: Step[]): QuizState => QuizService.initializeQuiz(steps),
+  resetQuiz: (steps: QuizStep[]): QuizState =>
+    QuizService.initializeQuiz(steps),
 
   isFirstStep: (state: QuizState): boolean => state.currentStep === 0,
 

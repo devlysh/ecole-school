@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useCallback, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Select, SelectItem, Spinner } from "@nextui-org/react";
 import useCurrencies from "@/hooks/useCurrencies";
 import useLanguages from "@/hooks/useLanguages";
@@ -76,11 +76,21 @@ const Pricing = () => {
     throw new Error("Something went wrong...");
   }
 
-  const [selectedPlanId, setSelectedPlanId] = useState<string>();
+  const [selectedPriceId, setSelectedPriceId] = useState<string>();
   const [selectedLanguage, setSelectedLanguage] =
     useState<Language["code"]>("en");
   const [selectedCurrency, setSelectedCurrency] =
     useState<Currency["code"]>("USD");
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem("language");
+    const savedCurrency = localStorage.getItem("currency");
+    const savedPriceId = localStorage.getItem("priceId");
+
+    if (savedLanguage) setSelectedLanguage(savedLanguage);
+    if (savedCurrency) setSelectedCurrency(savedCurrency);
+    if (savedPriceId) setSelectedPriceId(savedPriceId);
+  }, []);
 
   const plansByCurrency = useMemo(() => {
     const map = groupByCurrency(plans);
@@ -103,21 +113,21 @@ const Pricing = () => {
   );
 
   const handleSubscriptionPlanClick = useCallback((id: string) => {
-    setSelectedPlanId(id);
+    setSelectedPriceId(id);
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (selectedPlanId) {
-      const selectedPlan = plans.find((plan) => plan.id === selectedPlanId);
+    if (selectedPriceId) {
+      const selectedPlan = plans.find((plan) => plan.id === selectedPriceId);
       localStorage.setItem("selectedPlan", JSON.stringify(selectedPlan));
-      localStorage.setItem("priceId", selectedPlanId);
+      localStorage.setItem("priceId", selectedPriceId);
       localStorage.setItem("language", selectedLanguage);
       localStorage.setItem("currency", selectedCurrency);
       router.push("/checkout");
     } else {
-      throw new Error("Selected pan ID should be defined");
+      throw new Error("Selected plan ID should be defined");
     }
-  }, [plans, router, selectedCurrency, selectedLanguage, selectedPlanId]);
+  }, [plans, router, selectedCurrency, selectedLanguage, selectedPriceId]);
 
   return (
     <div className="grid md:grid-cols-2 gap-8">
@@ -174,13 +184,13 @@ const Pricing = () => {
                   price={plan.amount}
                   numberOfClasses={plan.metadata.numberOfClasses}
                   className="mb-8"
-                  isSelected={selectedPlanId === plan.id}
+                  isSelected={selectedPriceId === plan.id}
                   onClick={handleSubscriptionPlanClick}
                   discount={plan.metadata.discount}
                 />
               ))}
               <Button
-                isDisabled={!selectedPlanId}
+                isDisabled={!selectedPriceId}
                 color="secondary"
                 className="w-1/2 self-end"
                 onClick={handleSubmit}
