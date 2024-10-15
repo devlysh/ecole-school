@@ -42,35 +42,57 @@ const CheckoutForm = ({
     setError(null);
 
     try {
+      // Step 1: Create the payment method
+      const cardElement = elements.getElement(CardElement);
+      const { paymentMethod, error: paymentMethodError } =
+        await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement!,
+          billing_details: {
+            name: nameOnCard,
+            email: email,
+          },
+        });
+
+      if (paymentMethodError) {
+        setError(paymentMethodError.message || "An unknown error occurred.");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("email", email);
+      const paymentMethodId = paymentMethod?.id;
+
+      // Step 2: Send payment method ID to the server to create a subscription
       const res = await fetch("/api/v1/stripe/create-subscription", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, planId: selectedPrice?.id }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          planId: selectedPrice?.id,
+          paymentMethodId,
+        }),
       });
 
-      const data = await res.json();
-      console.log("Payment Intent Response:", data);
+      const { clientSecret, error } = await res.json();
 
-      const { clientSecret, error } = data;
       if (error) {
         setError(error);
         setLoading(false);
         return;
       }
 
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement)!,
-          billing_details: {
-            name: nameOnCard,
-            email: email,
-          },
-        },
-      });
+      // Step 3: Confirm payment if the payment intent hasn't succeeded yet
+      const { paymentIntent } =
+        await stripe.retrievePaymentIntent(clientSecret);
+      if (paymentIntent?.status === "succeeded") {
+        router.push("/account");
+        return;
+      }
 
-      console.log("Payment Result:", result);
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethodId,
+      });
 
       if (result.error) {
         setError(result.error.message || "An unknown error occurred.");
@@ -78,7 +100,7 @@ const CheckoutForm = ({
         router.push("/account");
       }
     } catch (err: unknown) {
-      logger.error("Error during checkout:", err);
+      console.error("Error during checkout:", err);
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -99,7 +121,6 @@ const CheckoutForm = ({
       />
       <CardElement
         className="p-3 border rounded-lg"
-        onChange={console.log}
         onReady={() => setCardElementReady(true)}
       />
       {error && <p className="text-red-500">{error}</p>}

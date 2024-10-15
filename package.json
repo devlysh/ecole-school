@@ -15,7 +15,10 @@
     "migrate": "npm run prisma:migrate",
     "seed": "npm run prisma:seed",
     "prisma:migrate": "npx prisma migrate dev",
-    "prisma:seed": "ts-node prisma/seed.ts"
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "stripe:login": "stripe login",
+    "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/v1/stripe/webhook",
+    "stripe:trigger:payment_succeeded": "stripe trigger invoice.payment_succeeded"
   },
   "dependencies": {
     "@nextui-org/button": "^2.0.38",
