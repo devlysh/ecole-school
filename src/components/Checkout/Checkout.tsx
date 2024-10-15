@@ -88,7 +88,7 @@ const CheckoutForm = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`${cardElementReady ? "" : "hidden"} space-y-4`}
+      className={`${cardElementReady ? "" : "opacity-0"} space-y-4 transition-opacity duration-1000 ease-in-out`}
     >
       <Input
         type="text"
