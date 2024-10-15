@@ -9,7 +9,7 @@ const usePlans = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await fetch("/api/v1/plans");
+        const response = await fetch("/api/v1/stripe/plans");
         if (!response.ok) {
           throw new Error("Failed to fetch plans");
         }

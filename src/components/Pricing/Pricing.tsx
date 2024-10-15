@@ -118,8 +118,8 @@ const Pricing = () => {
 
   const handleSubmit = useCallback(() => {
     if (selectedPriceId) {
-      const selectedPlan = plans.find((plan) => plan.id === selectedPriceId);
-      localStorage.setItem("selectedPlan", JSON.stringify(selectedPlan));
+      const selectedPrice = plans.find((plan) => plan.id === selectedPriceId);
+      localStorage.setItem("selectedPrice", JSON.stringify(selectedPrice));
       localStorage.setItem("priceId", selectedPriceId);
       localStorage.setItem("language", selectedLanguage);
       localStorage.setItem("currency", selectedCurrency);

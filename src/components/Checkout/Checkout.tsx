@@ -19,11 +19,11 @@ import { Input } from "@nextui-org/input";
 const CheckoutForm = ({
   email,
   setEmail,
-  selectedPlan,
+  selectedPrice,
 }: {
   email: string;
   setEmail: (email: string) => void;
-  selectedPlan: Plan;
+  selectedPrice: Plan;
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -31,6 +31,7 @@ const CheckoutForm = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [cardElementReady, setCardElementReady] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,12 +42,12 @@ const CheckoutForm = ({
     setError(null);
 
     try {
-      const res = await fetch("/api/v1/create-payment-intent", {
+      const res = await fetch("/api/v1/stripe/create-subscription", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, planId: selectedPlan?.id }),
+        body: JSON.stringify({ email, planId: selectedPrice?.id }),
       });
 
       const data = await res.json();
@@ -77,15 +78,18 @@ const CheckoutForm = ({
         router.push("/account");
       }
     } catch (err: unknown) {
-      console.error("Error during checkout:", err);
-      setError("An unexpected error occurred.");
+      logger.error("Error during checkout:", err);
+      setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className={`${cardElementReady ? "" : "hidden"} space-y-4`}
+    >
       <Input
         type="text"
         placeholder="Name on card"
@@ -93,7 +97,11 @@ const CheckoutForm = ({
         onChange={(e) => setNameOnCard(e.target.value)}
         className="w-full"
       />
-      <CardElement className="p-3 border rounded-lg" />
+      <CardElement
+        className="p-3 border rounded-lg"
+        onChange={console.log}
+        onReady={() => setCardElementReady(true)}
+      />
       {error && <p className="text-red-500">{error}</p>}
       <Input
         type="email"
@@ -123,21 +131,21 @@ const Checkout = () => {
   }
 
   const [language, setLanguage] = useState<Language["code"]>();
-  const [selectedPlan, setSelectedPlan] = useState<Plan>();
+  const [selectedPrice, setSelectedPrice] = useState<Plan>();
 
   useEffect(() => {
     try {
       const rawLanguage = localStorage.getItem("language");
-      const rawSelectedPlan = localStorage.getItem("selectedPlan");
-      if (!rawLanguage || !rawSelectedPlan) {
+      const rawSelectedPrice = localStorage.getItem("selectedPrice");
+      if (!rawLanguage || !rawSelectedPrice) {
         router.push("/pricing");
       }
       if (rawLanguage) {
         setLanguage(rawLanguage);
       }
 
-      if (rawSelectedPlan) {
-        setSelectedPlan(JSON.parse(rawSelectedPlan));
+      if (rawSelectedPrice) {
+        setSelectedPrice(JSON.parse(rawSelectedPrice));
       }
 
       const e = localStorage.getItem("email");
@@ -156,12 +164,16 @@ const Checkout = () => {
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <h2 className="text-2xl font-bold mb-6">Complete your purchase</h2>
-          {selectedPlan && (
+          {selectedPrice ? (
             <CheckoutForm
               email={email}
               setEmail={setEmail}
-              selectedPlan={selectedPlan}
+              selectedPrice={selectedPrice}
             />
+          ) : (
+            <div className="flex justify-center items-center h-full">
+              <Spinner size="sm" />
+            </div>
           )}
         </div>
         <div className="bg-gray-50 p-6 rounded-lg">
@@ -182,11 +194,11 @@ const Checkout = () => {
               <span>4 weeks</span>
             </div>
             <div className="flex justify-between">
-              {selectedPlan ? (
+              {selectedPrice ? (
                 <>
                   <span>Class credits</span>
                   <span>
-                    {selectedPlan.metadata.numberOfClasses} private class
+                    {selectedPrice.metadata.numberOfClasses} private class
                     credits
                   </span>
                 </>
@@ -200,12 +212,12 @@ const Checkout = () => {
               <span>Payment</span>
               <span>Recurring, 4 weeks</span>
             </div>
-            {selectedPlan ? (
+            {selectedPrice ? (
               <div className="flex justify-between text-2xl font-bold mt-6">
                 <span>Price</span>
                 <span>
-                  {(selectedPlan.amount / 100).toFixed(2)}{" "}
-                  {selectedPlan.currency.toUpperCase()}
+                  {(selectedPrice.amount / 100).toFixed(2)}{" "}
+                  {selectedPrice.currency.toUpperCase()}
                 </span>
               </div>
             ) : (
