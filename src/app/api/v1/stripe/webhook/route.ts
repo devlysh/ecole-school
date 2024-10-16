@@ -50,70 +50,34 @@ export async function POST(request: NextRequest) {
   }
 
   switch (event.type) {
-    case "charge.succeeded": {
-      const chargeSucceeded = event.data.object;
-      logger.info("Invoice payment succeeded:", chargeSucceeded);
-      return Response.json("Success!", { status: 200 });
-    }
     case "customer.created": {
       const customerCreated = event.data.object;
-      logger.info("Invoice payment succeeded:", customerCreated);
-      return Response.json("Success!", { status: 200 });
-    }
-    case "customer.updated": {
-      const customerUpdated = event.data.object;
-      logger.info("Invoice payment succeeded:", customerUpdated);
-      return Response.json("Success!", { status: 200 });
-    }
-    case "invoice.created": {
-      const invoiceCreated = event.data.object;
-      logger.info("Invoice payment succeeded:", invoiceCreated);
-      return Response.json("Success!", { status: 200 });
+      logger.info({ customerCreated }, "TODO");
+      return Response.json(null, { status: 200 });
     }
 
-    case "invoice.finalized": {
-      const invoiceFinalized = event.data.object;
-      logger.info("Invoice payment succeeded:", invoiceFinalized);
-      return Response.json("Success!", { status: 200 });
+    case "customer.updated": {
+      const customerUpdated = event.data.object;
+      logger.info({ customerUpdated }, "TODO");
+      return Response.json(null, { status: 200 });
     }
-    case "invoice.paid": {
-      const invoicePaid = event.data.object;
-      logger.info("Invoice payment succeeded:", invoicePaid);
-      return Response.json("Success!", { status: 200 });
+
+    case "price.updated": {
+      const priceUpdated = event.data.object;
+      logger.info({ priceUpdated }, "TODO");
+      return Response.json(null, { status: 200 });
     }
+
     case "invoice.payment_succeeded": {
-      const invoicePaymentSucceeded = event.data.object as Stripe.Invoice;
-      logger.info("Invoice payment succeeded:", invoicePaymentSucceeded);
-      return Response.json("Success!", { status: 200 });
+      const invoicePaymentSucceeded = event.data.object;
+      logger.info({ invoicePaymentSucceeded }, "TODO");
+      return Response.json(null, { status: 200 });
     }
-    case "invoice.updated": {
-      const invoiceUpdated = event.data.object;
-      logger.info("Invoice payment succeeded:", invoiceUpdated);
-      return Response.json("Success!", { status: 200 });
-    }
-    case "invoiceitem.created": {
-      const invoiceitemCreated = event.data.object;
-      logger.info("Invoice payment succeeded:", invoiceitemCreated);
-      return Response.json("Success!", { status: 200 });
-    }
-    case "payment_intent.created": {
-      const paymentIntentCreated = event.data.object;
-      logger.info("Invoice payment succeeded:", paymentIntentCreated);
-      return Response.json("Success!", { status: 200 });
-    }
-    case "payment_intent.succeeded": {
-      const paymentIntentSucceeded = event.data.object;
-      logger.info("Invoice payment succeeded:", paymentIntentSucceeded);
-      return Response.json("Success!", { status: 200 });
-    }
-    case "payment_method.attached": {
-      const paymentMethodAttached = event.data.object;
-      logger.info("Invoice payment succeeded:", paymentMethodAttached);
-      return Response.json("Success!", { status: 200 });
-    }
+
     default: {
-      logger.info(`Unhandled event type ${event.type}`);
-      return Response.json("Success!", { status: 200 });
+      const object = event.data.object;
+      logger.info({ type: event.type, data: object });
+      return Response.json(null, { status: 200 });
     }
   }
 }
