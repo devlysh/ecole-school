@@ -3,8 +3,7 @@ CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
-    "first_name" TEXT NOT NULL,
-    "last_name" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "date_joined" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
 
@@ -41,13 +40,12 @@ CREATE TABLE "currencies" (
 CREATE TABLE "subscription_plans" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "cost" DOUBLE PRECISION NOT NULL,
+    "cost" INTEGER NOT NULL,
     "currency_id" INTEGER NOT NULL,
-    "duration_months" INTEGER NOT NULL,
     "credits" INTEGER NOT NULL,
-    "description" TEXT,
-    "stripe_product_id" TEXT,
-    "stripe_plan_id" TEXT,
+    "stripe_product_id" TEXT NOT NULL,
+    "stripe_price_id" TEXT NOT NULL,
+    "discount" DOUBLE PRECISION,
 
     CONSTRAINT "subscription_plans_pkey" PRIMARY KEY ("id")
 );
@@ -215,7 +213,7 @@ CREATE UNIQUE INDEX "currencies_code_key" ON "currencies"("code");
 CREATE UNIQUE INDEX "currencies_name_key" ON "currencies"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "subscription_plans_name_key" ON "subscription_plans"("name");
+CREATE UNIQUE INDEX "subscription_plans_stripe_price_id_key" ON "subscription_plans"("stripe_price_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "subscriptions_stripe_subscription_id_key" ON "subscriptions"("stripe_subscription_id");

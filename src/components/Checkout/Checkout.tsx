@@ -175,8 +175,8 @@ const Checkout = () => {
         return;
       }
       setEmail(e);
-    } catch (e) {
-      logger.error("Failed to parse quiz answers from localStorage", e);
+    } catch (err) {
+      logger.error(err, "Failed to parse quiz answers from localStorage");
     }
   }, [router]);
 
@@ -219,8 +219,7 @@ const Checkout = () => {
                 <>
                   <span>Class credits</span>
                   <span>
-                    {selectedPrice.metadata.numberOfClasses} private class
-                    credits
+                    {selectedPrice.metadata.credits} private class credits
                   </span>
                 </>
               ) : (

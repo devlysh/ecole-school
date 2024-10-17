@@ -5,8 +5,8 @@ export const GET = async () => {
   try {
     const languages = await prisma.language.findMany();
     return Response.json(languages);
-  } catch (error) {
-    logger.error("Error fetching languages:", error);
+  } catch (err: unknown) {
+    logger.error(err, "Error fetching languages");
     return Response.json("Failed to fetch languages", { status: 500 });
   }
 };

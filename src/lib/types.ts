@@ -63,7 +63,7 @@ export interface Plan {
   product: string;
   amount: number;
   currency: string;
-  metadata: { discount?: number; numberOfClasses: number };
+  metadata: { discount?: number; credits: number };
 }
 
 export type PlansMap = Map<string, Plan[]>;

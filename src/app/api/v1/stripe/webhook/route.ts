@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
+import { handlePriceUpdated } from "./price-updated";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SIGNING_SECRET = process.env.STRIPE_WEBHOOK_SIGNING_SECRET;
@@ -63,9 +64,15 @@ export async function POST(request: NextRequest) {
     }
 
     case "price.updated": {
-      const priceUpdated = event.data.object;
-      logger.info({ priceUpdated }, "TODO");
-      return Response.json(null, { status: 200 });
+      const price = event.data.object;
+      logger.debug({ price }, "price.updated");
+      try {
+        await handlePriceUpdated(price);
+        return Response.json(null, { status: 200 });
+      } catch (err: unknown) {
+        logger.error(err, "Failed to handle price update");
+        return Response.json(err, { status: 500 });
+      }
     }
 
     case "invoice.payment_succeeded": {

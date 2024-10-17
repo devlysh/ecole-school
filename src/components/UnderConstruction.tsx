@@ -11,8 +11,8 @@ const UnderConstruction = () => {
   useEffect(() => {
     try {
       setLodalStorageDump(localStorage);
-    } catch (e) {
-      logger.error("Failed to parse quiz answers from localStorage", e);
+    } catch (err) {
+      logger.error(err, "Failed to parse quiz answers from localStorage");
     }
   }, []);
 

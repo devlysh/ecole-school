@@ -42,56 +42,6 @@ const main = async () => {
   }
 
   console.log("Languages table populated!");
-
-  // Seed subscription plans
-  const plans = [
-    {
-      name: "5 Classes",
-      cost: 185,
-      durationMonths: 1,
-      credits: 5,
-      description: null,
-      currencyId: (await prisma.currency.findUnique({ where: { code: "USD" } }))
-        .id,
-    },
-    {
-      name: "12 Classes",
-      cost: 372,
-      durationMonths: 1,
-      credits: 12,
-      description: "16% discount",
-      currencyId: (await prisma.currency.findUnique({ where: { code: "USD" } }))
-        .id,
-    },
-    {
-      name: "20 Classes",
-      cost: 518,
-      durationMonths: 1,
-      credits: 20,
-      description: "30% discount",
-      currencyId: (await prisma.currency.findUnique({ where: { code: "USD" } }))
-        .id,
-    },
-    {
-      name: "40 Classes",
-      cost: 888,
-      durationMonths: 1,
-      credits: 40,
-      description: "40% discount",
-      currencyId: (await prisma.currency.findUnique({ where: { code: "USD" } }))
-        .id,
-    },
-  ];
-
-  for (const plan of plans) {
-    await prisma.subscriptionPlan.upsert({
-      where: { name: plan.name },
-      update: {},
-      create: plan,
-    });
-  }
-
-  console.log("Subscription plans table populated!");
 };
 
 main()

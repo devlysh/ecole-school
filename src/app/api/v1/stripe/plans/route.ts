@@ -18,7 +18,7 @@ export const GET = async () => {
       amount: Number(price.unit_amount),
       currency: price.currency,
       metadata: {
-        numberOfClasses: Number(price.metadata.numberOfClasses),
+        credits: Number(price.metadata.credits),
         ...(price.metadata.discount && {
           discount: Number(price.metadata.discount),
         }),
@@ -26,8 +26,8 @@ export const GET = async () => {
     }));
 
     return Response.json(plans);
-  } catch (error) {
-    logger.error("Error fetching plans:", error);
+  } catch (err: unknown) {
+    logger.error(err, "Error fetching plans");
     return Response.json("Failed to load subscription plans", { status: 500 });
   }
 };

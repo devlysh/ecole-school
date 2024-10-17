@@ -182,7 +182,7 @@ const Pricing = () => {
                   name={plan.name}
                   currency={plan.currency}
                   price={plan.amount}
-                  numberOfClasses={plan.metadata.numberOfClasses}
+                  credits={plan.metadata.credits}
                   className="mb-8"
                   isSelected={selectedPriceId === plan.id}
                   onClick={handleSubscriptionPlanClick}

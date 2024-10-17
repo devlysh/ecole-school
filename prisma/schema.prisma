@@ -11,8 +11,7 @@ model User {
   id           Int      @id @default(autoincrement())
   email        String   @unique
   passwordHash String   @map("password_hash")
-  firstName    String   @map("first_name")
-  lastName     String   @map("last_name")
+  name         String   @map("name")
   dateJoined   DateTime @default(now()) @map("date_joined")
   isActive     Boolean  @default(true) @map("is_active")
 
@@ -65,15 +64,14 @@ model Currency {
 }
 
 model SubscriptionPlan {
-  id              Int     @id @default(autoincrement())
-  name            String  @unique
-  cost            Float
-  currencyId      Int     @map("currency_id")
-  durationMonths  Int     @map("duration_months")
+  id              Int    @id @default(autoincrement())
+  name            String
+  cost            Int
+  currencyId      Int    @map("currency_id")
   credits         Int
-  description     String?
-  stripeProductId String? @map("stripe_product_id")
-  stripePlanId    String? @map("stripe_plan_id")
+  stripeProductId String @map("stripe_product_id")
+  stripePriceId   String @unique @map("stripe_price_id")
+  discount        Float?
 
   subscriptions Subscription[]
   currency      Currency       @relation(fields: [currencyId], references: [id])

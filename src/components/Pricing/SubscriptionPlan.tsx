@@ -8,7 +8,7 @@ export interface SubscriptionPlanProps {
   name: string;
   discount?: number;
   price: number;
-  numberOfClasses: number;
+  credits: number;
   onClick?: (id: string) => void;
   isSelected: boolean;
 }
@@ -26,7 +26,7 @@ export const SubscriptionPlan = ({
   name,
   discount,
   price,
-  numberOfClasses,
+  credits,
   onClick,
   isSelected,
 }: SubscriptionPlanProps) => {
@@ -53,11 +53,10 @@ export const SubscriptionPlan = ({
             {(price / 100).toFixed(2)} {currency.toUpperCase()}
           </div>
         </div>
-        {numberOfClasses && (
+        {credits && (
           <div>
             <span className="text-xl font-bold">
-              {(price / 100 / numberOfClasses).toFixed(2)}{" "}
-              {currency.toUpperCase()}
+              {(price / 100 / credits).toFixed(2)} {currency.toUpperCase()}
             </span>
             <span> / class</span>
           </div>
