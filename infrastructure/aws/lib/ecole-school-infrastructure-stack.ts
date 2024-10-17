@@ -53,17 +53,12 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    // Security Group for RDS instance with limited access
     const dbSecurityGroup = new ec2.SecurityGroup(this, "DBSecurityGroup", {
       vpc,
-      allowAllOutbound: true,
     });
     dbInstance.connections.allowFrom(
       dbSecurityGroup,
-      ec2.Port.tcp(5432),
-      "Allow App Runner access to PostgreSQL"
-    );
-
-    dbInstance.connections.allowFromAnyIpv4(
       ec2.Port.tcp(5432),
       "Allow App Runner access to PostgreSQL"
     );
@@ -144,17 +139,31 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
     // Grant instance role read access to the database secret
     dbCredentialsSecret.grantRead(instanceRole);
 
-    // 7. App Runner service configuration without DATABASE_URL
+    // 7. VPC Connector for App Runner
+    const vpcConnector = new apprunner.VpcConnector(
+      this,
+      "AppRunnerVpcConnector",
+      {
+        vpc,
+        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+        securityGroups: [dbSecurityGroup],
+      }
+    );
+
+    // Construct DATABASE_URL from secret values and RDS instance details
+    const databaseUrl = `postgresql://${dbCredentialsSecret
+      .secretValueFromJson("username")
+      .unsafeUnwrap()}:${dbCredentialsSecret
+      .secretValueFromJson("password")
+      .unsafeUnwrap()}@${dbInstance.instanceEndpoint.hostname}:5432/${dbInstance.instanceIdentifier}`;
+
+    // 8. App Runner service configuration with VPC connector
     const service = new apprunner.Service(this, "EcoleSchoolAppRunnerService", {
       source: apprunner.Source.fromAsset({
         imageConfiguration: {
           port: 3000,
           environmentVariables: {
-            DATABASE_URL: `postgresql://${dbCredentialsSecret
-              .secretValueFromJson("username")
-              .unsafeUnwrap()}:${dbCredentialsSecret.secretValueFromJson("password").unsafeUnwrap()}@${
-              dbInstance.instanceEndpoint.hostname
-            }:5432/${dbInstance.instanceIdentifier}`,
+            DATABASE_URL: databaseUrl,
             COGNITO_USER_POOL_ID: userPool.userPoolId,
             COGNITO_USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
           },
@@ -163,9 +172,10 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       }),
       accessRole: accessRole,
       instanceRole: instanceRole,
+      vpcConnector: vpcConnector, // Attach the VPC Connector
     });
 
-    // 8. Output the App Runner service URL and Cognito details
+    // 9. Output the App Runner service URL and Cognito details
     new cdk.CfnOutput(this, "EcoleSchoolAppRunnerServiceUrl", {
       value: service.serviceUrl,
       description: "The URL of the App Runner service",
