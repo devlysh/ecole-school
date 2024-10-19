@@ -64,34 +64,47 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         }),
       });
 
-      const { clientSecret, error } = await res.json();
+      const data = await res.json();
 
-      if (error) {
-        setError(error);
+      if (!res.ok) {
+        setError(
+          data.error || "An error occurred while processing your payment."
+        );
         setLoading(false);
         return;
       }
 
-      // Step 3: Confirm payment if the payment intent hasn't succeeded yet
-      const { paymentIntent } =
-        await stripe.retrievePaymentIntent(clientSecret);
-      if (paymentIntent?.status === "succeeded") {
-        router.push("/account");
+      const { clientSecret } = data;
+
+      if (!clientSecret) {
+        console.error("Client secret is missing from the server response");
+        setError(
+          "An error occurred while processing your payment. Please try again."
+        );
+        setLoading(false);
         return;
       }
 
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: paymentMethodId,
-      });
+      // Step 3: Confirm payment
+      const { error: confirmError } =
+        await stripe.confirmCardPayment(clientSecret);
 
-      if (result.error) {
-        setError(result.error.message ?? "An unknown error occurred.");
-      } else if (result.paymentIntent?.status === "succeeded") {
-        router.push("/account");
+      if (confirmError) {
+        setError(
+          confirmError.message ??
+            "An error occurred while confirming your payment."
+        );
+        setLoading(false);
+        return;
       }
+
+      // Payment successful
+      router.push("/account");
     } catch (err: unknown) {
       console.error("Error during checkout:", err);
-      setError("An unexpected error occurred");
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -126,7 +139,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         className="w-full p-3 bg-primary text-white rounded-lg font-bold text-lg"
         type="submit"
       >
-        {loading ? "Processing..." : "Continue"}
+        {loading ? "Processing..." : "Pay"}
       </Button>
     </form>
   );

@@ -34,22 +34,35 @@ export async function POST(request: NextRequest) {
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [{ price: planId }],
+      payment_behavior: "default_incomplete",
       expand: ["latest_invoice.payment_intent"],
     });
 
-    let clientSecret;
-
-    if (
-      typeof subscription.latest_invoice !== "string" &&
+    const clientSecret =
+      typeof subscription.latest_invoice === "object" &&
       subscription.latest_invoice?.payment_intent &&
-      typeof subscription.latest_invoice?.payment_intent !== "string"
-    ) {
-      clientSecret = subscription.latest_invoice.payment_intent.client_secret;
+      typeof subscription.latest_invoice.payment_intent === "object" &&
+      "client_secret" in subscription.latest_invoice.payment_intent
+        ? subscription.latest_invoice.payment_intent.client_secret
+        : null;
+
+    if (!clientSecret) {
+      console.error("Failed to obtain client secret from Stripe");
+      return Response.json(
+        { error: "Failed to process payment" },
+        { status: 500 }
+      );
     }
 
     return Response.json({ clientSecret });
   } catch (err: unknown) {
     console.error("Error creating subscription:", err);
-    return Response.json(err, { status: 400 });
+    if (err instanceof Stripe.errors.StripeError) {
+      return Response.json({ error: err.message }, { status: 400 });
+    }
+    return Response.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 }
+    );
   }
 }
