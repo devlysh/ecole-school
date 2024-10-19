@@ -1,15 +1,16 @@
 import { Card } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QuestionStep as QuestionStepType } from "@/lib/types";
+import Cookies from "js-cookie";
 
 interface QuestionStepProps {
   step: QuestionStepType;
-  onAnswer: (answer: string) => void;
+  onNext: (answer: string) => void;
 }
 
-const QuestionStep: React.FC<QuestionStepProps> = ({ step, onAnswer }) => {
+const QuestionStep: React.FC<QuestionStepProps> = ({ step, onNext }) => {
   const [customAnswer, setCustomAnswer] = useState("");
 
   const handleCustomAnswerChange = (
@@ -20,17 +21,25 @@ const QuestionStep: React.FC<QuestionStepProps> = ({ step, onAnswer }) => {
 
   const handleCustomAnswerSubmit = () => {
     if (customAnswer.trim()) {
-      onAnswer(customAnswer.trim());
+      onNext(customAnswer.trim());
       setCustomAnswer("");
     }
   };
+
+  useEffect(() => {
+    const answer = Cookies.get(step.id);
+
+    if (answer) {
+      setCustomAnswer(answer);
+    }
+  }, [step.id]);
 
   return (
     <div>
       <div className="text-3xl mb-8">{step.text}</div>
       {step.answers.map((answer) => (
         <Card key={answer} className="w-full my-4">
-          <div className="cursor-pointer p-4" onClick={() => onAnswer(answer)}>
+          <div className="cursor-pointer p-4" onClick={() => onNext(answer)}>
             {answer}
           </div>
         </Card>

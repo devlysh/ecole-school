@@ -30,13 +30,19 @@ export interface QuestionStep extends Step {
 
 export interface FormStep extends Step {
   type: StepType.FORM;
-  fields: FormFieldType[];
+  fields: FormField[];
+}
+
+export interface FormField {
+  type: FormFieldType;
+  label: string;
+  placeholder?: string;
 }
 
 export type QuizStep = InfoStep | QuestionStep | FormStep;
 
 export interface Answer {
-  id: number;
+  id: string;
   text: string;
   question: string;
 }
@@ -44,7 +50,7 @@ export interface Answer {
 export interface QuizState {
   currentStep: number;
   steps: QuizStep[];
-  answers: Answer[];
+  answers: (Answer | null)[];
 }
 
 export interface Language {

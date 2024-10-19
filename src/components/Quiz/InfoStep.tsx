@@ -17,6 +17,7 @@ const InfoStep: React.FC<InfoStepProps> = ({ step, onNext }) => {
           <Image
             src={`/${step.image.url}`}
             alt={step.text}
+            aria-label={step.text}
             width={step.image.width}
             height={step.image.height}
             priority

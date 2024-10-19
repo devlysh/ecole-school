@@ -15,6 +15,7 @@ import { Spinner } from "@nextui-org/spinner";
 import useLanguages from "@/hooks/useLanguages";
 import { useRouter } from "next/navigation";
 import { Input } from "@nextui-org/input";
+import Cookies from "js-cookie";
 
 const CheckoutForm = ({
   email,
@@ -60,7 +61,7 @@ const CheckoutForm = ({
         return;
       }
 
-      localStorage.setItem("email", email);
+      Cookies.set("email", email);
       const paymentMethodId = paymentMethod?.id;
 
       // Step 2: Send payment method ID to the server to create a subscription
@@ -156,8 +157,8 @@ const Checkout = () => {
 
   useEffect(() => {
     try {
-      const rawLanguage = localStorage.getItem("language");
-      const rawSelectedPrice = localStorage.getItem("selectedPrice");
+      const rawLanguage = Cookies.get("language");
+      const rawSelectedPrice = Cookies.get("selectedPrice");
       if (!rawLanguage || !rawSelectedPrice) {
         router.push("/pricing");
       }
@@ -169,7 +170,7 @@ const Checkout = () => {
         setSelectedPrice(JSON.parse(rawSelectedPrice));
       }
 
-      const e = localStorage.getItem("email");
+      const e = Cookies.get("email");
       if (!e) {
         router.push("/quiz");
         return;

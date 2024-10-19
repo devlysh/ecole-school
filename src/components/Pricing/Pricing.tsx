@@ -9,6 +9,7 @@ import { SubscriptionPlan } from "./SubscriptionPlan";
 import { groupByCurrency } from "@/lib/utils";
 import { Currency, Language } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 const LanguageSelect = ({
   languages,
@@ -83,9 +84,9 @@ const Pricing = () => {
     useState<Currency["code"]>("USD");
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("language");
-    const savedCurrency = localStorage.getItem("currency");
-    const savedPriceId = localStorage.getItem("priceId");
+    const savedLanguage = Cookies.get("language");
+    const savedCurrency = Cookies.get("currency");
+    const savedPriceId = Cookies.get("priceId");
 
     if (savedLanguage) setSelectedLanguage(savedLanguage);
     if (savedCurrency) setSelectedCurrency(savedCurrency);
@@ -119,10 +120,10 @@ const Pricing = () => {
   const handleSubmit = useCallback(() => {
     if (selectedPriceId) {
       const selectedPrice = plans.find((plan) => plan.id === selectedPriceId);
-      localStorage.setItem("selectedPrice", JSON.stringify(selectedPrice));
-      localStorage.setItem("priceId", selectedPriceId);
-      localStorage.setItem("language", selectedLanguage);
-      localStorage.setItem("currency", selectedCurrency);
+      Cookies.set("selectedPrice", JSON.stringify(selectedPrice));
+      Cookies.set("priceId", selectedPriceId);
+      Cookies.set("language", selectedLanguage);
+      Cookies.set("currency", selectedCurrency);
       router.push("/checkout");
     } else {
       throw new Error("Selected plan ID should be defined");

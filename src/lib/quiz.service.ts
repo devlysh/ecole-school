@@ -1,4 +1,4 @@
-import { Answer, QuizState, QuizStep } from "./types";
+import { QuizState, QuizStep } from "./types";
 
 export const QuizService = {
   initializeQuiz: (steps: QuizStep[]): QuizState => ({
@@ -18,9 +18,9 @@ export const QuizService = {
       : state,
 
   submitAnswer: (state: QuizState, answerText: string): QuizState => {
-    const updatedAnswers: Answer[] = [...state.answers];
+    const updatedAnswers = [...state.answers];
     updatedAnswers[state.currentStep] = {
-      id: state.currentStep,
+      id: state.steps[state.currentStep].id,
       text: answerText,
       question: state.steps[state.currentStep].text,
     };
@@ -44,3 +44,11 @@ export const QuizService = {
 };
 
 export default QuizService;
+
+export const pipe =
+  (prevState: QuizState) =>
+  (...methods: ((state: QuizState) => QuizState)[]) => {
+    return methods.reduce((state, method) => {
+      return method(state);
+    }, prevState);
+  };
