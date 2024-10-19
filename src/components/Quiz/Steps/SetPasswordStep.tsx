@@ -46,7 +46,6 @@ const SetPasswordStep = () => {
   const handleChange = useCallback(
     (values: { [key: string]: string }) => {
       setValues(values);
-      logger.debug({ values }, "Values changed");
     },
     [setValues]
   );

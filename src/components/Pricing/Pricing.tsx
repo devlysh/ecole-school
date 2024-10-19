@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Select, SelectItem, Spinner } from "@nextui-org/react";
+import { Button, Spinner } from "@nextui-org/react";
 import useCurrencies from "@/hooks/useCurrencies";
 import useLanguages from "@/hooks/useLanguages";
 import usePlans from "@/hooks/usePlans";
@@ -10,62 +10,8 @@ import { groupByCurrency } from "@/lib/utils";
 import { Currency, Language } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-
-const LanguageSelect = ({
-  languages,
-  languagesLoading,
-  selectedLanguage,
-  onLanguageChange,
-}: {
-  languages: Language[];
-  languagesLoading: boolean;
-  selectedLanguage: string;
-  onLanguageChange: (event: ChangeEvent<HTMLSelectElement>) => void;
-}) =>
-  languagesLoading ? (
-    <div className="w-full text-center">
-      <Spinner size="sm" color="secondary" />
-    </div>
-  ) : (
-    <Select
-      label="Learning language"
-      labelPlacement="outside"
-      defaultSelectedKeys={[selectedLanguage]}
-      onChange={onLanguageChange}
-    >
-      {languages.map((language) => (
-        <SelectItem key={language.code}>{language.name}</SelectItem>
-      ))}
-    </Select>
-  );
-
-const CurrencySelect = ({
-  currencies,
-  currenciesLoading,
-  selectedCurrency,
-  onCurrencyChange,
-}: {
-  currencies: Currency[];
-  currenciesLoading: boolean;
-  selectedCurrency: string;
-  onCurrencyChange: (event: ChangeEvent<HTMLSelectElement>) => void;
-}) =>
-  currenciesLoading ? (
-    <div className="w-full text-center">
-      <Spinner size="sm" color="secondary" />
-    </div>
-  ) : (
-    <Select
-      label="Currency"
-      labelPlacement="outside"
-      defaultSelectedKeys={[selectedCurrency]}
-      onChange={onCurrencyChange}
-    >
-      {currencies.map((currency) => (
-        <SelectItem key={currency.code}>{currency.name}</SelectItem>
-      ))}
-    </Select>
-  );
+import LanguageSelect from "./LanguageSelect";
+import CurrencySelect from "./CurrencySelect";
 
 const Pricing = () => {
   const router = useRouter();
@@ -119,11 +65,13 @@ const Pricing = () => {
 
   const handleSubmit = useCallback(() => {
     if (selectedPriceId) {
-      const selectedPrice = plans.find((plan) => plan.id === selectedPriceId);
-      Cookies.set("selectedPrice", JSON.stringify(selectedPrice));
       Cookies.set("priceId", selectedPriceId);
       Cookies.set("language", selectedLanguage);
       Cookies.set("currency", selectedCurrency);
+      Cookies.set(
+        "selectedPrice",
+        JSON.stringify(plans.find((plan) => plan.id === selectedPriceId))
+      );
       router.push("/checkout");
     } else {
       throw new Error("Selected plan ID should be defined");

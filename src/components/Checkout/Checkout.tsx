@@ -28,6 +28,7 @@ const Checkout = () => {
     try {
       const rawLanguage = Cookies.get("language");
       const rawSelectedPrice = Cookies.get("selectedPrice");
+
       if (!rawLanguage || !rawSelectedPrice) {
         router.push("/pricing");
       }

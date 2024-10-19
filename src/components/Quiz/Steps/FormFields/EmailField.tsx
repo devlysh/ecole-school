@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Input } from "@nextui-org/input";
 
 interface EmailFieldProps {
@@ -16,16 +16,19 @@ const EmailField: React.FC<EmailFieldProps> = ({
 }) => {
   const [isValid, setIsValid] = useState(true);
 
-  const validateEmail = (email: string) => {
+  const validateEmail = useCallback((email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-  };
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setIsValid(validateEmail(newValue));
-    onChange(newValue);
-  };
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setIsValid(validateEmail(newValue));
+      onChange(newValue);
+    },
+    [validateEmail, onChange]
+  );
 
   return (
     <Input

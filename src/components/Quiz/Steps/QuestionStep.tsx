@@ -1,7 +1,7 @@
 import { Card } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { QuestionStep as QuestionStepType } from "@/lib/types";
 import Cookies from "js-cookie";
 
@@ -13,18 +13,19 @@ interface QuestionStepProps {
 const QuestionStep: React.FC<QuestionStepProps> = ({ step, onNext }) => {
   const [customAnswer, setCustomAnswer] = useState("");
 
-  const handleCustomAnswerChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setCustomAnswer(event.target.value);
-  };
+  const handleCustomAnswerChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setCustomAnswer(event.target.value);
+    },
+    []
+  );
 
-  const handleCustomAnswerSubmit = () => {
+  const handleCustomAnswerSubmit = useCallback(() => {
     if (customAnswer.trim()) {
       onNext(customAnswer.trim());
       setCustomAnswer("");
     }
-  };
+  }, [customAnswer, onNext]);
 
   useEffect(() => {
     const answer = Cookies.get(step.name);
