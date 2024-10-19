@@ -188,17 +188,5 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       value: userPoolClient.userPoolClientId,
       description: "The Cognito User Pool Client ID",
     });
-    new cdk.CfnOutput(this, "AdminGroupName", {
-      value: adminGroup.groupName!,
-      description: "The Cognito Admin Group",
-    });
-    new cdk.CfnOutput(this, "TeacherGroupName", {
-      value: teacherGroup.groupName!,
-      description: "The Cognito Teacher Group",
-    });
-    new cdk.CfnOutput(this, "StudentGroupName", {
-      value: studentGroup.groupName!,
-      description: "The Cognito Student Group",
-    });
   }
 }
