@@ -7,10 +7,11 @@ export enum StepType {
 export enum FormFieldType {
   TEXT,
   EMAIL,
+  PASSWORD,
 }
 
 export interface Step {
-  id: string;
+  name: string;
   type: StepType;
   title?: string;
   text: string;
@@ -34,9 +35,10 @@ export interface FormStep extends Step {
 }
 
 export interface FormField {
+  name: string;
   type: FormFieldType;
   label: string;
-  placeholder?: string;
+  shouldValidate?: boolean;
 }
 
 export type QuizStep = InfoStep | QuestionStep | FormStep;

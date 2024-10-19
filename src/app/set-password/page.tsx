@@ -2,9 +2,9 @@ import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import Pricing from "@/components/Pricing";
+import SetPasswordStep from "@/components/Quiz/Steps/SetPasswordStep";
 
-const PricingPage = async () => {
+const CreatePasswordPage = async () => {
   const cookieStore = cookies();
   const token = cookieStore.get("token");
 
@@ -18,7 +18,7 @@ const PricingPage = async () => {
     redirect("/quiz");
   }
 
-  return <Pricing />;
+  return <SetPasswordStep />;
 };
 
-export default PricingPage;
+export default CreatePasswordPage;

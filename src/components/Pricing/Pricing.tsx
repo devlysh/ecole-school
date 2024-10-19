@@ -95,7 +95,7 @@ const Pricing = () => {
 
   const plansByCurrency = useMemo(() => {
     const map = groupByCurrency(plans);
-    const filteredPlans = map.get(selectedCurrency.toLowerCase()) || [];
+    const filteredPlans = map.get(selectedCurrency.toLowerCase()) ?? [];
     return filteredPlans.sort((a, b) => a.amount - b.amount);
   }, [plans, selectedCurrency]);
 

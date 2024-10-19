@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { Progress } from "@nextui-org/progress";
 import { Button } from "@nextui-org/button";
 import { QuizState, QuizStep, StepType } from "@/lib/types";
-import InfoStep from "./InfoStep";
-import QuestionStep from "./QuestionStep";
-import FormStep from "./FormStep";
+import InfoStep from "./Steps/InfoStep";
+import QuestionStep from "./Steps/QuestionStep";
+import FormStep from "./Steps/FormStep";
 import logger from "@/lib/logger";
 import Cookies from "js-cookie";
 
@@ -38,46 +38,58 @@ const Quiz = () => {
     [quizState]
   );
 
+  const registerUserAndNavigate = useCallback(async () => {
+    try {
+      const response = await fetch("/api/v1/register-user");
+
+      if (!response.ok) {
+        throw new Error("Failed to register user");
+      }
+
+      router.push("/pricing");
+    } catch (err) {
+      logger.error(err, "Error registering user");
+    }
+  }, [router]);
+
   const handleNext = useCallback(
     (answer?: string) => {
       setQuizState((prevState) => {
-        let state;
-        if (answer) {
-          Cookies.set(currentStep.id, answer, { path: "/" });
-          state = pipe(prevState)(
-            (state: QuizState) => QuizService.submitAnswer(state, answer),
-            (state: QuizState) => QuizService.goToNextStep(state)
-          );
-        } else {
-          state = QuizService.goToNextStep(prevState);
-        }
-        logger.debug({ answer, state }, "Moving to next step");
-
-        if (isLastStep) {
-          logger.debug(
-            { state },
-            "Last step, name and email is set , moving to pricing"
-          );
+        if (!answer) {
+          return QuizService.goToNextStep(prevState);
         }
 
-        return state;
+        Cookies.set(currentStep.name, answer, { path: "/" });
+        return pipe(prevState)(
+          (state: QuizState) => QuizService.submitAnswer(state, answer),
+          QuizService.goToNextStep,
+          (state: QuizState) => {
+            logger.debug({ answer, state }, "Moving to next step");
+            if (isLastStep) {
+              logger.debug(
+                { state },
+                "Last step, name and email is set, moving to pricing"
+              );
+            }
+            return state;
+          }
+        );
       });
 
       if (isLastStep) {
-        router.push("/pricing");
+        registerUserAndNavigate();
       }
     },
-    [currentStep.id, isLastStep, router]
+    [currentStep.name, isLastStep, registerUserAndNavigate]
   );
 
   const handlePrevious = useCallback(() => {
-    logger.debug({ quizState }, "Moving to previous step");
     setQuizState((prevState) => {
       const state = QuizService.goToPreviousStep(prevState);
-      logger.debug({ state }, "Moving to next step");
+      logger.debug({ state }, "Moving to previous step");
       return state;
     });
-  }, [quizState]);
+  }, []);
 
   const renderStep = useCallback(() => {
     switch (currentStep.type) {
@@ -86,7 +98,12 @@ const Quiz = () => {
       case StepType.QUESTION:
         return <QuestionStep step={currentStep} onNext={handleNext} />;
       case StepType.FORM:
-        return <FormStep step={currentStep} onNext={handleNext} />;
+        return (
+          <FormStep
+            step={currentStep}
+            onNext={(values) => handleNext(values[currentStep.name])}
+          />
+        );
       default:
         return null;
     }

@@ -1,3 +1,4 @@
+import { Button } from "@nextui-org/button";
 import Image from "next/image";
 
 interface TextSlideProps {
@@ -24,7 +25,7 @@ const TextSlide: React.FC<TextSlideProps> = ({
         height={image.height}
       />
     )}
-    <button onClick={onNext}>Next</button>
+    <Button onClick={onNext}>Next</Button>
   </div>
 );
 

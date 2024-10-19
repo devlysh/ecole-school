@@ -1,147 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
-import { Button } from "@nextui-org/button";
+import { Elements } from "@stripe/react-stripe-js";
 import { getStripePromise } from "@/lib/stripe";
-import logger from "@/lib/logger";
-import { Language, Plan } from "@/lib/types";
 import { Spinner } from "@nextui-org/spinner";
-import useLanguages from "@/hooks/useLanguages";
 import { useRouter } from "next/navigation";
-import { Input } from "@nextui-org/input";
 import Cookies from "js-cookie";
 
-const CheckoutForm = ({
-  email,
-  setEmail,
-  selectedPrice,
-}: {
-  email: string;
-  setEmail: (email: string) => void;
-  selectedPrice: Plan;
-}) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [nameOnCard, setNameOnCard] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const [cardElementReady, setCardElementReady] = useState<boolean>(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Step 1: Create the payment method
-      const cardElement = elements.getElement(CardElement);
-      const { paymentMethod, error: paymentMethodError } =
-        await stripe.createPaymentMethod({
-          type: "card",
-          card: cardElement!,
-          billing_details: {
-            name: nameOnCard,
-            email: email,
-          },
-        });
-
-      if (paymentMethodError) {
-        setError(paymentMethodError.message || "An unknown error occurred.");
-        setLoading(false);
-        return;
-      }
-
-      Cookies.set("email", email);
-      const paymentMethodId = paymentMethod?.id;
-
-      // Step 2: Send payment method ID to the server to create a subscription
-      const res = await fetch("/api/v1/stripe/create-subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          planId: selectedPrice?.id,
-          paymentMethodId,
-        }),
-      });
-
-      const { clientSecret, error } = await res.json();
-
-      if (error) {
-        setError(error);
-        setLoading(false);
-        return;
-      }
-
-      // Step 3: Confirm payment if the payment intent hasn't succeeded yet
-      const { paymentIntent } =
-        await stripe.retrievePaymentIntent(clientSecret);
-      if (paymentIntent?.status === "succeeded") {
-        router.push("/account");
-        return;
-      }
-
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: paymentMethodId,
-      });
-
-      if (result.error) {
-        setError(result.error.message || "An unknown error occurred.");
-      } else if (result.paymentIntent?.status === "succeeded") {
-        router.push("/account");
-      }
-    } catch (err: unknown) {
-      console.error("Error during checkout:", err);
-      setError("An unexpected error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className={`${cardElementReady ? "" : "opacity-0"} space-y-4 transition-opacity duration-1000 ease-in-out`}
-    >
-      <Input
-        type="text"
-        placeholder="Name on card"
-        value={nameOnCard}
-        onChange={(e) => setNameOnCard(e.target.value)}
-        className="w-full"
-      />
-      <CardElement
-        className="p-3 border rounded-lg"
-        onReady={() => setCardElementReady(true)}
-      />
-      {error && <p className="text-red-500">{error}</p>}
-      <Input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full"
-      />
-      <Button
-        disabled={!stripe || loading}
-        className="w-full p-3 bg-primary text-white rounded-lg font-bold text-lg"
-        type="submit"
-      >
-        {loading ? "Processing..." : "Continue"}
-      </Button>
-    </form>
-  );
-};
+import useLanguages from "@/hooks/useLanguages";
+import logger from "@/lib/logger";
+import { Language, Plan } from "@/lib/types";
+import CheckoutForm from "./CheckoutForm";
 
 const Checkout = () => {
   const router = useRouter();
@@ -187,11 +56,7 @@ const Checkout = () => {
         <div>
           <h2 className="text-2xl font-bold mb-6">Complete your purchase</h2>
           {selectedPrice ? (
-            <CheckoutForm
-              email={email}
-              setEmail={setEmail}
-              selectedPrice={selectedPrice}
-            />
+            <CheckoutForm email={email} selectedPrice={selectedPrice} />
           ) : (
             <div className="flex justify-center items-center h-full">
               <Spinner size="sm" />

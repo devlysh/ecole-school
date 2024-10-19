@@ -1,10 +1,28 @@
 import { QuizService } from "./quiz.service";
-import { Step, QuizState } from "./types";
+import { QuizStep, QuizState, StepType } from "./types";
 
-const steps: Step[] = [
-  { id: 1, text: "Question 1" },
-  { id: 2, text: "Question 2" },
-  { id: 3, text: "Question 3" },
+const steps: QuizStep[] = [
+  {
+    type: StepType.QUESTION,
+    name: "1",
+    text: "Question 1",
+    answers: [],
+    allowCustomAnswer: false,
+  },
+  {
+    type: StepType.QUESTION,
+    name: "2",
+    text: "Question 2",
+    answers: [],
+    allowCustomAnswer: false,
+  },
+  {
+    type: StepType.QUESTION,
+    name: "3",
+    text: "Question 3",
+    answers: [],
+    allowCustomAnswer: false,
+  },
 ];
 
 describe("QuizService", () => {
@@ -50,7 +68,7 @@ describe("QuizService", () => {
     const answerText = "Answer to question 1";
     const stateWithAnswer = QuizService.submitAnswer(initialState, answerText);
     expect(stateWithAnswer.answers[0]).toEqual({
-      id: 0,
+      id: steps[0].name,
       text: answerText,
       question: "Question 1",
     });

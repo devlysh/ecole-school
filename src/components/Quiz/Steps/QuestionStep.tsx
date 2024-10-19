@@ -27,12 +27,12 @@ const QuestionStep: React.FC<QuestionStepProps> = ({ step, onNext }) => {
   };
 
   useEffect(() => {
-    const answer = Cookies.get(step.id);
+    const answer = Cookies.get(step.name);
 
     if (answer) {
       setCustomAnswer(answer);
     }
-  }, [step.id]);
+  }, [step.name]);
 
   return (
     <div>

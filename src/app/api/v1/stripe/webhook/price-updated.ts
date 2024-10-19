@@ -10,7 +10,7 @@ export async function handlePriceUpdated(eventData: Stripe.Price) {
 
   const updatedFields = {
     cost,
-    discount: parseFloat(eventData.metadata.discount) || null,
+    discount: parseFloat(eventData.metadata.discount) ?? null,
     name,
     credits,
     currency: {

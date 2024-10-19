@@ -20,7 +20,7 @@ export const QuizService = {
   submitAnswer: (state: QuizState, answerText: string): QuizState => {
     const updatedAnswers = [...state.answers];
     updatedAnswers[state.currentStep] = {
-      id: state.steps[state.currentStep].id,
+      id: state.steps[state.currentStep].name,
       text: answerText,
       question: state.steps[state.currentStep].text,
     };

@@ -2,14 +2,14 @@ import { FormFieldType, QuizStep, StepType } from "./types";
 
 export const steps: QuizStep[] = [
   {
-    id: "info-1",
+    name: "info-1",
     type: StepType.INFO,
     title: "Perfect Teacher Match",
     text: "We match you with a native - level teacher to fit your goals and schedule",
     image: { url: "hands-puzzle.png", width: 217, height: 265 },
   },
   {
-    id: "currentLevel",
+    name: "currentLevel",
     type: StepType.QUESTION,
     allowCustomAnswer: false,
     text: "What is your current level?",
@@ -21,7 +21,7 @@ export const steps: QuizStep[] = [
     ],
   },
   {
-    id: "info-2",
+    name: "info-2",
     type: StepType.INFO,
     title: "Any Level Welcome",
     text: "From beginners to advanced learners, we provide the tailored support you need to succeed",
@@ -32,7 +32,7 @@ export const steps: QuizStep[] = [
     },
   },
   {
-    id: "motivatesYou",
+    name: "motivatesYou",
     type: StepType.QUESTION,
     allowCustomAnswer: true,
     text: "What motivates you to learn this language?",
@@ -44,7 +44,7 @@ export const steps: QuizStep[] = [
     ],
   },
   {
-    id: "info-3",
+    name: "info-3",
     type: StepType.INFO,
     title: "Adaptable Class Times",
     text: "You can reschedule or cancel classes to fit your busy life",
@@ -55,7 +55,7 @@ export const steps: QuizStep[] = [
     },
   },
   {
-    id: "areasToFocus",
+    name: "areasToFocus",
     type: StepType.QUESTION,
     allowCustomAnswer: false,
     text: "Which areas do you want to focus on the most?",
@@ -69,7 +69,7 @@ export const steps: QuizStep[] = [
     ],
   },
   {
-    id: "info-4",
+    name: "info-4",
     type: StepType.INFO,
     title: "Your Goals First",
     text: "Our program adapts to your goals — learn what matters most, from work vocabulary to conversation!",
@@ -80,7 +80,7 @@ export const steps: QuizStep[] = [
     },
   },
   {
-    id: "studyTimePerWeek",
+    name: "studyTimePerWeek",
     type: StepType.QUESTION,
     allowCustomAnswer: false,
     text: "How much time do you want to study each week?",
@@ -93,7 +93,7 @@ export const steps: QuizStep[] = [
     ],
   },
   {
-    id: "into-5",
+    name: "into-5",
     type: StepType.INFO,
     title: "Flexible Subscription",
     text: "Change or cancel your subscription anytime — your plan, your control",
@@ -104,22 +104,24 @@ export const steps: QuizStep[] = [
     },
   },
   {
-    id: "name",
+    name: "name",
     type: StepType.FORM,
     text: "What is your name?",
     fields: [
       {
+        name: "name",
         type: FormFieldType.TEXT,
         label: "Name",
       },
     ],
   },
   {
-    id: "email",
+    name: "email",
     type: StepType.FORM,
     text: "What is your email?",
     fields: [
       {
+        name: "email",
         type: FormFieldType.EMAIL,
         label: "Email",
       },

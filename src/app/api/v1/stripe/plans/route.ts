@@ -2,7 +2,13 @@ import logger from "@/lib/logger";
 import { Plan } from "@/lib/types";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+
+if (!STRIPE_SECRET_KEY) {
+  throw new Error("STRIPE_SECRET_KEY is not set");
+}
+
+const stripe = new Stripe(STRIPE_SECRET_KEY);
 
 export const GET = async () => {
   try {
