@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import SetPasswordStep from "@/components/Quiz/Steps/SetPasswordStep";
+import { CookiesPayload } from "@/lib/types";
 
 const CreatePasswordPage = async () => {
   const cookieStore = cookies();
@@ -12,9 +13,17 @@ const CreatePasswordPage = async () => {
     redirect("/quiz");
   }
 
-  const decodedToken = await verifyToken(token.value);
+  const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
 
-  if (!decodedToken) {
+  if (
+    !decodedToken ||
+    !decodedToken.name ||
+    !decodedToken.email ||
+    !decodedToken.language ||
+    !decodedToken.currency ||
+    !decodedToken.selectedPrice ||
+    !decodedToken.priceId
+  ) {
     redirect("/quiz");
   }
 

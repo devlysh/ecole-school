@@ -1,3 +1,5 @@
+import { JwtPayload } from "jsonwebtoken";
+
 export enum StepType {
   INFO,
   QUESTION,
@@ -75,3 +77,12 @@ export interface Plan {
 }
 
 export type PlansMap = Map<string, Plan[]>;
+
+export interface CookiesPayload extends JwtPayload {
+  name: string;
+  email: string;
+  currency?: string;
+  language?: string;
+  priceId?: string;
+  selectedPrice?: string;
+}

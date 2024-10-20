@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
 import { Input } from "@nextui-org/input";
-import Cookies from "js-cookie";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Plan } from "@/lib/types";
 import logger from "@/lib/logger";

@@ -7,7 +7,7 @@ import useLanguages from "@/hooks/useLanguages";
 import usePlans from "@/hooks/usePlans";
 import { SubscriptionPlan } from "./SubscriptionPlan";
 import { groupByCurrency } from "@/lib/utils";
-import { Currency, Language } from "@/lib/types";
+import { CookiesPayload, Currency, Language } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
@@ -41,7 +41,7 @@ const Pricing = () => {
         return;
       }
 
-      const payload = jwt.decode(token) as jwt.JwtPayload;
+      const payload = jwt.decode(token) as CookiesPayload;
 
       if (!payload) {
         router.push("/quiz");

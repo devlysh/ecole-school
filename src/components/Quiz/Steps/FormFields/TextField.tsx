@@ -30,6 +30,7 @@ const TextField: React.FC<TextFieldProps> = ({
       onChange={handleChange}
       isInvalid={!isValid}
       errorMessage={!isValid ? "This field is required" : ""}
+      autoFocus
     />
   );
 };

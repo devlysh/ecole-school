@@ -39,6 +39,7 @@ const EmailField: React.FC<EmailFieldProps> = ({
       onChange={handleChange}
       isInvalid={!isValid}
       errorMessage={!isValid ? "Please enter a valid email address" : ""}
+      autoFocus
     />
   );
 };

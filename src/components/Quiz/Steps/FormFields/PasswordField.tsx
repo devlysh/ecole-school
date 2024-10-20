@@ -65,6 +65,7 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
       onChange={handleChange}
       isInvalid={!isValid}
       errorMessage={!isValid ? errorMessage : ""}
+      autoFocus
     />
   );
 };

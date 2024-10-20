@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 
 import useLanguages from "@/hooks/useLanguages";
 import logger from "@/lib/logger";
-import { Language, Plan } from "@/lib/types";
+import { CookiesPayload, Language, Plan } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
 
 const Checkout = () => {
@@ -34,7 +34,7 @@ const Checkout = () => {
         return;
       }
 
-      const payload = jwt.decode(token) as jwt.JwtPayload;
+      const payload = jwt.decode(token) as CookiesPayload;
 
       if (
         !payload ||
