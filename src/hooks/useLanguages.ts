@@ -1,3 +1,4 @@
+import { getLanguages } from "@/app/api/v1/languages/request";
 import { Language } from "@/lib/types";
 import { useState, useEffect } from "react";
 
@@ -9,12 +10,8 @@ const useLanguages = () => {
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const response = await fetch("/api/v1/languages");
-        if (!response.ok) {
-          throw new Error("Failed to fetch languages");
-        }
-        const data = await response.json();
-        setLanguages(data);
+        const languages = await getLanguages();
+        setLanguages(languages);
       } catch (err) {
         setError(err);
       } finally {

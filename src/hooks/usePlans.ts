@@ -1,3 +1,4 @@
+import { getPlans } from "@/app/api/v1/stripe/plans/request";
 import { Plan } from "@/lib/types";
 import { useState, useEffect } from "react";
 
@@ -9,12 +10,8 @@ const usePlans = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await fetch("/api/v1/stripe/plans");
-        if (!response.ok) {
-          throw new Error("Failed to fetch plans");
-        }
-        const data = await response.json();
-        setPlans(data);
+        const plans = await getPlans();
+        setPlans(plans);
       } catch (err) {
         setError(err);
       } finally {

@@ -1,3 +1,4 @@
+import { getCurrencies } from "@/app/api/v1/currencies/request";
 import { Currency } from "@/lib/types";
 import { useState, useEffect } from "react";
 
@@ -9,12 +10,8 @@ const useCurrencies = () => {
   useEffect(() => {
     const fetchCurrencies = async () => {
       try {
-        const response = await fetch("/api/v1/currencies");
-        if (!response.ok) {
-          throw new Error("Failed to fetch currencies");
-        }
-        const data = await response.json();
-        setCurrencies(data);
+        const currencies = await getCurrencies();
+        setCurrencies(currencies);
       } catch (err) {
         setError(err);
       } finally {
