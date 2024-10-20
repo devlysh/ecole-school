@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
 import CurrencySelect from "./CurrencySelect";
-import { preRegisterUserRequest } from "@/app/api/v1/pre-register-user/request";
+import { preRegisterUserRequest } from "@/app/api/v1/preregister-user/request";
 import logger from "@/lib/logger";
 import jwt from "jsonwebtoken";
 
