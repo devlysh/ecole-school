@@ -15,8 +15,14 @@ export const verifyToken = async (token: string) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     return decoded;
-  } catch (error) {
-    logger.error({ error }, "Token verification failed");
+  } catch (err: unknown) {
+    if (err instanceof jwt.JsonWebTokenError) {
+      logger.error({ error: err }, "Invalid token signature");
+    } else if (err instanceof jwt.TokenExpiredError) {
+      logger.error({ error: err }, "Token has expired");
+    } else {
+      logger.error({ error: err }, "Token verification failed");
+    }
     return null;
   }
 };
