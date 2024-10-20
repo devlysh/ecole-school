@@ -8,21 +8,21 @@ generator client {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  name         String   @map("name")
-  dateJoined   DateTime @default(now()) @map("date_joined")
-  isActive     Boolean  @default(true) @map("is_active")
-
-  roles         UserRole[]
-  subscriptions Subscription[]
-  credits       Credit[]
-  notifications Notification[]
-  payments      Payment[]
-  lessonNotes   LessonNote[]
-  student       Student?
-  teacher       Teacher?
+  id                   Int            @id @default(autoincrement())
+  email                String         @unique
+  passwordHash         String         @map("password_hash")
+  name                 String         @map("name")
+  dateJoined           DateTime       @default(now()) @map("date_joined")
+  isActive             Boolean        @default(true) @map("is_active")
+  stripeCustomerId     String         @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?        @unique @map("stripe_subscription_id")
+  roles                UserRole[]
+  credits              Credit[]
+  notifications        Notification[]
+  payments             Payment[]
+  lessonNotes          LessonNote[]
+  student              Student?
+  teacher              Teacher?
 
   @@index([email], name: "idx_user_email")
   @@index([isActive], name: "idx_user_is_active")
@@ -73,30 +73,9 @@ model SubscriptionPlan {
   stripePriceId   String @unique @map("stripe_price_id")
   discount        Float?
 
-  subscriptions Subscription[]
-  currency      Currency       @relation(fields: [currencyId], references: [id])
+  currency Currency @relation(fields: [currencyId], references: [id])
 
   @@map("subscription_plans")
-}
-
-model Subscription {
-  id                   Int       @id @default(autoincrement())
-  userId               Int       @map("user_id")
-  planId               Int       @map("plan_id")
-  startDate            DateTime  @map("start_date")
-  endDate              DateTime  @map("end_date")
-  status               String
-  stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
-  autoRenew            Boolean   @default(true) @map("auto_renew")
-  nextBillingDate      DateTime? @map("next_billing_date")
-  cancellationDate     DateTime? @map("cancellation_date")
-
-  user User             @relation(fields: [userId], references: [id])
-  plan SubscriptionPlan @relation(fields: [planId], references: [id])
-
-  @@index([userId], name: "idx_subscription_user_id")
-  @@index([status], name: "idx_subscription_status")
-  @@map("subscriptions")
 }
 
 model Credit {

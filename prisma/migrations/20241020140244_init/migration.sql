@@ -6,6 +6,8 @@ CREATE TABLE "users" (
     "name" TEXT NOT NULL,
     "date_joined" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "stripe_customer_id" TEXT NOT NULL,
+    "stripe_subscription_id" TEXT,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -48,22 +50,6 @@ CREATE TABLE "subscription_plans" (
     "discount" DOUBLE PRECISION,
 
     CONSTRAINT "subscription_plans_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "subscriptions" (
-    "id" SERIAL NOT NULL,
-    "user_id" INTEGER NOT NULL,
-    "plan_id" INTEGER NOT NULL,
-    "start_date" TIMESTAMP(3) NOT NULL,
-    "end_date" TIMESTAMP(3) NOT NULL,
-    "status" TEXT NOT NULL,
-    "stripe_subscription_id" TEXT,
-    "auto_renew" BOOLEAN NOT NULL DEFAULT true,
-    "next_billing_date" TIMESTAMP(3),
-    "cancellation_date" TIMESTAMP(3),
-
-    CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -192,6 +178,12 @@ CREATE TABLE "system_settings" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "users_stripe_customer_id_key" ON "users"("stripe_customer_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_stripe_subscription_id_key" ON "users"("stripe_subscription_id");
+
+-- CreateIndex
 CREATE INDEX "idx_user_email" ON "users"("email");
 
 -- CreateIndex
@@ -214,15 +206,6 @@ CREATE UNIQUE INDEX "currencies_name_key" ON "currencies"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "subscription_plans_stripe_price_id_key" ON "subscription_plans"("stripe_price_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "subscriptions_stripe_subscription_id_key" ON "subscriptions"("stripe_subscription_id");
-
--- CreateIndex
-CREATE INDEX "idx_subscription_user_id" ON "subscriptions"("user_id");
-
--- CreateIndex
-CREATE INDEX "idx_subscription_status" ON "subscriptions"("status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "credits_lesson_id_key" ON "credits"("lesson_id");
@@ -301,12 +284,6 @@ ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_role_id_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "subscription_plans" ADD CONSTRAINT "subscription_plans_currency_id_fkey" FOREIGN KEY ("currency_id") REFERENCES "currencies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_plan_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "subscription_plans"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "credits" ADD CONSTRAINT "credits_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
