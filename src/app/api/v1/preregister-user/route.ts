@@ -1,5 +1,5 @@
 import logger from "@/lib/logger";
-import { signToken, verifyToken } from "@/lib/jwt";
+import { appendTokenToResponse, signToken, verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { CookiesPayload } from "@/lib/types";
 
@@ -25,38 +25,48 @@ const cookiesList = [
 export const GET = async () => {
   try {
     const cookieStore = cookies();
-    let cookiesData = cookiesList.reduce(
-      (data: Record<string, string>, cookieName: string) => {
-        const cookie = cookieStore.get(cookieName);
-        if (cookie) {
-          data[cookieName] = cookie.value;
-        }
-        return data;
-      },
-      {}
-    );
+    const cookiesData = getCookiesData(cookieStore, cookiesList);
 
     const existingToken = cookieStore.get("token");
+    const mergedData = existingToken
+      ? await mergeWithExistingTokenData(existingToken.value, cookiesData)
+      : cookiesData;
 
-    if (existingToken) {
-      const decodedToken = (await verifyToken(
-        existingToken.value
-      )) as CookiesPayload;
-      delete decodedToken.exp;
-      cookiesData = { ...cookiesData, ...decodedToken };
-    }
-
-    const token = signToken(cookiesData, { expiresIn: "1h" });
-
-    const response = Response.json(token);
-
-    response.headers.set(
-      "Set-Cookie",
-      `token=${token}; Path=/; Max-Age=${60 * 60 * 1};`
-    );
-    return response;
+    const token = signToken(mergedData, { expiresIn: "1h" });
+    return createResponseWithToken(token);
   } catch (err: unknown) {
     logger.error(err, "Error during user registration");
     return Response.json("Failed to preregister user", { status: 500 });
   }
 };
+
+function getCookiesData(
+  cookieStore: ReturnType<typeof cookies>,
+  cookiesList: string[]
+) {
+  return cookiesList.reduce(
+    (data: Record<string, string>, cookieName: string) => {
+      const cookie = cookieStore.get(cookieName);
+      if (cookie) {
+        data[cookieName] = cookie.value;
+      }
+      return data;
+    },
+    {}
+  );
+}
+
+async function mergeWithExistingTokenData(
+  tokenValue: string,
+  cookiesData: Record<string, string>
+) {
+  const decodedToken = (await verifyToken(tokenValue)) as CookiesPayload;
+  delete decodedToken.exp;
+  return { ...cookiesData, ...decodedToken };
+}
+
+function createResponseWithToken(token: string) {
+  const response = Response.json(token);
+  appendTokenToResponse(response, token);
+  return response;
+}
