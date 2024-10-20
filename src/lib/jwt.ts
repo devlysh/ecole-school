@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import logger from "./logger";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -15,7 +16,7 @@ export const verifyToken = async (token: string) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     return decoded;
   } catch (error) {
-    console.error("Token verification failed:", error);
+    logger.error({ error }, "Token verification failed");
     return null;
   }
 };
