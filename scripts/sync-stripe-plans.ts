@@ -12,7 +12,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-09-30.acacia",
 });
 
-async function syncSubscriptionPlans() {
+export const syncSubscriptionPlans = async () => {
   try {
     const prices = await stripe.prices.list({
       expand: ["data.product"],
@@ -77,6 +77,6 @@ async function syncSubscriptionPlans() {
   } finally {
     await prisma.$disconnect();
   }
-}
+};
 
 syncSubscriptionPlans();
