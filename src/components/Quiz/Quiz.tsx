@@ -25,7 +25,6 @@ const Quiz = () => {
     () => quizState.steps[quizState.currentStep],
     [quizState.currentStep, quizState.steps]
   );
-
   const isFirstStep = useMemo<boolean>(
     () => QuizService.isFirstStep(quizState),
     [quizState]

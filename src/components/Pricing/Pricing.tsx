@@ -12,6 +12,9 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
 import CurrencySelect from "./CurrencySelect";
+import { preRegisterUserRequest } from "@/app/api/v1/pre-register-user/request";
+import logger from "@/lib/logger";
+import jwt from "jsonwebtoken";
 
 const Pricing = () => {
   const router = useRouter();
@@ -30,14 +33,28 @@ const Pricing = () => {
     useState<Currency["code"]>("USD");
 
   useEffect(() => {
-    const savedLanguage = Cookies.get("language");
-    const savedCurrency = Cookies.get("currency");
-    const savedPriceId = Cookies.get("priceId");
+    try {
+      const token = Cookies.get("token");
 
-    if (savedLanguage) setSelectedLanguage(savedLanguage);
-    if (savedCurrency) setSelectedCurrency(savedCurrency);
-    if (savedPriceId) setSelectedPriceId(savedPriceId);
-  }, []);
+      if (!token) {
+        router.push("/quiz");
+        return;
+      }
+
+      const payload = jwt.decode(token) as jwt.JwtPayload;
+
+      if (!payload) {
+        router.push("/quiz");
+        return;
+      }
+
+      if (payload.language) setSelectedLanguage(payload.language.value);
+      if (payload.currency) setSelectedCurrency(payload.currency.value);
+      if (payload.priceId) setSelectedPriceId(payload.priceId.value);
+    } catch (err) {
+      logger.error(err, "Failed to parse pricing data from cookies");
+    }
+  }, [router]);
 
   const plansByCurrency = useMemo(() => {
     const map = groupByCurrency(plans);
@@ -63,7 +80,7 @@ const Pricing = () => {
     setSelectedPriceId(id);
   }, []);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (selectedPriceId) {
       Cookies.set("priceId", selectedPriceId);
       Cookies.set("language", selectedLanguage);
@@ -72,6 +89,9 @@ const Pricing = () => {
         "selectedPrice",
         JSON.stringify(plans.find((plan) => plan.id === selectedPriceId))
       );
+
+      await preRegisterUserRequest();
+
       router.push("/checkout");
     } else {
       throw new Error("Selected plan ID should be defined");

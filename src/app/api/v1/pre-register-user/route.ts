@@ -18,6 +18,10 @@ export const GET = async () => {
     const motivatesYou = cookieStore.get("motivatesYou");
     const areasToFocus = cookieStore.get("areasToFocus");
     const studyTimePerWeek = cookieStore.get("studyTimePerWeek");
+    const currency = cookieStore.get("currency");
+    const language = cookieStore.get("language");
+    const priceId = cookieStore.get("priceId");
+    const selectedPrice = cookieStore.get("selectedPrice");
 
     if (!email) {
       return Response.json("Email is required", { status: 400 });
@@ -39,6 +43,10 @@ export const GET = async () => {
         motivatesYou,
         areasToFocus,
         studyTimePerWeek,
+        currency,
+        language,
+        priceId,
+        selectedPrice,
       },
       { expiresIn: "1h" }
     );
@@ -46,7 +54,7 @@ export const GET = async () => {
     const response = Response.json(token);
     response.headers.set(
       "Set-Cookie",
-      `token=${token}; Path=/; HttpOnly; Max-Age=3600;`
+      `token=${token}; Path=/; Max-Age=${60 * 60 * 1};`
     );
     return response;
   } catch (err: unknown) {

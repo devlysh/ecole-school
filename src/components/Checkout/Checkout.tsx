@@ -6,6 +6,7 @@ import { getStripePromise } from "@/lib/stripe";
 import { Spinner } from "@nextui-org/spinner";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import jwt from "jsonwebtoken";
 
 import useLanguages from "@/hooks/useLanguages";
 import logger from "@/lib/logger";
@@ -15,39 +16,41 @@ import CheckoutForm from "./CheckoutForm";
 const Checkout = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [language, setLanguage] = useState<Language["code"]>();
+  const [selectedPrice, setSelectedPrice] = useState<Plan>();
+
   const { languages, languagesLoading, languagesError } = useLanguages();
 
   if (languagesError) {
     throw new Error("Failed to load languages");
   }
 
-  const [language, setLanguage] = useState<Language["code"]>();
-  const [selectedPrice, setSelectedPrice] = useState<Plan>();
-
   useEffect(() => {
     try {
-      const rawLanguage = Cookies.get("language");
-      const rawSelectedPrice = Cookies.get("selectedPrice");
+      const token = Cookies.get("token");
 
-      if (!rawLanguage || !rawSelectedPrice) {
+      if (!token) {
         router.push("/pricing");
-      }
-      if (rawLanguage) {
-        setLanguage(rawLanguage);
-      }
-
-      if (rawSelectedPrice) {
-        setSelectedPrice(JSON.parse(rawSelectedPrice));
-      }
-
-      const e = Cookies.get("email");
-      if (!e) {
-        router.push("/quiz");
         return;
       }
-      setEmail(e);
+
+      const payload = jwt.decode(token) as jwt.JwtPayload;
+
+      if (
+        !payload ||
+        !payload.language ||
+        !payload.selectedPrice ||
+        !payload.email
+      ) {
+        router.push("/pricing");
+        return;
+      }
+
+      setLanguage(payload.language.value);
+      setSelectedPrice(JSON.parse(payload.selectedPrice.value));
+      setEmail(payload.email.value);
     } catch (err) {
-      logger.error(err, "Failed to parse quiz answers from localStorage");
+      logger.error(err, "Failed to parse checkout data from cookies");
     }
   }, [router]);
 

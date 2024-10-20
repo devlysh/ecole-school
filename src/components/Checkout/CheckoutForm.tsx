@@ -52,7 +52,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         return;
       }
 
-      Cookies.set("email", email);
       const paymentMethodId = paymentMethod?.id;
 
       // Step 2: Send payment method ID to the server to create a subscription
