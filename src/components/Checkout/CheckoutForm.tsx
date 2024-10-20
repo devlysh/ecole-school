@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Button } from "@nextui-org/button";
-import { useRouter } from "next/navigation";
 import { Input } from "@nextui-org/input";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Plan } from "@/lib/types";
@@ -10,18 +9,19 @@ import { createSubscription } from "@/app/api/v1/stripe/create-subscription/requ
 interface CheckoutFormProps {
   email: string;
   selectedPrice: Plan;
+  onSuccessfulPayment: () => void;
 }
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   email,
   selectedPrice,
+  onSuccessfulPayment,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [nameOnCard, setNameOnCard] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const [cardElementReady, setCardElementReady] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,7 +75,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         }
 
         // Payment successful
-        router.push("/set-password");
+        onSuccessfulPayment();
       } catch (err) {
         logger.error({ err }, "Error during create subscription");
         setError("An error occurred while processing your payment.");

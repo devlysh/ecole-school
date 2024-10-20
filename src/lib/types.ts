@@ -79,10 +79,12 @@ export interface Plan {
 export type PlansMap = Map<string, Plan[]>;
 
 export interface CookiesPayload extends JwtPayload {
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   currency?: string;
   language?: string;
   priceId?: string;
   selectedPrice?: string;
+  subscriptionId?: string;
+  clientSecret?: string;
 }

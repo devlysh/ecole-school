@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { getStripePromise } from "@/lib/stripe";
 import { Spinner } from "@nextui-org/spinner";
@@ -12,6 +12,7 @@ import useLanguages from "@/hooks/useLanguages";
 import logger from "@/lib/logger";
 import { CookiesPayload, Language, Plan } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
+import { preRegisterUser } from "@/app/api/v1/preregister-user/request";
 
 const Checkout = () => {
   const router = useRouter();
@@ -25,12 +26,17 @@ const Checkout = () => {
     throw new Error("Failed to load languages");
   }
 
+  const handleSuccessfulPayment = useCallback(async () => {
+    await preRegisterUser();
+
+    router.push("/set-password");
+  }, [router]);
+
   useEffect(() => {
     try {
       const token = Cookies.get("token");
 
       if (!token) {
-        router.push("/pricing");
         return;
       }
 
@@ -42,7 +48,6 @@ const Checkout = () => {
         !payload.selectedPrice ||
         !payload.email
       ) {
-        router.push("/pricing");
         return;
       }
 
@@ -60,7 +65,11 @@ const Checkout = () => {
         <div>
           <h2 className="text-2xl font-bold mb-6">Complete your purchase</h2>
           {selectedPrice ? (
-            <CheckoutForm email={email} selectedPrice={selectedPrice} />
+            <CheckoutForm
+              email={email}
+              selectedPrice={selectedPrice}
+              onSuccessfulPayment={handleSuccessfulPayment}
+            />
           ) : (
             <div className="flex justify-center items-center h-full">
               <Spinner size="sm" />

@@ -15,16 +15,8 @@ const CreatePasswordPage = async () => {
 
   const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
 
-  if (
-    !decodedToken ||
-    !decodedToken.name ||
-    !decodedToken.email ||
-    !decodedToken.language ||
-    !decodedToken.currency ||
-    !decodedToken.selectedPrice ||
-    !decodedToken.priceId
-  ) {
-    redirect("/quiz");
+  if (!decodedToken.subscriptionId || !decodedToken.clientSecret) {
+    redirect("/checkout");
   }
 
   return <SetPasswordStep />;

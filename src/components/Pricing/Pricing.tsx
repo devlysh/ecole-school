@@ -37,14 +37,12 @@ const Pricing = () => {
       const token = Cookies.get("token");
 
       if (!token) {
-        router.push("/quiz");
         return;
       }
 
       const payload = jwt.decode(token) as CookiesPayload;
 
       if (!payload) {
-        router.push("/quiz");
         return;
       }
 

@@ -2,6 +2,9 @@ import Stripe from "stripe";
 import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
 import { CreateSubscriptionRequest } from "./request";
+import { cookies } from "next/headers";
+import { CookiesPayload } from "@/lib/types";
+import { signToken, verifyToken } from "@/lib/jwt";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not set in the environment variables");
@@ -53,6 +56,7 @@ export const POST = async (request: NextRequest) => {
     const invoice = subscription.latest_invoice as Stripe.Invoice;
     const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
     const clientSecret = paymentIntent?.client_secret;
+    const subscriptionId = subscription.id;
 
     if (!clientSecret) {
       logger.error("Failed to obtain client secret from Stripe");
@@ -63,10 +67,28 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    return Response.json({
+    const cookieStore = cookies();
+    const token = cookieStore.get("token");
+
+    if (!token) {
+      return Response.json({ error: "Token is missing" }, { status: 400 });
+    }
+
+    const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
+
+    const newToken = signToken(
+      { ...decodedToken, subscriptionId, clientSecret } as CookiesPayload,
+      { expiresIn: "1h" }
+    );
+
+    const response = Response.json({
       clientSecret,
-      subscriptionId: subscription.id,
+      subscriptionId,
     });
+
+    response.headers.set("Set-Cookie", `token=${newToken}`);
+
+    return response;
   } catch (err: unknown) {
     logger.error({ err }, "Error creating subscription");
     if (err instanceof Stripe.errors.StripeError) {
