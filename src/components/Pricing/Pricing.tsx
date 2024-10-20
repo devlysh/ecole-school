@@ -48,9 +48,9 @@ const Pricing = () => {
         return;
       }
 
-      if (payload.language) setSelectedLanguage(payload.language.value);
-      if (payload.currency) setSelectedCurrency(payload.currency.value);
-      if (payload.priceId) setSelectedPriceId(payload.priceId.value);
+      if (payload.language) setSelectedLanguage(payload.language);
+      if (payload.currency) setSelectedCurrency(payload.currency);
+      if (payload.priceId) setSelectedPriceId(payload.priceId);
     } catch (err) {
       logger.error(err, "Failed to parse pricing data from cookies");
     }

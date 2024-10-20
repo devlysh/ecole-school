@@ -24,7 +24,16 @@ const cookiesList = [
 export const GET = async () => {
   try {
     const cookieStore = cookies();
-    const cookiesData = cookiesList.map((cookie) => cookieStore.get(cookie));
+    const cookiesData = cookiesList.reduce(
+      (data: Record<string, string>, cookieName: string) => {
+        const cookie = cookieStore.get(cookieName);
+        if (cookie) {
+          data[cookieName] = cookie.value;
+        }
+        return data;
+      },
+      {}
+    );
     const token = signToken(cookiesData, { expiresIn: "1h" });
 
     const response = Response.json(token);

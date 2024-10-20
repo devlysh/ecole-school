@@ -8,8 +8,8 @@ import PasswordField from "./FormFields/PasswordField";
 
 interface FormStepProps {
   step: FormStepType;
-  onNext: (values: { [key: string]: string }) => void;
-  onChange?: (values: { [key: string]: string }) => void;
+  onNext: (values: Record<string, string>) => void;
+  onChange?: (values: Record<string, string>) => void;
   error?: string | null;
   isDisabled?: boolean;
 }
@@ -21,7 +21,7 @@ const FormStep: React.FC<FormStepProps> = ({
   error,
   isDisabled,
 }) => {
-  const [values, setValues] = useState<{ [key: string]: string }>({});
+  const [values, setValues] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
 
   const handleChange = useCallback(

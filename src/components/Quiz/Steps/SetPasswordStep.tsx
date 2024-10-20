@@ -29,10 +29,10 @@ const setPasswordStep = {
 
 const SetPasswordStep = () => {
   const [error, setError] = useState<string | null>(null);
-  const [values, setValues] = useState<{ [key: string]: string }>({});
+  const [values, setValues] = useState<Record<string, string>>({});
 
   const handleNext = useCallback(
-    (values: { [key: string]: string }) => {
+    (values: Record<string, string>) => {
       if (values.password !== values.confirmPassword) {
         setError("Passwords do not match.");
         return;
@@ -44,7 +44,7 @@ const SetPasswordStep = () => {
   );
 
   const handleChange = useCallback(
-    (values: { [key: string]: string }) => {
+    (values: Record<string, string>) => {
       setValues(values);
     },
     [setValues]

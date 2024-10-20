@@ -46,9 +46,9 @@ const Checkout = () => {
         return;
       }
 
-      setLanguage(payload.language.value);
-      setSelectedPrice(JSON.parse(payload.selectedPrice.value));
-      setEmail(payload.email.value);
+      setLanguage(payload.language);
+      setSelectedPrice(JSON.parse(payload.selectedPrice));
+      setEmail(payload.email);
     } catch (err) {
       logger.error(err, "Failed to parse checkout data from cookies");
     }
