@@ -1,7 +1,8 @@
 import Stripe from "stripe";
 import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
-import { handlePriceUpdated } from "./price-updated";
+import { handlePriceUpdated } from "./price.updated";
+import { handleCustomerUpdated } from "./customer.updated";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SIGNING_SECRET = process.env.STRIPE_WEBHOOK_SIGNING_SECRET;
@@ -18,9 +19,9 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
   apiVersion: "2024-09-30.acacia",
 });
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   if (!STRIPE_WEBHOOK_SIGNING_SECRET) {
-    console.error("STRIPE_WEBHOOK_SIGNING_SECRET is missing");
+    logger.error("STRIPE_WEBHOOK_SIGNING_SECRET is missing");
     return new Response(
       JSON.stringify({ error: "Webhook signing secret missing" }),
       { status: 500 }
@@ -51,16 +52,32 @@ export async function POST(request: NextRequest) {
   }
 
   switch (event.type) {
-    case "customer.created": {
-      const customerCreated = event.data.object;
-      logger.info({ customerCreated }, "TODO");
-      return Response.json(null, { status: 200 });
-    }
-
     case "customer.updated": {
       const customerUpdated = event.data.object;
-      logger.info({ customerUpdated }, "TODO");
-      return Response.json(null, { status: 200 });
+      logger.debug({ customerUpdated }, "Customer updated event received");
+      try {
+        await handleCustomerUpdated(customerUpdated);
+        return Response.json(null, { status: 200 });
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          logger.error({ err: err.message }, "Error handling customer update");
+          if (err.message.includes("Unknown argument `stripeCustomerId`")) {
+            return Response.json(
+              {
+                error:
+                  "Prisma schema mismatch: stripeCustomerId field is missing",
+              },
+              { status: 500 }
+            );
+          }
+        } else {
+          logger.error({ err }, "Unknown error handling customer update");
+        }
+        return Response.json(
+          { error: "Internal server error" },
+          { status: 500 }
+        );
+      }
     }
 
     case "price.updated": {
@@ -77,14 +94,14 @@ export async function POST(request: NextRequest) {
 
     case "invoice.payment_succeeded": {
       const invoicePaymentSucceeded = event.data.object;
-      logger.info({ invoicePaymentSucceeded }, "TODO");
+      logger.debug({ invoicePaymentSucceeded }, "TODO");
       return Response.json(null, { status: 200 });
     }
 
     default: {
-      const object = event.data.object;
-      logger.info({ type: event.type, data: object });
+      // const object = event.data.object;
+      // logger.debug({ type: event.type, data: object });
       return Response.json(null, { status: 200 });
     }
   }
-}
+};
