@@ -51,6 +51,6 @@ export const GET = async () => {
     return response;
   } catch (err: unknown) {
     logger.error(err, "Error during user registration");
-    return Response.json("Failed to register user", { status: 500 });
+    return Response.json("Failed to pre-register user", { status: 500 });
   }
 };
