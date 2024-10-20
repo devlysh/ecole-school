@@ -8,7 +8,7 @@ import logger from "@/lib/logger";
 const setPasswordStep = {
   name: "password",
   type: StepType.FORM,
-  text: "What is your email?",
+  text: "Create your password",
   fields: [
     {
       name: "password",
