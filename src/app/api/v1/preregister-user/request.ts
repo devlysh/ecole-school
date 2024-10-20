@@ -1,6 +1,6 @@
 import logger from "@/lib/logger";
 
-export const preRegisterUserRequest = async () => {
+export const preRegisterUser = async () => {
   const response = await fetch("/api/v1/preregister-user");
 
   if (!response.ok) {

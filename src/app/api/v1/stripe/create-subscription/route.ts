@@ -1,8 +1,8 @@
 import Stripe from "stripe";
 import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
+import { CreateSubscriptionRequest } from "./request";
 
-// Check for STRIPE_SECRET_KEY
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not set in the environment variables");
 }
@@ -11,17 +11,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-09-30.acacia",
 });
 
-// Define request body type
-interface CreateSubscriptionRequest {
-  email: string;
-  planId: string;
-  paymentMethodId: string;
-}
-
-// Helper functions
 async function getOrCreateCustomer(email: string): Promise<Stripe.Customer> {
   const existingCustomers = await stripe.customers.list({ email });
-  if (existingCustomers.data.length > 0) {
+  if (existingCustomers.data.length) {
     return existingCustomers.data[0];
   }
   return await stripe.customers.create({ email });

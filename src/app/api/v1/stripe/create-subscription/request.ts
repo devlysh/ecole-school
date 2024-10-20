@@ -1,6 +1,12 @@
 import logger from "@/lib/logger";
 
-export const createSubscriptionRequest = async (
+export interface CreateSubscriptionRequest {
+  email: string;
+  planId: string;
+  paymentMethodId: string;
+}
+
+export const createSubscription = async (
   email: string,
   planId: string,
   paymentMethodId: string
@@ -12,7 +18,7 @@ export const createSubscriptionRequest = async (
       email,
       planId,
       paymentMethodId,
-    }),
+    } as CreateSubscriptionRequest),
   });
 
   if (!response.ok) {

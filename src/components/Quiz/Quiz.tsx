@@ -12,7 +12,7 @@ import FormStep from "./Steps/FormStep";
 import logger from "@/lib/logger";
 import Cookies from "js-cookie";
 import { checkEmail } from "@/app/api/v1/check-email/request";
-import { preRegisterUserRequest } from "@/app/api/v1/preregister-user/request";
+import { preRegisterUser } from "@/app/api/v1/preregister-user/request";
 
 const Quiz = () => {
   const router = useRouter();
@@ -42,7 +42,7 @@ const Quiz = () => {
 
   const preRegisterUserAndNavigateToPricing = useCallback(async () => {
     try {
-      await preRegisterUserRequest();
+      await preRegisterUser();
 
       router.push("/pricing");
     } catch (err) {

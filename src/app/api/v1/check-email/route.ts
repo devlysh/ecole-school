@@ -1,8 +1,9 @@
 import logger from "@/lib/logger";
 import prisma from "@/lib/prisma";
+import { CheckEmailRequest } from "./request";
 
 export async function POST(request: Request) {
-  const { email } = await request.json();
+  const { email } = (await request.json()) as CheckEmailRequest;
 
   try {
     const user = await prisma.user.findUnique({

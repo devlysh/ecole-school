@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
 import CurrencySelect from "./CurrencySelect";
-import { preRegisterUserRequest } from "@/app/api/v1/preregister-user/request";
+import { preRegisterUser } from "@/app/api/v1/preregister-user/request";
 import logger from "@/lib/logger";
 import jwt from "jsonwebtoken";
 
@@ -90,7 +90,7 @@ const Pricing = () => {
         JSON.stringify(plans.find((plan) => plan.id === selectedPriceId))
       );
 
-      await preRegisterUserRequest();
+      await preRegisterUser();
 
       router.push("/checkout");
     } else {
