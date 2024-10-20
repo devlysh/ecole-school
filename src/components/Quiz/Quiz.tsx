@@ -11,12 +11,15 @@ import QuestionStep from "./Steps/QuestionStep";
 import FormStep from "./Steps/FormStep";
 import logger from "@/lib/logger";
 import Cookies from "js-cookie";
+import { checkEmail } from "@/app/api/v1/check-email/request";
+import { preRegisterUserRequest } from "@/app/api/v1/pre-register-user/request";
 
 const Quiz = () => {
   const router = useRouter();
   const [quizState, setQuizState] = useState<QuizState>(
     QuizService.initializeQuiz(steps)
   );
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const currentStep = useMemo<QuizStep>(
     () => quizState.steps[quizState.currentStep],
@@ -38,13 +41,9 @@ const Quiz = () => {
     [quizState]
   );
 
-  const registerUserAndNavigate = useCallback(async () => {
+  const preRegisterUserAndNavigateToPricing = useCallback(async () => {
     try {
-      const response = await fetch("/api/v1/register-user");
-
-      if (!response.ok) {
-        throw new Error("Failed to register user");
-      }
+      await preRegisterUserRequest();
 
       router.push("/pricing");
     } catch (err) {
@@ -53,7 +52,28 @@ const Quiz = () => {
   }, [router]);
 
   const handleNext = useCallback(
-    (answer?: string) => {
+    async (answer?: string) => {
+      if (currentStep.name === "email" && answer) {
+        try {
+          const { isTaken } = await checkEmail(answer);
+
+          if (isTaken) {
+            setEmailError("Email is already taken");
+            return;
+          }
+        } catch (error) {
+          logger.error({ error }, "Error during check if email is taken");
+          if (error instanceof Error) {
+            setEmailError(error.message);
+          } else if (typeof error === "string") {
+            setEmailError(error);
+          } else {
+            setEmailError("Failed to check if email is taken");
+          }
+          return;
+        }
+      }
+
       setQuizState((prevState) => {
         if (!answer) {
           return QuizService.goToNextStep(prevState);
@@ -77,10 +97,10 @@ const Quiz = () => {
       });
 
       if (isLastStep) {
-        registerUserAndNavigate();
+        preRegisterUserAndNavigateToPricing();
       }
     },
-    [currentStep.name, isLastStep, registerUserAndNavigate]
+    [currentStep, isLastStep, preRegisterUserAndNavigateToPricing]
   );
 
   const handlePrevious = useCallback(() => {
@@ -100,6 +120,7 @@ const Quiz = () => {
       case StepType.FORM:
         return (
           <FormStep
+            error={emailError}
             step={currentStep}
             onNext={(values) => handleNext(values[currentStep.name])}
           />
@@ -107,7 +128,7 @@ const Quiz = () => {
       default:
         return null;
     }
-  }, [currentStep, handleNext]);
+  }, [currentStep, emailError, handleNext]);
 
   return (
     <div className="flex flex-col justify-center items-center mt-12">
