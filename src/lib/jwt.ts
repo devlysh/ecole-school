@@ -30,3 +30,10 @@ export const verifyToken = async (token: string) => {
 export const signToken = (payload: object, options: jwt.SignOptions) => {
   return jwt.sign(payload, JWT_SECRET, options);
 };
+
+export const appendTokenToResponse = (response: Response, token: string) => {
+  response.headers.set(
+    "Set-Cookie",
+    `token=${token}; Path=/; Max-Age=${60 * 60 * 1};`
+  );
+};

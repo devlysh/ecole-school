@@ -15,7 +15,7 @@ const PricingPage = async () => {
 
   const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
 
-  if (!decodedToken || !decodedToken.name || !decodedToken.email) {
+  if (!decodedToken.name || !decodedToken.email) {
     redirect("/quiz");
   }
 

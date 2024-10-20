@@ -15,7 +15,7 @@ const ChecokutPage = async () => {
 
   const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
 
-  if (!decodedToken || !decodedToken.priceId || !decodedToken.selectedPrice) {
+  if (!decodedToken.priceId || !decodedToken.selectedPrice) {
     redirect("/pricing");
   }
 
