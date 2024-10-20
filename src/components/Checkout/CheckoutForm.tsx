@@ -5,6 +5,8 @@ import { Input } from "@nextui-org/input";
 import Cookies from "js-cookie";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Plan } from "@/lib/types";
+import logger from "@/lib/logger";
+import { createSubscriptionRequest } from "@/app/api/v1/stripe/create-subscription/request";
 
 interface CheckoutFormProps {
   email: string;
@@ -54,54 +56,36 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       const paymentMethodId = paymentMethod?.id;
 
       // Step 2: Send payment method ID to the server to create a subscription
-      const res = await fetch("/api/v1/stripe/create-subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      try {
+        const { clientSecret } = await createSubscriptionRequest(
           email,
-          planId: selectedPrice?.id,
-          paymentMethodId,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(
-          data.error || "An error occurred while processing your payment."
+          selectedPrice.id,
+          paymentMethodId
         );
+
+        // Step 3: Confirm payment
+        const { error: confirmError } =
+          await stripe.confirmCardPayment(clientSecret);
+
+        if (confirmError) {
+          setError(
+            confirmError.message ??
+              "An error occurred while confirming your payment."
+          );
+          setLoading(false);
+          return;
+        }
+
+        // Payment successful
+        router.push("/set-password");
+      } catch (err) {
+        logger.error({ err }, "Error during create subscription");
+        setError("An error occurred while processing your payment.");
         setLoading(false);
         return;
       }
-
-      const { clientSecret } = data;
-
-      if (!clientSecret) {
-        console.error("Client secret is missing from the server response");
-        setError(
-          "An error occurred while processing your payment. Please try again."
-        );
-        setLoading(false);
-        return;
-      }
-
-      // Step 3: Confirm payment
-      const { error: confirmError } =
-        await stripe.confirmCardPayment(clientSecret);
-
-      if (confirmError) {
-        setError(
-          confirmError.message ??
-            "An error occurred while confirming your payment."
-        );
-        setLoading(false);
-        return;
-      }
-
-      // Payment successful
-      router.push("/account");
     } catch (err: unknown) {
-      console.error("Error during checkout:", err);
+      logger.error({ err }, "Error during checkout");
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred.";
       setError(errorMessage);
