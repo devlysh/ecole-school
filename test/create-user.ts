@@ -7,7 +7,7 @@ prisma.user
       passwordHash: "",
       name: "Test User",
       dateJoined: new Date(),
-      isActive: true,
+      isActive: false,
       stripeCustomerId: "cus_PZ555555555555555",
     },
   })

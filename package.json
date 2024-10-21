@@ -39,6 +39,7 @@
     "@prisma/client": "^5.20.0",
     "@stripe/react-stripe-js": "^2.8.1",
     "@stripe/stripe-js": "^4.8.0",
+    "bcrypt": "^5.1.1",
     "esm": "^3.2.25",
     "framer-motion": "^11.11.1",
     "install": "^0.13.0",
@@ -56,6 +57,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
+    "@types/bcrypt": "^5.0.2",
     "@types/jest": "^29.5.13",
     "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.7",

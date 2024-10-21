@@ -24,7 +24,7 @@ export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
           passwordHash: "",
           name: eventData.name ?? "Unknown",
           dateJoined: new Date(),
-          isActive: true,
+          isActive: false,
           stripeCustomerId,
         },
       });

@@ -44,7 +44,7 @@ export const syncStripeCustomers = async () => {
             passwordHash: "",
             name: name ?? "Unknown",
             dateJoined: new Date(),
-            isActive: true,
+            isActive: false,
             stripeCustomerId,
           },
         });
