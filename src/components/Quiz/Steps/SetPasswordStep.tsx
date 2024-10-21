@@ -35,7 +35,6 @@ const SetPasswordStep = () => {
         return;
       }
 
-      // TODO: Refactor all requests, use "Request" in postfixes
       const response = await setPasswordRequest(values.password, token);
 
       if (!response.ok) {
