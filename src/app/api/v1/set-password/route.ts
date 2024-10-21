@@ -51,6 +51,10 @@ export const POST = async (request: Request) => {
     cookieStore.delete("currency");
     cookieStore.delete("language");
     cookieStore.delete("selectedPrice");
+    cookieStore.delete("areasToFocus");
+    cookieStore.delete("currentLevel");
+    cookieStore.delete("motivatesYou");
+    cookieStore.delete("studyTimePerWeek");
 
     return Response.json({ message: "Password set" }, { status: 200 });
   } catch (err: unknown) {

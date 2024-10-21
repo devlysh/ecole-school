@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import Pricing from "@/components/Pricing";
 import { CookiesPayload } from "@/lib/types";
+import logger from "@/lib/logger";
 
 const PricingPage = async () => {
   const cookieStore = cookies();
@@ -13,13 +14,18 @@ const PricingPage = async () => {
     redirect("/quiz");
   }
 
-  const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
+  try {
+    const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
 
-  if (!decodedToken.name || !decodedToken.email) {
+    if (!decodedToken.name || !decodedToken.email) {
+      redirect("/quiz");
+    }
+
+    return <Pricing />;
+  } catch (err: unknown) {
+    logger.error({ err }, "Error in PricingPage");
     redirect("/quiz");
   }
-
-  return <Pricing />;
 };
 
 export default PricingPage;

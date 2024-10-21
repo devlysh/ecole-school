@@ -22,8 +22,9 @@ const cookiesList = [
 ];
 
 export const GET = async () => {
+  const cookieStore = cookies();
+
   try {
-    const cookieStore = cookies();
     const cookiesData = getCookiesData(cookieStore, cookiesList);
 
     const existingToken = cookieStore.get("token");
@@ -34,6 +35,7 @@ export const GET = async () => {
     const token = signToken(mergedData, { expiresIn: "1h" });
     return createResponseWithToken(token);
   } catch (err: unknown) {
+    cookieStore.delete("token");
     logger.error(err, "Error during user registration");
     return Response.json("Failed to preregister user", { status: 500 });
   }
