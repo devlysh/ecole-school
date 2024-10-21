@@ -1,6 +1,6 @@
 import { signToken, verifyToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
-import { CookiesPayload, Role } from "@/lib/types";
+import { AuthTokenPayload, IntroTokenPayload, Role } from "@/lib/types";
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
@@ -16,7 +16,12 @@ export const POST = async (request: Request) => {
   const { token, password } = await request.json();
 
   try {
-    const { name, email } = (await verifyToken(token)) as CookiesPayload;
+    const { name, email } = (await verifyToken(token)) as IntroTokenPayload;
+
+    if (!email) {
+      return Response.json({ error: "Invalid token" }, { status: 401 });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     await prisma.user.update({
@@ -28,17 +33,17 @@ export const POST = async (request: Request) => {
       },
     });
 
-    const tokenData = {
+    const tokenData: AuthTokenPayload = {
       email,
-      isActive: true,
-      isAuthenticated: true,
+      active: true,
+      auth: true,
       role: Role.STUDENT,
     };
 
-    const jwtToken = signToken(tokenData, "1d");
+    const authToken = signToken(tokenData, "1d");
 
     const cookieStore = cookies();
-    cookieStore.set("token", jwtToken, { httpOnly: true, path: "/" });
+    cookieStore.set("token", authToken, { httpOnly: true, path: "/" });
 
     return Response.json({ message: "Password set" }, { status: 200 });
   } catch (err: unknown) {

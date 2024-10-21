@@ -2,7 +2,7 @@ import logger from "@/lib/logger";
 import { appendCookieToResponse, signToken, verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { CookiesPayload } from "@/lib/types";
+import { IntroTokenPayload } from "@/lib/types";
 
 export const GET = async () => {
   const cookieStore = cookies();
@@ -20,7 +20,7 @@ export const GET = async () => {
 
     const decodedToken = (await verifyToken(
       existingToken.value
-    )) as CookiesPayload;
+    )) as IntroTokenPayload;
 
     if (!decodedToken) {
       redirect("/quiz");

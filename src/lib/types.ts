@@ -83,7 +83,18 @@ export interface Plan {
 
 export type PlansMap = Map<string, Plan[]>;
 
-export interface CookiesPayload extends JwtPayload {
+export interface AuthTokenPayload {
+  exp?: number;
+  iat?: number;
+  email: string;
+  active: boolean;
+  auth: boolean;
+  role: Role;
+}
+
+export interface IntroTokenPayload {
+  exp?: number;
+  iat?: number;
   token?: string;
   registrationToken?: string;
   name?: string;
@@ -92,4 +103,5 @@ export interface CookiesPayload extends JwtPayload {
   language?: string;
   selectedPrice?: string;
   subscriptionId?: string;
+  quizAnswers?: string;
 }

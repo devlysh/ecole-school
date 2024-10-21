@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
 import { CreateSubscriptionRequest } from "./request";
 import { cookies } from "next/headers";
-import { CookiesPayload } from "@/lib/types";
+import { IntroTokenPayload } from "@/lib/types";
 import { appendCookieToResponse, signToken, verifyToken } from "@/lib/jwt";
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -44,14 +44,14 @@ export const POST = async (request: NextRequest) => {
       return Response.json({ error: "Token is missing" }, { status: 400 });
     }
 
-    const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
+    const decodedToken = (await verifyToken(token.value)) as IntroTokenPayload;
 
     const tokenData = {
       email: decodedToken.email,
       name: decodedToken.name,
     };
 
-    const registrationToken = signToken(tokenData);
+    const registrationToken = signToken(tokenData, "1h");
 
     const response = Response.json({
       clientSecret,

@@ -2,7 +2,7 @@ import { verifyToken } from "@/lib/jwt";
 import { redirect } from "next/navigation";
 
 import SetPasswordStep from "@/components/Quiz/Steps/SetPasswordStep";
-import { CookiesPayload } from "@/lib/types";
+import { IntroTokenPayload } from "@/lib/types";
 import logger from "@/lib/logger";
 
 const SetPasswordPage = async ({
@@ -17,7 +17,7 @@ const SetPasswordPage = async ({
   }
 
   try {
-    const decodedToken = (await verifyToken(token)) as CookiesPayload;
+    const decodedToken = (await verifyToken(token)) as IntroTokenPayload;
 
     if (!decodedToken.email || !decodedToken.name) {
       redirect("/quiz");

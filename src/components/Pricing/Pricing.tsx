@@ -7,7 +7,7 @@ import useLanguages from "@/hooks/useLanguages";
 import usePlans from "@/hooks/usePlans";
 import { SubscriptionPlan } from "./SubscriptionPlan";
 import { groupByCurrency } from "@/lib/utils";
-import { CookiesPayload, Currency, Language } from "@/lib/types";
+import { IntroTokenPayload, Currency, Language } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
@@ -40,7 +40,7 @@ const Pricing = () => {
         return;
       }
 
-      const payload = jwt.decode(token) as CookiesPayload;
+      const payload = jwt.decode(token) as IntroTokenPayload;
 
       if (!payload) {
         return;

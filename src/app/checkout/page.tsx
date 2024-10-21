@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import Checkout from "@/components/Checkout";
-import { CookiesPayload } from "@/lib/types";
+import { IntroTokenPayload } from "@/lib/types";
 
 const ChecokutPage = async () => {
   const cookieStore = cookies();
@@ -13,7 +13,7 @@ const ChecokutPage = async () => {
     redirect("/quiz");
   }
 
-  const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
+  const decodedToken = (await verifyToken(token.value)) as IntroTokenPayload;
 
   if (!decodedToken.selectedPrice) {
     redirect("/pricing");

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import Pricing from "@/components/Pricing";
-import { CookiesPayload } from "@/lib/types";
+import { IntroTokenPayload } from "@/lib/types";
 import logger from "@/lib/logger";
 
 const PricingPage = async () => {
@@ -15,7 +15,7 @@ const PricingPage = async () => {
   }
 
   try {
-    const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
+    const decodedToken = (await verifyToken(token.value)) as IntroTokenPayload;
 
     if (!decodedToken.name || !decodedToken.email) {
       redirect("/quiz");
