@@ -62,7 +62,9 @@ async function mergeWithExistingTokenData(
 ) {
   const decodedToken = (await verifyToken(tokenValue)) as CookiesPayload;
   delete decodedToken.exp;
-  return { ...cookiesData, ...decodedToken };
+  const newData = { ...decodedToken, ...cookiesData };
+  logger.debug({ newData }, "Merged data");
+  return newData;
 }
 
 function createResponseWithToken(token: string) {
