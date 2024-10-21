@@ -1,6 +1,6 @@
 import logger from "@/lib/logger";
 
-export const getCurrencies = async () => {
+export const getCurrenciesRequest = async () => {
   const response = await fetch("/api/v1/currencies");
 
   if (!response.ok) {

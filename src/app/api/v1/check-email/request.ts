@@ -4,7 +4,7 @@ export interface CheckEmailRequest {
   email: string;
 }
 
-export const checkEmail = async (
+export const checkEmailRequest = async (
   email: string
 ): Promise<{ error: unknown; isTaken?: boolean }> => {
   const response = await fetch("/api/v1/check-email", {

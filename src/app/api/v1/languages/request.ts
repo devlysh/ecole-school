@@ -1,6 +1,6 @@
 import logger from "@/lib/logger";
 
-export const getLanguages = async () => {
+export const getLanguagesRequest = async () => {
   const response = await fetch("/api/v1/languages");
 
   if (!response.ok) {

@@ -1,6 +1,6 @@
 import logger from "@/lib/logger";
 
-export const setPassword = async (password: string, token: string) => {
+export const setPasswordRequest = async (password: string, token: string) => {
   try {
     const response = await fetch(`/api/v1/set-password`, {
       method: "POST",

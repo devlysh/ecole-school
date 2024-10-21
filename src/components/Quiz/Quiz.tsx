@@ -11,7 +11,7 @@ import QuestionStep from "./Steps/QuestionStep";
 import FormStep from "./Steps/FormStep";
 import logger from "@/lib/logger";
 import Cookies from "js-cookie";
-import { checkEmail } from "@/app/api/v1/check-email/request";
+import { checkEmailRequest } from "@/app/api/v1/check-email/request";
 import { preRegisterUser } from "@/app/api/v1/preregister-user/request";
 
 const Quiz = () => {
@@ -54,7 +54,7 @@ const Quiz = () => {
     async (answer?: string) => {
       if (currentStep.name === "email" && answer) {
         try {
-          const { isTaken } = await checkEmail(answer);
+          const { isTaken } = await checkEmailRequest(answer);
 
           if (isTaken) {
             setEmailError("Email is already taken");
