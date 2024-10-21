@@ -1,33 +1,11 @@
 "use client";
 
-import { FormFieldType, FormStep as FormStepType, StepType } from "@/lib/types";
 import FormStep from "./FormStep";
 import { useCallback, useState, useEffect } from "react";
 import { setPassword } from "@/app/api/v1/set-password/request";
 import logger from "@/lib/logger";
 import { useRouter } from "next/navigation";
-
-const setPasswordStep = {
-  name: "password",
-  type: StepType.FORM,
-  text: "Create your password",
-  fields: [
-    {
-      name: "password",
-      type: FormFieldType.PASSWORD,
-      label: "Password",
-      shouldValidate: true,
-    },
-    {
-      name: "confirmPassword",
-      type: FormFieldType.PASSWORD,
-      label: "Confirm Password",
-      shouldValidate: false,
-    },
-  ],
-  footerText:
-    "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special character.",
-} as FormStepType;
+import { setPasswordStep } from "@/lib/set-password-step.model";
 
 const SetPasswordStep = () => {
   const router = useRouter();

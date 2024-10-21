@@ -12,8 +12,6 @@ const SetPasswordPage = async ({
 }) => {
   const token = searchParams.token;
 
-  console.debug({ token });
-
   if (!token) {
     redirect("/quiz");
   }
