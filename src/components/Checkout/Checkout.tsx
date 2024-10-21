@@ -29,7 +29,13 @@ const Checkout = () => {
   const handleSuccessfulPayment = useCallback(async () => {
     await preRegisterUser();
 
-    router.push("/set-password");
+    const token = Cookies.get("registrationToken");
+
+    if (!token) {
+      return;
+    }
+
+    router.push(`/set-password?token=${token}`);
   }, [router]);
 
   useEffect(() => {

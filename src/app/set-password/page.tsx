@@ -7,7 +7,7 @@ import { CookiesPayload } from "@/lib/types";
 
 const CreatePasswordPage = async () => {
   const cookieStore = cookies();
-  const token = cookieStore.get("token");
+  const token = cookieStore.get("registrationToken");
 
   if (!token) {
     redirect("/quiz");

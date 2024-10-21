@@ -31,9 +31,14 @@ export const signToken = (payload: object, options: jwt.SignOptions) => {
   return jwt.sign(payload, JWT_SECRET, options);
 };
 
-export const appendTokenToResponse = (response: Response, token: string) => {
+export const appendTokenToResponse = (
+  response: Response,
+  value: string,
+  key: string = "token",
+  hours: number = 1
+) => {
   response.headers.set(
     "Set-Cookie",
-    `token=${token}; Path=/; Max-Age=${60 * 60 * 1};`
+    `${key}=${value}; Path=/; Max-Age=${60 * 60 * hours};`
   );
 };

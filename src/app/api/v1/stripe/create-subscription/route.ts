@@ -78,8 +78,8 @@ export const POST = async (request: NextRequest) => {
 
     delete decodedToken.exp;
 
-    const newToken = signToken(
-      { ...decodedToken, subscriptionId } as CookiesPayload,
+    const registrationToken = signToken(
+      { email: decodedToken.email, subscriptionId } as CookiesPayload,
       { expiresIn: "1h" }
     );
 
@@ -88,7 +88,12 @@ export const POST = async (request: NextRequest) => {
       subscriptionId,
     });
 
-    appendTokenToResponse(response, newToken);
+    appendTokenToResponse(
+      response,
+      registrationToken,
+      "registrationToken",
+      24 * 365 // 1 year
+    );
 
     return response;
   } catch (err: unknown) {
