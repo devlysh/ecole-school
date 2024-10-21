@@ -93,6 +93,12 @@ export const POST = async (request: NextRequest) => {
       24 * 365 // 1 year
     );
 
+    cookieStore.delete("name");
+    cookieStore.delete("email");
+    cookieStore.delete("currency");
+    cookieStore.delete("language");
+    cookieStore.delete("selectedPrice");
+
     return response;
   } catch (err: unknown) {
     logger.error({ err }, "Error creating subscription");
