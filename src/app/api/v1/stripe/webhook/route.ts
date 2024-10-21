@@ -93,6 +93,7 @@ export const POST = async (request: NextRequest) => {
     }
 
     case "invoice.payment_succeeded": {
+      // TODO: Handle invoice payment succeeded
       const invoicePaymentSucceeded = event.data.object;
       logger.debug({ invoicePaymentSucceeded }, "TODO");
       return Response.json(null, { status: 200 });
