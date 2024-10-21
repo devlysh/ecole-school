@@ -76,8 +76,6 @@ export const POST = async (request: NextRequest) => {
 
     const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
 
-    delete decodedToken.exp;
-
     const registrationToken = signToken(
       { email: decodedToken.email, name: decodedToken.name } as CookiesPayload,
       { expiresIn: "1y" }
