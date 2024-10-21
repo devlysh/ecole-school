@@ -2,8 +2,10 @@
 
 import { FormFieldType, FormStep as FormStepType, StepType } from "@/lib/types";
 import FormStep from "./FormStep";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
+import { setPassword } from "@/app/api/v1/set-password/request";
 import logger from "@/lib/logger";
+import { useRouter } from "next/navigation";
 
 const setPasswordStep = {
   name: "password",
@@ -28,19 +30,44 @@ const setPasswordStep = {
 } as FormStepType;
 
 const SetPasswordStep = () => {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const urlToken = new URLSearchParams(window.location.search).get("token");
+    setToken(urlToken);
+
+    if (!urlToken) {
+      router.push("/quiz");
+    }
+  }, [router]);
 
   const handleNext = useCallback(
-    (values: Record<string, string>) => {
+    async (values: Record<string, string>) => {
       if (values.password !== values.confirmPassword) {
         setError("Passwords do not match.");
         return;
       }
       setError(null);
-      logger.debug({ values }, "Password set");
+
+      if (!token) {
+        router.push("/quiz");
+        return;
+      }
+
+      const response = await setPassword(values.password, token);
+
+      if (!response.ok) {
+        logger.error({ response }, "Failed to set password");
+        setError("Failed to set password");
+        return;
+      }
+
+      router.push("/account");
     },
-    [setError]
+    [router, token]
   );
 
   const handleChange = useCallback(

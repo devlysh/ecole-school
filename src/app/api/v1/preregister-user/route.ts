@@ -1,5 +1,5 @@
 import logger from "@/lib/logger";
-import { appendTokenToResponse, signToken, verifyToken } from "@/lib/jwt";
+import { appendCookieToResponse, signToken, verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { CookiesPayload } from "@/lib/types";
 
@@ -67,6 +67,6 @@ async function mergeWithExistingTokenData(
 
 function createResponseWithToken(token: string) {
   const response = Response.json(token);
-  appendTokenToResponse(response, token);
+  appendCookieToResponse(response, token);
   return response;
 }

@@ -1,25 +1,35 @@
 import { verifyToken } from "@/lib/jwt";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import SetPasswordStep from "@/components/Quiz/Steps/SetPasswordStep";
 import { CookiesPayload } from "@/lib/types";
+import logger from "@/lib/logger";
 
-const CreatePasswordPage = async () => {
-  const cookieStore = cookies();
-  const token = cookieStore.get("registrationToken");
+const SetPasswordPage = async ({
+  searchParams,
+}: {
+  searchParams: { token: string };
+}) => {
+  const token = searchParams.token;
+
+  console.debug({ token });
 
   if (!token) {
     redirect("/quiz");
   }
 
-  const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
+  try {
+    const decodedToken = (await verifyToken(token)) as CookiesPayload;
 
-  if (!decodedToken.subscriptionId) {
-    redirect("/checkout");
+    if (!decodedToken.email || !decodedToken.name) {
+      redirect("/quiz");
+    }
+
+    return <SetPasswordStep />;
+  } catch (err: unknown) {
+    logger.error({ err }, "Invalid token");
+    redirect("/quiz");
   }
-
-  return <SetPasswordStep />;
 };
 
-export default CreatePasswordPage;
+export default SetPasswordPage;

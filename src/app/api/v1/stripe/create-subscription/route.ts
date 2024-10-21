@@ -4,7 +4,7 @@ import logger from "@/lib/logger";
 import { CreateSubscriptionRequest } from "./request";
 import { cookies } from "next/headers";
 import { CookiesPayload } from "@/lib/types";
-import { appendTokenToResponse, signToken, verifyToken } from "@/lib/jwt";
+import { appendCookieToResponse, signToken, verifyToken } from "@/lib/jwt";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not set in the environment variables");
@@ -79,8 +79,8 @@ export const POST = async (request: NextRequest) => {
     delete decodedToken.exp;
 
     const registrationToken = signToken(
-      { email: decodedToken.email, subscriptionId } as CookiesPayload,
-      { expiresIn: "1h" }
+      { email: decodedToken.email, name: decodedToken.name } as CookiesPayload,
+      { expiresIn: "1y" }
     );
 
     const response = Response.json({
@@ -88,7 +88,7 @@ export const POST = async (request: NextRequest) => {
       subscriptionId,
     });
 
-    appendTokenToResponse(
+    appendCookieToResponse(
       response,
       registrationToken,
       "registrationToken",

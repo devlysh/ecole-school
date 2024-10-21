@@ -31,7 +31,7 @@ export const signToken = (payload: object, options: jwt.SignOptions) => {
   return jwt.sign(payload, JWT_SECRET, options);
 };
 
-export const appendTokenToResponse = (
+export const appendCookieToResponse = (
   response: Response,
   value: string,
   key: string = "token",
