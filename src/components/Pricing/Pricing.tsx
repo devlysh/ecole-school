@@ -48,7 +48,10 @@ const Pricing = () => {
 
       if (payload.language) setSelectedLanguage(payload.language);
       if (payload.currency) setSelectedCurrency(payload.currency);
-      if (payload.priceId) setSelectedPriceId(payload.priceId);
+      if (payload.selectedPrice) {
+        const priceId = JSON.parse(payload.selectedPrice).priceId;
+        setSelectedPriceId(priceId);
+      }
     } catch (err) {
       logger.error(err, "Failed to parse pricing data from cookies");
     }
@@ -80,7 +83,6 @@ const Pricing = () => {
 
   const handleSubmit = useCallback(async () => {
     if (selectedPriceId) {
-      Cookies.set("priceId", selectedPriceId);
       Cookies.set("language", selectedLanguage);
       Cookies.set("currency", selectedCurrency);
       Cookies.set(

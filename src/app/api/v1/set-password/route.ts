@@ -9,9 +9,9 @@ export const POST = async (request: Request) => {
   try {
     const decodedToken = verifyToken(token);
 
-    const { email } = decodedToken as CookiesPayload;
+    const { name, email } = decodedToken as CookiesPayload;
 
-    logger.info({ email, password }, "Setting password for user");
+    logger.info({ name, email, password }, "Setting password for user");
 
     // TODO: Implement password setting
 
@@ -24,7 +24,6 @@ export const POST = async (request: Request) => {
     cookieStore.delete("name");
     cookieStore.delete("currency");
     cookieStore.delete("language");
-    cookieStore.delete("priceId");
     cookieStore.delete("selectedPrice");
 
     return Response.json({ message: "Password set" }, { status: 200 });

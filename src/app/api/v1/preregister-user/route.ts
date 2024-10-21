@@ -18,7 +18,6 @@ const cookiesList = [
   "studyTimePerWeek",
   "currency",
   "language",
-  "priceId",
   "selectedPrice",
 ];
 
