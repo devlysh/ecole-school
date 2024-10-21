@@ -31,6 +31,8 @@ const Checkout = () => {
 
     const token = Cookies.get("registrationToken");
 
+    Cookies.remove("registrationToken");
+
     if (!token) {
       return;
     }

@@ -27,8 +27,23 @@ export const verifyToken = async (token: string) => {
   }
 };
 
-export const signToken = (payload: object, options: jwt.SignOptions) => {
-  return jwt.sign(payload, JWT_SECRET, options);
+export const signToken = (
+  payload: object,
+  expiresIn?: string | number,
+  options?: jwt.SignOptions
+) => {
+  if (expiresIn) {
+    return jwt.sign(payload, JWT_SECRET, { ...options, expiresIn });
+  } else {
+    return jwt.sign(payload, JWT_SECRET, options);
+  }
+};
+
+export const signRefreshToken = (
+  payload: object,
+  options?: jwt.SignOptions
+) => {
+  return jwt.sign(payload, JWT_SECRET, { ...options, expiresIn: "7d" });
 };
 
 export const appendCookieToResponse = (

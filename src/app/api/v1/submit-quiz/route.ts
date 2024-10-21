@@ -31,7 +31,7 @@ export const GET = async () => {
       },
     };
 
-    const token = signToken(tokenData, { expiresIn: "1h" });
+    const token = signToken(tokenData, "1h");
     const response = Response.json(token);
     appendCookieToResponse(response, token);
     return response;

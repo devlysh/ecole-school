@@ -26,11 +26,11 @@ export const GET = async () => {
       redirect("/quiz");
     }
 
-    const { exp, ...tokenPayload } = decodedToken;
-    const newToken = signToken(
-      { ...tokenPayload, email: email || tokenPayload.email },
-      { expiresIn: "1h" }
-    );
+    delete decodedToken.exp;
+
+    const tokenData = { ...decodedToken, email: email || decodedToken.email };
+
+    const newToken = signToken(tokenData, "1h");
     const response = Response.json(newToken);
     appendCookieToResponse(response, newToken);
     return response;

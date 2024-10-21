@@ -1,5 +1,10 @@
 import { JwtPayload } from "jsonwebtoken";
 
+export enum Role {
+  STUDENT = "student",
+  ADMIN = "admin",
+}
+
 export enum StepType {
   INFO,
   QUESTION,

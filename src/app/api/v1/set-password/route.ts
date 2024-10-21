@@ -1,6 +1,6 @@
 import { signToken, verifyToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
-import { CookiesPayload } from "@/lib/types";
+import { CookiesPayload, Role } from "@/lib/types";
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
@@ -28,12 +28,14 @@ export const POST = async (request: Request) => {
       },
     });
 
-    const jwtToken = signToken(
-      { email, name },
-      {
-        expiresIn: "1d",
-      }
-    );
+    const tokenData = {
+      email,
+      isActive: true,
+      isAuthenticated: true,
+      role: Role.STUDENT,
+    };
+
+    const jwtToken = signToken(tokenData, "1d");
 
     const cookieStore = cookies();
     cookieStore.set("token", jwtToken, { httpOnly: true, path: "/" });

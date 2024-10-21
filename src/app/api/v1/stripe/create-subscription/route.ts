@@ -14,36 +14,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-09-30.acacia",
 });
 
-const getOrCreateCustomer = async (email: string): Promise<Stripe.Customer> => {
-  const existingCustomers = await stripe.customers.list({ email });
-  if (existingCustomers.data.length) {
-    return existingCustomers.data[0];
-  }
-  return await stripe.customers.create({ email });
-};
-
-const setupCustomerPaymentMethod = async (
-  customerId: string,
-  paymentMethodId: string
-): Promise<void> => {
-  await stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
-  await stripe.customers.update(customerId, {
-    invoice_settings: { default_payment_method: paymentMethodId },
-  });
-};
-
-const createSubscription = async (
-  customerId: string,
-  planId: string
-): Promise<Stripe.Subscription> => {
-  return await stripe.subscriptions.create({
-    customer: customerId,
-    items: [{ price: planId }],
-    payment_behavior: "default_incomplete",
-    expand: ["latest_invoice.payment_intent"],
-  });
-};
-
 export const POST = async (request: NextRequest) => {
   try {
     const { email, planId, paymentMethodId } =
@@ -76,10 +46,12 @@ export const POST = async (request: NextRequest) => {
 
     const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
 
-    const registrationToken = signToken(
-      { email: decodedToken.email, name: decodedToken.name } as CookiesPayload,
-      { expiresIn: "1y" }
-    );
+    const tokenData = {
+      email: decodedToken.email,
+      name: decodedToken.name,
+    };
+
+    const registrationToken = signToken(tokenData);
 
     const response = Response.json({
       clientSecret,
@@ -104,4 +76,34 @@ export const POST = async (request: NextRequest) => {
       { status: 500 }
     );
   }
+};
+
+const getOrCreateCustomer = async (email: string): Promise<Stripe.Customer> => {
+  const existingCustomers = await stripe.customers.list({ email });
+  if (existingCustomers.data.length) {
+    return existingCustomers.data[0];
+  }
+  return await stripe.customers.create({ email });
+};
+
+const setupCustomerPaymentMethod = async (
+  customerId: string,
+  paymentMethodId: string
+): Promise<void> => {
+  await stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
+  await stripe.customers.update(customerId, {
+    invoice_settings: { default_payment_method: paymentMethodId },
+  });
+};
+
+const createSubscription = async (
+  customerId: string,
+  planId: string
+): Promise<Stripe.Subscription> => {
+  return await stripe.subscriptions.create({
+    customer: customerId,
+    items: [{ price: planId }],
+    payment_behavior: "default_incomplete",
+    expand: ["latest_invoice.payment_intent"],
+  });
 };

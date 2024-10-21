@@ -42,7 +42,7 @@ export const GET = async () => {
       selectedPrice,
       quizAnswers,
     };
-    const newToken = signToken(tokenData, { expiresIn: "1h" });
+    const newToken = signToken(tokenData, "1h");
     const response = Response.json(null);
     appendCookieToResponse(response, newToken);
     return response;
