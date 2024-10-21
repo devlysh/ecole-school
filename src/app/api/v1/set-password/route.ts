@@ -1,4 +1,4 @@
-import { verifyToken } from "@/lib/jwt";
+import { signToken, verifyToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { CookiesPayload } from "@/lib/types";
 import { cookies } from "next/headers";
@@ -17,15 +17,8 @@ export const POST = async (request: Request) => {
 
   try {
     const { name, email } = (await verifyToken(token)) as CookiesPayload;
-
-    logger.debug({ token, password, name, email }, "DEBUG!");
-
-    logger.info({ name, email, password }, "Setting password for user");
-
-    // Hash the password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Update the user in the database
     await prisma.user.update({
       where: { email },
       data: {
@@ -35,26 +28,15 @@ export const POST = async (request: Request) => {
       },
     });
 
-    // Generate JWT token
-    const jwtToken = jwt.sign({ email, name }, JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const jwtToken = signToken(
+      { email, name },
+      {
+        expiresIn: "1d",
+      }
+    );
 
-    // Set HttpOnly cookie
     const cookieStore = cookies();
     cookieStore.set("token", jwtToken, { httpOnly: true, path: "/" });
-
-    // Clear other cookies
-    cookieStore.delete("registrationToken");
-    cookieStore.delete("email");
-    cookieStore.delete("name");
-    cookieStore.delete("currency");
-    cookieStore.delete("language");
-    cookieStore.delete("selectedPrice");
-    cookieStore.delete("areasToFocus");
-    cookieStore.delete("currentLevel");
-    cookieStore.delete("motivatesYou");
-    cookieStore.delete("studyTimePerWeek");
 
     return Response.json({ message: "Password set" }, { status: 200 });
   } catch (err: unknown) {

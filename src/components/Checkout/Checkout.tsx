@@ -12,7 +12,7 @@ import useLanguages from "@/hooks/useLanguages";
 import logger from "@/lib/logger";
 import { CookiesPayload, Language, Plan } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
-import { preRegisterUser } from "@/app/api/v1/preregister-user/request";
+import { submitCheckoutRequest } from "@/app/api/v1/submit-checkout/request";
 
 const Checkout = () => {
   const router = useRouter();
@@ -27,7 +27,7 @@ const Checkout = () => {
   }
 
   const handleSuccessfulPayment = useCallback(async () => {
-    await preRegisterUser();
+    await submitCheckoutRequest();
 
     const token = Cookies.get("registrationToken");
 

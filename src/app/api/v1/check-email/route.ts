@@ -2,7 +2,7 @@ import logger from "@/lib/logger";
 import prisma from "@/lib/prisma";
 import { CheckEmailRequest } from "./request";
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
   const { email } = (await request.json()) as CheckEmailRequest;
 
   try {
@@ -15,4 +15,4 @@ export async function POST(request: Request) {
     logger.error(err, "Error checking if email exists");
     return Response.json("Failed to check if email exists", { status: 500 });
   }
-}
+};

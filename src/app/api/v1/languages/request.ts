@@ -5,7 +5,7 @@ export const getLanguagesRequest = async () => {
 
   if (!response.ok) {
     logger.error({ response }, "Error during fetch languages");
-    throw new Error(response.statusText ?? "Failed to fetch plans");
+    throw new Error(response.statusText ?? "Failed to fetch languages");
   }
 
   return await response.json();

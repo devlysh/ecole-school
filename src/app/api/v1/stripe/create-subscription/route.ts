@@ -14,35 +14,35 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-09-30.acacia",
 });
 
-async function getOrCreateCustomer(email: string): Promise<Stripe.Customer> {
+const getOrCreateCustomer = async (email: string): Promise<Stripe.Customer> => {
   const existingCustomers = await stripe.customers.list({ email });
   if (existingCustomers.data.length) {
     return existingCustomers.data[0];
   }
   return await stripe.customers.create({ email });
-}
+};
 
-async function setupCustomerPaymentMethod(
+const setupCustomerPaymentMethod = async (
   customerId: string,
   paymentMethodId: string
-): Promise<void> {
+): Promise<void> => {
   await stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
   await stripe.customers.update(customerId, {
     invoice_settings: { default_payment_method: paymentMethodId },
   });
-}
+};
 
-async function createSubscription(
+const createSubscription = async (
   customerId: string,
   planId: string
-): Promise<Stripe.Subscription> {
+): Promise<Stripe.Subscription> => {
   return await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: planId }],
     payment_behavior: "default_incomplete",
     expand: ["latest_invoice.payment_intent"],
   });
-}
+};
 
 export const POST = async (request: NextRequest) => {
   try {
@@ -92,16 +92,6 @@ export const POST = async (request: NextRequest) => {
       "registrationToken",
       24 * 365 // 1 year
     );
-
-    cookieStore.delete("name");
-    cookieStore.delete("email");
-    cookieStore.delete("currency");
-    cookieStore.delete("language");
-    cookieStore.delete("selectedPrice");
-    cookieStore.delete("areasToFocus");
-    cookieStore.delete("currentLevel");
-    cookieStore.delete("motivatesYou");
-    cookieStore.delete("studyTimePerWeek");
 
     return response;
   } catch (err: unknown) {

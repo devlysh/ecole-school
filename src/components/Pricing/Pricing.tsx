@@ -12,9 +12,9 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
 import CurrencySelect from "./CurrencySelect";
-import { preRegisterUser } from "@/app/api/v1/preregister-user/request";
 import logger from "@/lib/logger";
 import jwt from "jsonwebtoken";
+import { submitPlanRequest } from "@/app/api/v1/submit-plan/request";
 
 const Pricing = () => {
   const router = useRouter();
@@ -49,7 +49,8 @@ const Pricing = () => {
       if (payload.language) setSelectedLanguage(payload.language);
       if (payload.currency) setSelectedCurrency(payload.currency);
       if (payload.selectedPrice) {
-        const priceId = JSON.parse(payload.selectedPrice).priceId;
+        const priceId = JSON.parse(payload.selectedPrice).id;
+        logger.debug({ priceId }, "Selected price ID");
         setSelectedPriceId(priceId);
       }
     } catch (err) {
@@ -90,7 +91,7 @@ const Pricing = () => {
         JSON.stringify(plans.find((plan) => plan.id === selectedPriceId))
       );
 
-      await preRegisterUser();
+      await submitPlanRequest();
 
       router.push("/checkout");
     } else {
