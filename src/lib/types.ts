@@ -86,5 +86,4 @@ export interface CookiesPayload extends JwtPayload {
   priceId?: string;
   selectedPrice?: string;
   subscriptionId?: string;
-  clientSecret?: string;
 }

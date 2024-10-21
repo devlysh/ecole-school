@@ -15,7 +15,7 @@ const CreatePasswordPage = async () => {
 
   const decodedToken = (await verifyToken(token.value)) as CookiesPayload;
 
-  if (!decodedToken.subscriptionId || !decodedToken.clientSecret) {
+  if (!decodedToken.subscriptionId) {
     redirect("/checkout");
   }
 

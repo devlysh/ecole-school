@@ -79,7 +79,7 @@ export const POST = async (request: NextRequest) => {
     delete decodedToken.exp;
 
     const newToken = signToken(
-      { ...decodedToken, subscriptionId, clientSecret } as CookiesPayload,
+      { ...decodedToken, subscriptionId } as CookiesPayload,
       { expiresIn: "1h" }
     );
 
