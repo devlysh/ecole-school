@@ -53,6 +53,7 @@ export const POST = async (request: NextRequest) => {
 
     const registrationToken = signToken(tokenData, "5m");
 
+    cookieStore.delete("token");
     cookieStore.set("registrationToken", registrationToken, {
       maxAge: 60 * 5, // 5 minutes
     });
