@@ -32,7 +32,7 @@ export const GET = async () => {
       },
     };
 
-    const preAuthToken = signToken(tokenData, "1h");
+    const preAuthToken = await signToken(tokenData, "1h");
 
     cookieStore.set(TokenType.PRE_AUTH, preAuthToken, {
       maxAge: 60 * 60 * 1, // 1 hour

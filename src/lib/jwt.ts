@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import { jwtVerify, SignJWT } from "jose";
 import logger from "./logger";
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -7,41 +7,37 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is missing!");
 }
 
+const secretKey = new TextEncoder().encode(JWT_SECRET);
+
 export const verifyToken = async (token: string) => {
-  if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET is missing!");
-  }
-
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return decoded;
+    const { payload } = await jwtVerify(token, secretKey);
+    return payload;
   } catch (err: unknown) {
-    if (err instanceof jwt.JsonWebTokenError) {
-      logger.error({ error: err }, "Invalid token signature");
-    } else if (err instanceof jwt.TokenExpiredError) {
-      logger.error({ error: err }, "Token has expired");
-    } else {
-      logger.error({ error: err }, "Token verification failed");
+    if (err instanceof Error) {
+      if (err.message.includes("JWTExpired")) {
+        logger.error({ error: err }, "Token has expired");
+      } else if (err.message.includes("JWTInvalid")) {
+        logger.error({ error: err }, "Invalid token signature");
+      } else {
+        logger.error({ error: err }, "Token verification failed");
+      }
     }
-    return null;
+    throw err;
   }
 };
 
-export const signToken = (
-  payload: object,
-  expiresIn?: string | number,
-  options?: jwt.SignOptions
+export const signToken = async (
+  payload: Record<string, any>,
+  expiresIn?: string | number
 ) => {
+  let token = new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt();
+
   if (expiresIn) {
-    return jwt.sign(payload, JWT_SECRET, { ...options, expiresIn });
-  } else {
-    return jwt.sign(payload, JWT_SECRET, options);
+    token = token.setExpirationTime(expiresIn);
   }
-};
 
-export const signRefreshToken = (
-  payload: object,
-  options?: jwt.SignOptions
-) => {
-  return jwt.sign(payload, JWT_SECRET, { ...options, expiresIn: "7d" });
+  return await token.sign(secretKey);
 };

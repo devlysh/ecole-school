@@ -9,7 +9,6 @@ import {
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -45,13 +44,13 @@ export const POST = async (request: Request) => {
       role: Role.STUDENT,
     };
 
-    const accessToken = signToken(tokenData, "1h");
+    const accessToken = await signToken(tokenData, "1h");
 
     const cookieStore = cookies();
     cookieStore.set(TokenType.ACCESS, accessToken, {
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60 * 1,
+      maxAge: 60 * 60 * 1, // 1 hour
     });
 
     return Response.json({ message: "Password set" }, { status: 200 });

@@ -32,7 +32,7 @@ export const GET = async () => {
       ...decodedPreAuthToken,
       email: email || decodedPreAuthToken.email,
     };
-    const newPreAuthToken = signToken(tokenData, "1h");
+    const newPreAuthToken = await signToken(tokenData, "1h");
 
     cookieStore.set(TokenType.PRE_AUTH, newPreAuthToken, {
       maxAge: 60 * 60 * 1, // 1 hour

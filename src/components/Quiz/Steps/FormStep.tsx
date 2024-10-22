@@ -59,13 +59,19 @@ const FormStep: React.FC<FormStepProps> = ({
       return;
     }
 
-    const decodedPreAuthToken = jwt.decode(preAuthToken) as PreAuthTokenPayload;
+    try {
+      const decodedPreAuthToken = jwt.decode(
+        preAuthToken
+      ) as PreAuthTokenPayload;
 
-    const value =
-      decodedPreAuthToken[step.name as keyof PreAuthTokenPayload]?.toString();
+      const value =
+        decodedPreAuthToken[step.name as keyof PreAuthTokenPayload]?.toString();
 
-    if (value) {
-      setValues((prevValues) => ({ ...prevValues, [step.name]: value }));
+      if (value) {
+        setValues((prevValues) => ({ ...prevValues, [step.name]: value }));
+      }
+    } catch (err) {
+      logger.error(err, "Failed to decode pre-auth token");
     }
   }, [step.name]);
 

@@ -53,7 +53,7 @@ export const POST = async (request: NextRequest) => {
       name: decodedPreAuthToken.name,
     };
 
-    const registrationToken = signToken(tokenData, "5m");
+    const registrationToken = await signToken(tokenData, "5m");
 
     cookieStore.set(TokenType.REGISTRATION, registrationToken, {
       maxAge: 60 * 5, // 5 minutes

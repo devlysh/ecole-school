@@ -1,13 +1,17 @@
 "use client";
 
 import { logoutRequest } from "@/app/api/v1/logout/request";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-const Logout = async () => {
+const Logout = () => {
   const router = useRouter();
-  await logoutRequest();
 
-  return router.push("/");
+  useEffect(() => {
+    logoutRequest().then(() => router.push("/"));
+  }, []);
+
+  return null;
 };
 
 export default Logout;
