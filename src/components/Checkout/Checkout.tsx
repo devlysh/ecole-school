@@ -49,6 +49,7 @@ const Checkout = ({ languages }: { languages: Language[] }) => {
         !payload.selectedPrice ||
         !payload.email
       ) {
+        router.push("/pricing");
         return;
       }
 
