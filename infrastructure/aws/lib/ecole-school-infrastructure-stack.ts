@@ -6,7 +6,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
-import * as cognito from "aws-cdk-lib/aws-cognito";
 
 export class EcoleSchoolInfrastructureStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -63,54 +62,6 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       "Allow App Runner access to PostgreSQL"
     );
 
-    // 3. Cognito User Pool
-    const userPool = new cognito.UserPool(this, "EcoleSchoolUserPool", {
-      selfSignUpEnabled: true,
-      signInAliases: { email: true },
-      autoVerify: { email: true },
-      standardAttributes: {
-        email: { required: true, mutable: true },
-      },
-      passwordPolicy: {
-        minLength: 8,
-        requireSymbols: true,
-        requireDigits: true,
-        requireLowercase: true,
-        requireUppercase: true,
-      },
-    });
-
-    const userPoolClient = new cognito.UserPoolClient(
-      this,
-      "EcoleSchoolUserPoolClient",
-      {
-        userPool,
-        authFlows: { userPassword: true, userSrp: true },
-      }
-    );
-
-    // Cognito Groups for roles
-    const adminGroup = new cognito.CfnUserPoolGroup(this, "AdminGroup", {
-      userPoolId: userPool.userPoolId,
-      groupName: "admin",
-      description: "Admin users with full access",
-      precedence: 1,
-    });
-
-    const teacherGroup = new cognito.CfnUserPoolGroup(this, "TeacherGroup", {
-      userPoolId: userPool.userPoolId,
-      groupName: "teacher",
-      description: "Teacher users with teaching privileges",
-      precedence: 2,
-    });
-
-    const studentGroup = new cognito.CfnUserPoolGroup(this, "StudentGroup", {
-      userPoolId: userPool.userPoolId,
-      groupName: "student",
-      description: "Student users with learning privileges",
-      precedence: 3,
-    });
-
     // 4. Docker Image Asset
     const dockerImageAsset = new ecr_assets.DockerImageAsset(
       this,
@@ -164,8 +115,6 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
           port: 3000,
           environmentVariables: {
             DATABASE_URL: databaseUrl,
-            COGNITO_USER_POOL_ID: userPool.userPoolId,
-            COGNITO_USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
           },
         },
         asset: dockerImageAsset,
@@ -175,18 +124,10 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       vpcConnector: vpcConnector, // Attach the VPC Connector
     });
 
-    // 9. Output the App Runner service URL and Cognito details
+    // 9. Output the App Runner service URL
     new cdk.CfnOutput(this, "EcoleSchoolAppRunnerServiceUrl", {
       value: service.serviceUrl,
       description: "The URL of the App Runner service",
-    });
-    new cdk.CfnOutput(this, "CognitoUserPoolId", {
-      value: userPool.userPoolId,
-      description: "The Cognito User Pool ID",
-    });
-    new cdk.CfnOutput(this, "CognitoUserPoolClientId", {
-      value: userPoolClient.userPoolClientId,
-      description: "The Cognito User Pool Client ID",
     });
   }
 }
