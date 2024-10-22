@@ -9,7 +9,7 @@ const Logout = () => {
 
   useEffect(() => {
     logoutRequest().then(() => router.push("/"));
-  }, []);
+  }, [router]);
 
   return null;
 };

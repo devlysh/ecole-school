@@ -39,8 +39,6 @@ export const POST = async (request: Request) => {
 
     const tokenData: AccessTokenPayload = {
       email,
-      active: true,
-      auth: true,
       role: Role.STUDENT,
     };
 

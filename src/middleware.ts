@@ -3,7 +3,7 @@ import { verifyToken } from "./lib/jwt";
 import { Role, TokenType } from "./lib/types";
 import logger from "./lib/logger";
 
-const guestPaths = ["/quiz", "/pricing", "/checkout"];
+const guestPaths = ["/quiz", "/pricing", "/checkout", "/login"];
 
 const studentPaths = [
   "/account",
@@ -19,13 +19,16 @@ const protectedPaths = [...studentPaths, ...teacherPaths, ...adminPaths];
 
 export const middleware = async (req: NextRequest) => {
   const token = req.cookies.get(TokenType.ACCESS)?.value;
+  const pathname = req.nextUrl.pathname;
+
+  logger.debug({ pathname }, "Pathname");
 
   const isGuestPath = guestPaths.some((path) =>
     req.nextUrl.pathname.startsWith(path)
   );
 
   const isProtectedPath = protectedPaths.some((path) =>
-    req.nextUrl.pathname.startsWith(path)
+    pathname.startsWith(path)
   );
 
   if (!token && isGuestPath) {
@@ -33,11 +36,11 @@ export const middleware = async (req: NextRequest) => {
   }
 
   if (!token && isProtectedPath) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   if (!token) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   try {
@@ -54,7 +57,7 @@ export const middleware = async (req: NextRequest) => {
 
     if (isStudent) {
       const isStudentPath = studentPaths.some((path) =>
-        req.nextUrl.pathname.startsWith(path)
+        pathname.startsWith(path)
       );
       if (isStudentPath) {
         return NextResponse.next();
@@ -65,7 +68,7 @@ export const middleware = async (req: NextRequest) => {
 
     if (isTeacher) {
       const isTeacherPath = teacherPaths.some((path) =>
-        req.nextUrl.pathname.startsWith(path)
+        pathname.startsWith(path)
       );
       if (isTeacherPath) {
         return NextResponse.next();
@@ -74,22 +77,21 @@ export const middleware = async (req: NextRequest) => {
       }
     }
 
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   } catch (error) {
     logger.error({ error }, "Error in middleware");
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 };
 
 export const config = {
   matcher: [
     "/account/:path*",
-    "/account/book-classes",
-    "/account/my-classes",
-    "/account/teacher",
     "/admin",
+    "/login",
     "/quiz",
     "/pricing",
     "/checkout",
+    "/set-password",
   ],
 };
