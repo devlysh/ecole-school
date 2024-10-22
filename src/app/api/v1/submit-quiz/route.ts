@@ -1,6 +1,7 @@
 import logger from "@/lib/logger";
 import { signToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { TokenType } from "@/lib/types";
 
 export const GET = async () => {
   const cookieStore = cookies();
@@ -31,9 +32,9 @@ export const GET = async () => {
       },
     };
 
-    const token = signToken(tokenData, "1h");
+    const preAuthToken = signToken(tokenData, "1h");
 
-    cookieStore.set("token", token, {
+    cookieStore.set(TokenType.PRE_AUTH, preAuthToken, {
       maxAge: 60 * 60 * 1, // 1 hour
     });
 

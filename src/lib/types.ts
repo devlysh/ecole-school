@@ -1,4 +1,9 @@
-import { JwtPayload } from "jsonwebtoken";
+export enum TokenType {
+  URL_TOKEN = "token",
+  ACCESS = "accessToken",
+  REGISTRATION = "registrationToken",
+  PRE_AUTH = "preAuthToken",
+}
 
 export enum Role {
   STUDENT = "student",
@@ -92,7 +97,7 @@ export interface AccessTokenPayload {
   role: Role;
 }
 
-export interface IntroTokenPayload {
+export interface PreAuthTokenPayload {
   exp?: number;
   iat?: number;
   token?: string;

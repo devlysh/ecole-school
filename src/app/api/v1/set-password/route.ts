@@ -1,6 +1,11 @@
 import { signToken, verifyToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
-import { AccessTokenPayload, IntroTokenPayload, Role } from "@/lib/types";
+import {
+  AccessTokenPayload,
+  PreAuthTokenPayload,
+  Role,
+  TokenType,
+} from "@/lib/types";
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
@@ -16,7 +21,7 @@ export const POST = async (request: Request) => {
   const { token, password } = await request.json();
 
   try {
-    const { name, email } = (await verifyToken(token)) as IntroTokenPayload;
+    const { name, email } = (await verifyToken(token)) as PreAuthTokenPayload;
 
     if (!email) {
       return Response.json({ error: "Invalid token" }, { status: 401 });
@@ -43,7 +48,7 @@ export const POST = async (request: Request) => {
     const accessToken = signToken(tokenData, "1h");
 
     const cookieStore = cookies();
-    cookieStore.set("token", accessToken, {
+    cookieStore.set(TokenType.ACCESS, accessToken, {
       httpOnly: true,
       path: "/",
       maxAge: 60 * 60 * 1,

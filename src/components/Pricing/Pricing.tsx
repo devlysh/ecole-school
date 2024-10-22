@@ -4,7 +4,13 @@ import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Spinner } from "@nextui-org/react";
 import { SubscriptionPlan } from "./SubscriptionPlan";
 import { groupByCurrency } from "@/lib/utils";
-import { IntroTokenPayload, Currency, Language, Plan } from "@/lib/types";
+import {
+  PreAuthTokenPayload,
+  Currency,
+  Language,
+  Plan,
+  TokenType,
+} from "@/lib/types";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
@@ -38,13 +44,13 @@ const Pricing = ({
 
   useEffect(() => {
     try {
-      const token = Cookies.get("token");
+      const preAuthToken = Cookies.get(TokenType.PRE_AUTH);
 
-      if (!token) {
+      if (!preAuthToken) {
         return;
       }
 
-      const payload = jwt.decode(token) as IntroTokenPayload;
+      const payload = jwt.decode(preAuthToken) as PreAuthTokenPayload;
 
       if (!payload) {
         return;
@@ -54,7 +60,6 @@ const Pricing = ({
       if (payload.currency) setSelectedCurrency(payload.currency);
       if (payload.selectedPrice) {
         const priceId = JSON.parse(payload.selectedPrice).id;
-        logger.debug({ priceId }, "Selected price ID");
         setSelectedPriceId(priceId);
       }
     } catch (err) {
@@ -83,7 +88,6 @@ const Pricing = ({
   );
 
   const handleSubscriptionPlanClick = useCallback((id: string) => {
-    logger.debug({ id }, "Selected price ID");
     setSelectedPriceId(id);
   }, []);
 

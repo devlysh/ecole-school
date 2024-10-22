@@ -2,7 +2,7 @@ import { verifyToken } from "@/lib/jwt";
 import { redirect } from "next/navigation";
 
 import SetPasswordStep from "@/components/Quiz/Steps/SetPasswordStep";
-import { IntroTokenPayload } from "@/lib/types";
+import { PreAuthTokenPayload, TokenType } from "@/lib/types";
 import logger from "@/lib/logger";
 
 const SetPasswordPage = async ({
@@ -10,16 +10,18 @@ const SetPasswordPage = async ({
 }: {
   searchParams: { token: string };
 }) => {
-  const token = searchParams.token;
+  const registrationToken = searchParams[TokenType.URL_TOKEN];
 
-  if (!token) {
+  if (!registrationToken) {
     redirect("/quiz");
   }
 
   try {
-    const decodedToken = (await verifyToken(token)) as IntroTokenPayload;
+    const decodedPreAuthToken = (await verifyToken(
+      registrationToken
+    )) as PreAuthTokenPayload;
 
-    if (!decodedToken.email || !decodedToken.name) {
+    if (!decodedPreAuthToken.email || !decodedPreAuthToken.name) {
       redirect("/quiz");
     }
 

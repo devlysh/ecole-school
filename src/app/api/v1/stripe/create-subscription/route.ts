@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
 import { CreateSubscriptionRequest } from "./request";
 import { cookies } from "next/headers";
-import { IntroTokenPayload } from "@/lib/types";
+import { PreAuthTokenPayload, TokenType } from "@/lib/types";
 import { signToken, verifyToken } from "@/lib/jwt";
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -38,23 +38,24 @@ export const POST = async (request: NextRequest) => {
     }
 
     const cookieStore = cookies();
-    const token = cookieStore.get("token");
+    const preAuthToken = cookieStore.get(TokenType.PRE_AUTH);
 
-    if (!token) {
+    if (!preAuthToken) {
       return Response.json({ error: "Token is missing" }, { status: 400 });
     }
 
-    const decodedToken = (await verifyToken(token.value)) as IntroTokenPayload;
+    const decodedPreAuthToken = (await verifyToken(
+      preAuthToken.value
+    )) as PreAuthTokenPayload;
 
     const tokenData = {
-      email: decodedToken.email,
-      name: decodedToken.name,
+      email: decodedPreAuthToken.email,
+      name: decodedPreAuthToken.name,
     };
 
     const registrationToken = signToken(tokenData, "5m");
 
-    cookieStore.delete("token");
-    cookieStore.set("registrationToken", registrationToken, {
+    cookieStore.set(TokenType.REGISTRATION, registrationToken, {
       maxAge: 60 * 5, // 5 minutes
     });
 

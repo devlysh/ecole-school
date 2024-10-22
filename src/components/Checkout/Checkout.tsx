@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 
 import { submitCheckoutRequest } from "@/app/api/v1/submit-checkout/request";
 import logger from "@/lib/logger";
-import { IntroTokenPayload, Language, Plan } from "@/lib/types";
+import { PreAuthTokenPayload, Language, Plan, TokenType } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
 
 const Checkout = ({ languages }: { languages: Language[] }) => {
@@ -22,9 +22,10 @@ const Checkout = ({ languages }: { languages: Language[] }) => {
   const handleSuccessfulPayment = useCallback(async () => {
     await submitCheckoutRequest();
 
-    const registrationToken = Cookies.get("registrationToken");
+    const registrationToken = Cookies.get(TokenType.REGISTRATION);
 
-    Cookies.remove("registrationToken");
+    Cookies.remove(TokenType.REGISTRATION);
+    Cookies.remove(TokenType.PRE_AUTH);
 
     if (!registrationToken) {
       return;
@@ -35,27 +36,29 @@ const Checkout = ({ languages }: { languages: Language[] }) => {
 
   useEffect(() => {
     try {
-      const token = Cookies.get("token");
+      const preAuthToken = Cookies.get(TokenType.PRE_AUTH);
 
-      if (!token) {
+      if (!preAuthToken) {
         return;
       }
 
-      const decodedToken = jwt.decode(token) as IntroTokenPayload;
+      const decodedPreAuthToken = jwt.decode(
+        preAuthToken
+      ) as PreAuthTokenPayload;
 
       if (
-        !decodedToken ||
-        !decodedToken.language ||
-        !decodedToken.selectedPrice ||
-        !decodedToken.email
+        !decodedPreAuthToken ||
+        !decodedPreAuthToken.language ||
+        !decodedPreAuthToken.selectedPrice ||
+        !decodedPreAuthToken.email
       ) {
         router.push("/pricing");
         return;
       }
 
-      setLanguage(decodedToken.language);
-      setSelectedPrice(JSON.parse(decodedToken.selectedPrice));
-      setEmail(decodedToken.email);
+      setLanguage(decodedPreAuthToken.language);
+      setSelectedPrice(JSON.parse(decodedPreAuthToken.selectedPrice));
+      setEmail(decodedPreAuthToken.email);
     } catch (err) {
       logger.error(err, "Failed to parse checkout data from cookies");
     }

@@ -2,35 +2,35 @@ import logger from "@/lib/logger";
 import { signToken, verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { IntroTokenPayload } from "@/lib/types";
+import { PreAuthTokenPayload, TokenType } from "@/lib/types";
 
 export const GET = async () => {
   const cookieStore = cookies();
 
   try {
-    const existingToken = cookieStore.get("token");
+    const existingPreAuthToken = cookieStore.get(TokenType.PRE_AUTH);
     const currency = cookieStore.get("currency")?.value;
     const language = cookieStore.get("language")?.value;
     const selectedPrice = cookieStore.get("selectedPrice")?.value;
 
-    cookieStore.delete("token");
+    cookieStore.delete(TokenType.PRE_AUTH);
     cookieStore.delete("currency");
     cookieStore.delete("language");
     cookieStore.delete("selectedPrice");
 
-    if (!existingToken) {
+    if (!existingPreAuthToken) {
       redirect("/quiz");
     }
 
-    const decodedToken = (await verifyToken(
-      existingToken.value
-    )) as IntroTokenPayload;
+    const decodedPreAuthToken = (await verifyToken(
+      existingPreAuthToken.value
+    )) as PreAuthTokenPayload;
 
-    if (!decodedToken) {
+    if (!decodedPreAuthToken) {
       redirect("/quiz");
     }
 
-    const { email, name, quizAnswers } = decodedToken;
+    const { email, name, quizAnswers } = decodedPreAuthToken;
 
     const tokenData = {
       name,
@@ -40,8 +40,8 @@ export const GET = async () => {
       selectedPrice,
       quizAnswers,
     };
-    const newToken = signToken(tokenData, "1h");
-    cookieStore.set("token", newToken, {
+    const newPreAuthToken = signToken(tokenData, "1h");
+    cookieStore.set(TokenType.PRE_AUTH, newPreAuthToken, {
       maxAge: 60 * 60 * 1, // 1 hour
     });
     return Response.json(null);

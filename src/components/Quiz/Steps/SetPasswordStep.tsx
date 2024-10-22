@@ -6,6 +6,7 @@ import { setPasswordRequest } from "@/app/api/v1/set-password/request";
 import logger from "@/lib/logger";
 import { useRouter } from "next/navigation";
 import { setPasswordStep } from "@/lib/set-password-step.model";
+import { TokenType } from "@/lib/types";
 
 const SetPasswordStep = () => {
   const router = useRouter();
@@ -14,7 +15,9 @@ const SetPasswordStep = () => {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const urlToken = new URLSearchParams(window.location.search).get("token");
+    const urlToken = new URLSearchParams(window.location.search).get(
+      TokenType.URL_TOKEN
+    );
     setToken(urlToken);
 
     if (!urlToken) {

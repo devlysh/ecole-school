@@ -81,17 +81,7 @@ const Quiz = () => {
         Cookies.set(currentStep.name, answer, { path: "/" });
         return pipe(prevState)(
           (state: QuizState) => QuizService.submitAnswer(state, answer),
-          QuizService.goToNextStep,
-          (state: QuizState) => {
-            logger.debug({ answer, state }, "Moving to next step");
-            if (isLastStep) {
-              logger.debug(
-                { state },
-                "Last step, name and email is set, moving to pricing"
-              );
-            }
-            return state;
-          }
+          (state: QuizState) => QuizService.goToNextStep(state)
         );
       });
 
@@ -104,9 +94,7 @@ const Quiz = () => {
 
   const handlePrevious = useCallback(() => {
     setQuizState((prevState) => {
-      const state = QuizService.goToPreviousStep(prevState);
-      logger.debug({ state }, "Moving to previous step");
-      return state;
+      return QuizService.goToPreviousStep(prevState);
     });
   }, []);
 

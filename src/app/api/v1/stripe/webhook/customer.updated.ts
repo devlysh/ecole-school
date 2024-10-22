@@ -5,8 +5,6 @@ import Stripe from "stripe";
 export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
   const { email, id: stripeCustomerId } = eventData;
 
-  logger.debug({ eventData }, "Customer updated event received");
-
   if (!email) {
     logger.error("Email is missing from the Stripe customer data");
     return;
@@ -28,7 +26,6 @@ export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
           stripeCustomerId,
         },
       });
-      logger.debug({ email }, "Created new user with email");
     } else {
       await prisma.user.update({
         where: { id: existingUser.id },
@@ -37,7 +34,6 @@ export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
           name: eventData.name ?? "Unknown",
         },
       });
-      logger.debug({ email }, "Updated user with email");
     }
   } catch (err) {
     logger.error({ err, email }, "Error handling customer update");

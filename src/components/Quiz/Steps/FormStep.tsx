@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@nextui-org/button";
-import { FormStep as FormStepType, FormFieldType } from "@/lib/types";
+import {
+  FormStep as FormStepType,
+  FormFieldType,
+  TokenType,
+  PreAuthTokenPayload,
+} from "@/lib/types";
 import Cookies from "js-cookie";
 import TextField from "./FormFields/TextField";
 import EmailField from "./FormFields/EmailField";
 import PasswordField from "./FormFields/PasswordField";
+import jwt from "jsonwebtoken";
+import logger from "@/lib/logger";
 
 interface FormStepProps {
   step: FormStepType;
@@ -46,7 +53,17 @@ const FormStep: React.FC<FormStepProps> = ({
   }, [values, step.fields]);
 
   useEffect(() => {
-    const value = Cookies.get(step.name);
+    const preAuthToken = Cookies.get(TokenType.PRE_AUTH);
+
+    if (!preAuthToken) {
+      return;
+    }
+
+    const decodedPreAuthToken = jwt.decode(preAuthToken) as PreAuthTokenPayload;
+
+    const value =
+      decodedPreAuthToken[step.name as keyof PreAuthTokenPayload]?.toString();
+
     if (value) {
       setValues((prevValues) => ({ ...prevValues, [step.name]: value }));
     }
