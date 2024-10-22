@@ -7,7 +7,9 @@ if (!NEXT_PUBLIC_BASE_URL) {
 }
 
 export const submitCheckoutRequest = async () => {
-  const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/submit-checkout`);
+  const response = await fetch(
+    `${NEXT_PUBLIC_BASE_URL}/api/v1/submit-checkout`
+  );
 
   if (!response.ok) {
     logger.error({ response }, "Error during checkout submission");

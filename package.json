@@ -25,7 +25,9 @@
     "stripe:sync:customers": "tsx scripts/sync-stripe-customers.ts",
     "stripe:login": "stripe login",
     "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/v1/stripe/webhook",
-    "stripe:trigger:payment_succeeded": "stripe trigger invoice.payment_succeeded"
+    "stripe:trigger:payment_succeeded": "stripe trigger invoice.payment_succeeded",
+    "start:prod": "NODE_ENV=production dotenv -e .env.production -- next start",
+    "build:prod": "NODE_ENV=production dotenv -e .env.production -- next build"
   },
   "dependencies": {
     "@nextui-org/button": "^2.0.38",

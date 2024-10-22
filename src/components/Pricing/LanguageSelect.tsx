@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent } from "react";
-import { Select, SelectItem, Spinner } from "@nextui-org/react";
+import { Select, SelectItem } from "@nextui-org/react";
 import { Language } from "@/lib/types";
 
 const LanguageSelect = ({

@@ -9,7 +9,7 @@ export const GET = async () => {
 
   try {
     const existingPreAuthToken = cookieStore.get(TokenType.PRE_AUTH);
-    const email = cookieStore.get("email");
+    const email = cookieStore.get("email")?.value;
 
     cookieStore.delete(TokenType.PRE_AUTH);
     cookieStore.delete("email");
@@ -22,16 +22,17 @@ export const GET = async () => {
       existingPreAuthToken.value
     )) as PreAuthTokenPayload;
 
-    if (!decodedPreAuthToken) {
+    if (!decodedPreAuthToken || !decodedPreAuthToken.email) {
       redirect("/quiz");
     }
 
     delete decodedPreAuthToken.exp;
 
-    const tokenData = {
+    const tokenData: PreAuthTokenPayload = {
       ...decodedPreAuthToken,
-      email: email || decodedPreAuthToken.email,
+      email: email ?? decodedPreAuthToken.email,
     };
+
     const newPreAuthToken = await signToken(tokenData, "1h");
 
     cookieStore.set(TokenType.PRE_AUTH, newPreAuthToken, {

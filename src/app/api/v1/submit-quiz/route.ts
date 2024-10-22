@@ -1,7 +1,7 @@
 import logger from "@/lib/logger";
 import { signToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
-import { TokenType } from "@/lib/types";
+import { PreAuthTokenPayload, TokenType } from "@/lib/types";
 
 export const GET = async () => {
   const cookieStore = cookies();
@@ -21,16 +21,14 @@ export const GET = async () => {
     cookieStore.delete("areasToFocus");
     cookieStore.delete("studyTimePerWeek");
 
-    const tokenData = {
-      name,
-      email,
-      quizAnswers: {
-        currentLevel,
-        motivatesYou,
-        areasToFocus,
-        studyTimePerWeek,
-      },
+    const quizAnswers = {
+      currentLevel: currentLevel || "",
+      motivatesYou: motivatesYou || "",
+      areasToFocus: areasToFocus || "",
+      studyTimePerWeek: studyTimePerWeek || "",
     };
+
+    const tokenData: PreAuthTokenPayload = { name, email, quizAnswers };
 
     const preAuthToken = await signToken(tokenData, "1h");
 

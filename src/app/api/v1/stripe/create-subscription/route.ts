@@ -3,7 +3,11 @@ import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
 import { CreateSubscriptionRequest } from "./request";
 import { cookies } from "next/headers";
-import { PreAuthTokenPayload, TokenType } from "@/lib/types";
+import {
+  PreAuthTokenPayload,
+  RegistrationTokenPayload,
+  TokenType,
+} from "@/lib/types";
 import { signToken, verifyToken } from "@/lib/jwt";
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -48,7 +52,11 @@ export const POST = async (request: NextRequest) => {
       preAuthToken.value
     )) as PreAuthTokenPayload;
 
-    const tokenData = {
+    if (!decodedPreAuthToken.email || !decodedPreAuthToken.name) {
+      return Response.json({ error: "Invalid token" }, { status: 400 });
+    }
+
+    const tokenData: RegistrationTokenPayload = {
       email: decodedPreAuthToken.email,
       name: decodedPreAuthToken.name,
     };

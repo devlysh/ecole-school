@@ -1,5 +1,6 @@
-import { jwtVerify, SignJWT } from "jose";
+import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import logger from "./logger";
+import { TokenPayload } from "./types";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -28,10 +29,10 @@ export const verifyToken = async (token: string) => {
 };
 
 export const signToken = async (
-  payload: Record<string, any>,
+  payload: TokenPayload,
   expiresIn?: string | number
 ) => {
-  let token = new SignJWT(payload)
+  let token = new SignJWT(payload as JWTPayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt();
 

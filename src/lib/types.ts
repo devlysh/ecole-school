@@ -96,6 +96,13 @@ export interface AccessTokenPayload {
   role: Role;
 }
 
+export interface RegistrationTokenPayload {
+  exp?: number;
+  iat?: number;
+  email: string;
+  name: string;
+}
+
 export interface PreAuthTokenPayload {
   exp?: number;
   iat?: number;
@@ -107,5 +114,10 @@ export interface PreAuthTokenPayload {
   language?: string;
   selectedPrice?: string;
   subscriptionId?: string;
-  quizAnswers?: string;
+  quizAnswers?: Record<string, string>;
 }
+
+export type TokenPayload =
+  | AccessTokenPayload
+  | PreAuthTokenPayload
+  | RegistrationTokenPayload;
