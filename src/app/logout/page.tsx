@@ -1,7 +1,17 @@
-import { logoutRequest } from "../api/v1/logout/request";
+import Logout from "@/components/Logout";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const LogoutPage = async () => {
-  await logoutRequest();
+  const cookieStore = cookies();
+
+  const token = cookieStore.get("token");
+
+  if (!token) {
+    redirect("/");
+  }
+
+  return <Logout />;
 };
 
 export default LogoutPage;

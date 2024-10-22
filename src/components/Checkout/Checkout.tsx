@@ -22,15 +22,15 @@ const Checkout = ({ languages }: { languages: Language[] }) => {
   const handleSuccessfulPayment = useCallback(async () => {
     await submitCheckoutRequest();
 
-    const token = Cookies.get("registrationToken");
+    const registrationToken = Cookies.get("registrationToken");
 
     Cookies.remove("registrationToken");
 
-    if (!token) {
+    if (!registrationToken) {
       return;
     }
 
-    router.push(`/set-password?token=${token}`);
+    router.push(`/set-password?token=${registrationToken}`);
   }, [router]);
 
   useEffect(() => {
