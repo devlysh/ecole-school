@@ -40,7 +40,7 @@ export const POST = async (request: Request) => {
       role: Role.STUDENT,
     };
 
-    const accessToken = signToken(tokenData, "1d");
+    const accessToken = signToken(tokenData, "1h");
 
     const cookieStore = cookies();
     cookieStore.set("token", accessToken, {
