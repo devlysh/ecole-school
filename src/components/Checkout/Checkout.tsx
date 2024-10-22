@@ -41,21 +41,21 @@ const Checkout = ({ languages }: { languages: Language[] }) => {
         return;
       }
 
-      const payload = jwt.decode(token) as IntroTokenPayload;
+      const decodedToken = jwt.decode(token) as IntroTokenPayload;
 
       if (
-        !payload ||
-        !payload.language ||
-        !payload.selectedPrice ||
-        !payload.email
+        !decodedToken ||
+        !decodedToken.language ||
+        !decodedToken.selectedPrice ||
+        !decodedToken.email
       ) {
         router.push("/pricing");
         return;
       }
 
-      setLanguage(payload.language);
-      setSelectedPrice(JSON.parse(payload.selectedPrice));
-      setEmail(payload.email);
+      setLanguage(decodedToken.language);
+      setSelectedPrice(JSON.parse(decodedToken.selectedPrice));
+      setEmail(decodedToken.email);
     } catch (err) {
       logger.error(err, "Failed to parse checkout data from cookies");
     }
