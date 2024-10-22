@@ -45,15 +45,3 @@ export const signRefreshToken = (
 ) => {
   return jwt.sign(payload, JWT_SECRET, { ...options, expiresIn: "7d" });
 };
-
-export const appendCookieToResponse = (
-  response: Response,
-  value: string,
-  key: string = "token",
-  hours: number = 1
-) => {
-  response.headers.set(
-    "Set-Cookie",
-    `${key}=${value}; Path=/; Max-Age=${60 * 60 * hours};`
-  );
-};

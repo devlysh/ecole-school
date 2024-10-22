@@ -43,7 +43,11 @@ export const POST = async (request: Request) => {
     const authToken = signToken(tokenData, "1d");
 
     const cookieStore = cookies();
-    cookieStore.set("token", authToken, { httpOnly: true, path: "/" });
+    cookieStore.set("token", authToken, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 60 * 60 * 1,
+    });
 
     return Response.json({ message: "Password set" }, { status: 200 });
   } catch (err: unknown) {

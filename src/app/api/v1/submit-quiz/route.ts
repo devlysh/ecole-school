@@ -1,5 +1,5 @@
 import logger from "@/lib/logger";
-import { appendCookieToResponse, signToken } from "@/lib/jwt";
+import { signToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 
 export const GET = async () => {
@@ -32,9 +32,12 @@ export const GET = async () => {
     };
 
     const token = signToken(tokenData, "1h");
-    const response = Response.json(token);
-    appendCookieToResponse(response, token);
-    return response;
+
+    cookieStore.set("token", token, {
+      maxAge: 60 * 60 * 1, // 1 hour
+    });
+
+    return Response.json(null);
   } catch (err: unknown) {
     logger.error(err, "Error during quiz submission");
     return Response.json("Failed to submit quiz", { status: 500 });

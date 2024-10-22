@@ -4,7 +4,7 @@ import logger from "@/lib/logger";
 import { CreateSubscriptionRequest } from "./request";
 import { cookies } from "next/headers";
 import { IntroTokenPayload } from "@/lib/types";
-import { appendCookieToResponse, signToken, verifyToken } from "@/lib/jwt";
+import { signToken, verifyToken } from "@/lib/jwt";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not set in the environment variables");
@@ -51,21 +51,16 @@ export const POST = async (request: NextRequest) => {
       name: decodedToken.name,
     };
 
-    const registrationToken = signToken(tokenData, "1h");
+    const registrationToken = signToken(tokenData);
 
-    const response = Response.json({
+    cookieStore.set("registrationToken", registrationToken, {
+      maxAge: 60 * 5, // 5 minutes
+    });
+
+    return Response.json({
       clientSecret,
       subscriptionId,
     });
-
-    appendCookieToResponse(
-      response,
-      registrationToken,
-      "registrationToken",
-      24 * 365 // 1 year
-    );
-
-    return response;
   } catch (err: unknown) {
     logger.error({ err }, "Error creating subscription");
     if (err instanceof Stripe.errors.StripeError) {

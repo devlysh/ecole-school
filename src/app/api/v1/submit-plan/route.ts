@@ -1,10 +1,8 @@
 import logger from "@/lib/logger";
-import { appendCookieToResponse, signToken, verifyToken } from "@/lib/jwt";
+import { signToken, verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { IntroTokenPayload } from "@/lib/types";
-
-const cookiesList = ["currency", "language", "selectedPrice"];
 
 export const GET = async () => {
   const cookieStore = cookies();
@@ -43,9 +41,10 @@ export const GET = async () => {
       quizAnswers,
     };
     const newToken = signToken(tokenData, "1h");
-    const response = Response.json(null);
-    appendCookieToResponse(response, newToken);
-    return response;
+    cookieStore.set("token", newToken, {
+      maxAge: 60 * 60 * 1, // 1 hour
+    });
+    return Response.json(null);
   } catch (err: unknown) {
     logger.error(err, "Error during plan submission");
     return Response.json("Failed to submit plan", { status: 500 });
