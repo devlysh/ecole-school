@@ -3,7 +3,13 @@ import { verifyToken } from "./lib/jwt";
 import { Role, TokenType } from "./lib/types";
 import logger from "./lib/logger";
 
-const guestPaths = ["/quiz", "/pricing", "/checkout", "/login"];
+const guestPaths = [
+  "/quiz",
+  "/pricing",
+  "/checkout",
+  "/login",
+  "/set-password",
+];
 
 const studentPaths = [
   "/account",
