@@ -51,7 +51,7 @@ export const POST = async (request: Request) => {
 
     return Response.json({ message: "Password set" }, { status: 200 });
   } catch (err: unknown) {
-    logger.error({ err }, "Invalid token");
-    return Response.json({ error: "Invalid token" }, { status: 401 });
+    logger.error({ err }, "Error setting password");
+    return Response.json({ error: "Failed to set password" }, { status: 500 });
   }
 };
