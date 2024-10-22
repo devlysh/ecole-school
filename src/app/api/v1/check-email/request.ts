@@ -1,5 +1,11 @@
 import logger from "@/lib/logger";
 
+const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+if (!NEXT_PUBLIC_BASE_URL) {
+  throw new Error("NEXT_PUBLIC_BASE_URL is not set");
+}
+
 export interface CheckEmailRequest {
   email: string;
 }
@@ -7,7 +13,7 @@ export interface CheckEmailRequest {
 export const checkEmailRequest = async (
   email: string
 ): Promise<{ error: unknown; isTaken?: boolean }> => {
-  const response = await fetch("/api/v1/check-email", {
+  const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/check-email`, {
     method: "POST",
     body: JSON.stringify({ email } as CheckEmailRequest),
   });

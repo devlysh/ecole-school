@@ -2,12 +2,9 @@
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Spinner } from "@nextui-org/react";
-import useCurrencies from "@/hooks/useCurrencies";
-import useLanguages from "@/hooks/useLanguages";
-import usePlans from "@/hooks/usePlans";
 import { SubscriptionPlan } from "./SubscriptionPlan";
 import { groupByCurrency } from "@/lib/utils";
-import { IntroTokenPayload, Currency, Language } from "@/lib/types";
+import { IntroTokenPayload, Currency, Language, Plan } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
@@ -16,17 +13,24 @@ import logger from "@/lib/logger";
 import jwt from "jsonwebtoken";
 import { submitPlanRequest } from "@/app/api/v1/submit-plan/request";
 
-const Pricing = () => {
+const Pricing = ({
+  languages,
+  currencies,
+  plans,
+}: {
+  languages: Language[];
+  currencies: Currency[];
+  plans: Plan[];
+}) => {
   const router = useRouter();
-  const { languages, languagesLoading, languagesError } = useLanguages();
-  const { currencies, currenciesLoading, currenciesError } = useCurrencies();
-  const { plans, plansLoading, plansError } = usePlans();
 
-  if (languagesError || currenciesError || plansError) {
-    throw new Error("Something went wrong...");
-  }
+  const defaultSelectedPrice = plans.find(
+    (plan) => plan.currency === "usd" && plan.metadata.credits === 12
+  );
 
-  const [selectedPriceId, setSelectedPriceId] = useState<string>();
+  const [selectedPriceId, setSelectedPriceId] = useState<string>(
+    defaultSelectedPrice?.id ?? ""
+  );
   const [selectedLanguage, setSelectedLanguage] =
     useState<Language["code"]>("en");
   const [selectedCurrency, setSelectedCurrency] =
@@ -79,6 +83,7 @@ const Pricing = () => {
   );
 
   const handleSubscriptionPlanClick = useCallback((id: string) => {
+    logger.debug({ id }, "Selected price ID");
     setSelectedPriceId(id);
   }, []);
 
@@ -113,7 +118,6 @@ const Pricing = () => {
           <div className="w-1/2">
             <LanguageSelect
               languages={languages}
-              languagesLoading={languagesLoading}
               selectedLanguage={selectedLanguage}
               onLanguageChange={handleLanguageChange}
             />
@@ -121,7 +125,6 @@ const Pricing = () => {
           <div className="w-1/3">
             <CurrencySelect
               currencies={currencies}
-              currenciesLoading={currenciesLoading}
               selectedCurrency={selectedCurrency}
               onCurrencyChange={handleCurrencyChange}
             />
@@ -139,7 +142,7 @@ const Pricing = () => {
         <div className="text-2xl">Recurring number of classes:</div>
         <div className="text-base my-8">Total changes every 4 weeks</div>
         <div className="flex flex-col">
-          {plansLoading || !plans.length ? (
+          {!plans.length ? (
             <div className="w-full text-center">
               <Spinner size="sm" color="secondary" />
             </div>

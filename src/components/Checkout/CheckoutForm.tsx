@@ -4,7 +4,7 @@ import { Input } from "@nextui-org/input";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Plan } from "@/lib/types";
 import logger from "@/lib/logger";
-import { createSubscription } from "@/app/api/v1/stripe/create-subscription/request";
+import { createSubscriptionRequest } from "@/app/api/v1/stripe/create-subscription/request";
 
 interface CheckoutFormProps {
   email: string;
@@ -55,7 +55,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
       // Step 2: Send payment method ID to the server to create a subscription
       try {
-        const { clientSecret } = await createSubscription(
+        const { clientSecret } = await createSubscriptionRequest(
           email,
           selectedPrice.id,
           paymentMethodId

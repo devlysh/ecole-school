@@ -1,4 +1,4 @@
-import { getPlans } from "@/app/api/v1/stripe/plans/request";
+import { getPlansRequest } from "@/app/api/v1/stripe/plans/request";
 import { Plan } from "@/lib/types";
 import { useState, useEffect } from "react";
 
@@ -10,7 +10,7 @@ const usePlans = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const plans = await getPlans();
+        const plans = await getPlansRequest();
         setPlans(plans);
       } catch (err) {
         setError(err);

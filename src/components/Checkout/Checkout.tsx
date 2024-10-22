@@ -8,23 +8,16 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import jwt from "jsonwebtoken";
 
-import useLanguages from "@/hooks/useLanguages";
+import { submitCheckoutRequest } from "@/app/api/v1/submit-checkout/request";
 import logger from "@/lib/logger";
 import { IntroTokenPayload, Language, Plan } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
-import { submitCheckoutRequest } from "@/app/api/v1/submit-checkout/request";
 
-const Checkout = () => {
+const Checkout = ({ languages }: { languages: Language[] }) => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [language, setLanguage] = useState<Language["code"]>();
   const [selectedPrice, setSelectedPrice] = useState<Plan>();
-
-  const { languages, languagesLoading, languagesError } = useLanguages();
-
-  if (languagesError) {
-    throw new Error("Failed to load languages");
-  }
 
   const handleSuccessfulPayment = useCallback(async () => {
     await submitCheckoutRequest();
@@ -87,16 +80,12 @@ const Checkout = () => {
         <div className="bg-gray-50 p-6 rounded-lg">
           <h2 className="text-2xl font-bold mb-6">Summary</h2>
           <div className="space-y-4 text-gray-700">
-            {languagesLoading ? (
-              <div className="w-full text-center">
-                <Spinner size="sm" />
-              </div>
-            ) : (
+            {
               <div className="flex justify-between">
                 <span>Language</span>
                 <span>{languages.find((l) => l.code === language)?.name}</span>
               </div>
-            )}
+            }
             <div className="flex justify-between">
               <span>Duration</span>
               <span>4 weeks</span>

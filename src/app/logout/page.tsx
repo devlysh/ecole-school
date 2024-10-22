@@ -1,7 +1,7 @@
-import Logout from "@/components/Logout";
+import { logoutRequest } from "../api/v1/logout/request";
 
 const LogoutPage = async () => {
-  return <Logout />;
+  await logoutRequest();
 };
 
 export default LogoutPage;

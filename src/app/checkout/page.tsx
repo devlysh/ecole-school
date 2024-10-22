@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import Checkout from "@/components/Checkout";
 import { IntroTokenPayload } from "@/lib/types";
+import { getLanguagesRequest } from "../api/v1/languages/request";
 
 const ChecokutPage = async () => {
   const cookieStore = cookies();
@@ -19,7 +20,9 @@ const ChecokutPage = async () => {
     redirect("/pricing");
   }
 
-  return <Checkout />;
+  const languages = await getLanguagesRequest();
+
+  return <Checkout languages={languages} />;
 };
 
 export default ChecokutPage;
