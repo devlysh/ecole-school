@@ -83,7 +83,7 @@ export interface Plan {
 
 export type PlansMap = Map<string, Plan[]>;
 
-export interface AuthTokenPayload {
+export interface AccessTokenPayload {
   exp?: number;
   iat?: number;
   email: string;

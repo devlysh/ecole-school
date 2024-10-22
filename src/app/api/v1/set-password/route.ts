@@ -1,6 +1,6 @@
 import { signToken, verifyToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
-import { AuthTokenPayload, IntroTokenPayload, Role } from "@/lib/types";
+import { AccessTokenPayload, IntroTokenPayload, Role } from "@/lib/types";
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
@@ -33,17 +33,17 @@ export const POST = async (request: Request) => {
       },
     });
 
-    const tokenData: AuthTokenPayload = {
+    const tokenData: AccessTokenPayload = {
       email,
       active: true,
       auth: true,
       role: Role.STUDENT,
     };
 
-    const authToken = signToken(tokenData, "1d");
+    const accessToken = signToken(tokenData, "1d");
 
     const cookieStore = cookies();
-    cookieStore.set("token", authToken, {
+    cookieStore.set("token", accessToken, {
       httpOnly: true,
       path: "/",
       maxAge: 60 * 60 * 1,
