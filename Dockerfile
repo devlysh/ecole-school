@@ -11,8 +11,8 @@ RUN npm install
 # Install Prisma CLI, dotenv-cli, and tsx globally
 RUN npm install -g prisma dotenv-cli tsx
 
-# Set the environment to production
-ENV NODE_ENV=production
+# Set environment to production
+ENV NODE_ENV production
 
 # Copy the application files, excluding .env files
 COPY . .

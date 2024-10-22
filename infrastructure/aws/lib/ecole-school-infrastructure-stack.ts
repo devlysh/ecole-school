@@ -1,6 +1,10 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apprunner from "@aws-cdk/aws-apprunner-alpha";
+import {
+  CfnService,
+  CfnObservabilityConfiguration,
+} from "aws-cdk-lib/aws-apprunner";
 import * as ecr_assets from "aws-cdk-lib/aws-ecr-assets";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
@@ -108,6 +112,18 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       .secretValueFromJson("password")
       .unsafeUnwrap()}@${dbInstance.instanceEndpoint.hostname}:5432/${dbInstance.instanceIdentifier}`;
 
+    // Create a custom observability configuration
+    const observabilityConfig = new CfnObservabilityConfiguration(
+      this,
+      "AppRunnerObservabilityConfig",
+      {
+        observabilityConfigurationName: "EcoleSchoolObservabilityConfig",
+        traceConfiguration: {
+          vendor: "AWSXRAY",
+        },
+      }
+    );
+
     // 8. App Runner service configuration with VPC connector
     const service = new apprunner.Service(this, "EcoleSchoolAppRunnerService", {
       source: apprunner.Source.fromAsset({
@@ -115,13 +131,37 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
           port: 3000,
           environmentVariables: {
             DATABASE_URL: databaseUrl,
+            NODE_OPTIONS: '--trace-warnings',
+            DEBUG: '*',
           },
         },
         asset: dockerImageAsset,
       }),
       accessRole: accessRole,
       instanceRole: instanceRole,
-      vpcConnector: vpcConnector, // Attach the VPC Connector
+      vpcConnector: vpcConnector,
+      cpu: apprunner.Cpu.ONE_VCPU,
+      memory: apprunner.Memory.TWO_GB,
+    });
+
+    // Enable CloudWatch logs for the App Runner service
+    const cfnService = service.node.defaultChild as CfnService;
+    cfnService.healthCheckConfiguration = {
+      protocol: apprunner.HealthCheckProtocolType.TCP,
+    };
+    cfnService.observabilityConfiguration = {
+      observabilityConfigurationArn:
+        observabilityConfig.attrObservabilityConfigurationArn,
+      observabilityEnabled: true,
+    };
+
+    // After creating the App Runner service
+    const logGroupName = `/aws/apprunner/${service.serviceName}/${service.serviceId}`;
+
+    // Output the log group name
+    new cdk.CfnOutput(this, "EcoleSchoolAppRunnerLogGroup", {
+      value: logGroupName,
+      description: "The CloudWatch Log Group for the App Runner service",
     });
 
     // 9. Output the App Runner service URL
