@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
 import { handlePriceUpdated } from "./price.updated";
 import { handleCustomerUpdated } from "./customer.updated";
+import { handleInvoicePaymentSucceeded } from "./invoice.payment_succeeded";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SIGNING_SECRET = process.env.STRIPE_WEBHOOK_SIGNING_SECRET;
@@ -20,6 +21,8 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
 });
 
 export const POST = async (request: NextRequest) => {
+  logger.info("Webhook received");
+
   if (!STRIPE_WEBHOOK_SIGNING_SECRET) {
     logger.error("STRIPE_WEBHOOK_SIGNING_SECRET is missing");
     return new Response(
@@ -32,6 +35,7 @@ export const POST = async (request: NextRequest) => {
   const signature = request.headers.get("stripe-signature");
 
   if (!signature) {
+    logger.error("Webhook signature missing");
     return new Response(
       JSON.stringify({ error: "Webhook signature missing" }),
       { status: 400 }
@@ -46,64 +50,53 @@ export const POST = async (request: NextRequest) => {
       signature,
       STRIPE_WEBHOOK_SIGNING_SECRET
     );
+    logger.info({ eventType: event.type }, "Received Stripe webhook event");
   } catch (err: unknown) {
-    logger.error(err, "Webhook error");
-    return new Response(JSON.stringify({ err }), { status: 500 });
+    logger.error({ err }, "Webhook signature verification failed");
+    return new Response(
+      JSON.stringify({ error: "Webhook signature verification failed" }),
+      { status: 400 }
+    );
   }
 
-  switch (event.type) {
-    case "customer.updated": {
-      const customerUpdated = event.data.object;
-      logger.debug({ customerUpdated }, "Customer updated event received");
-      try {
+  try {
+    switch (event.type) {
+      case "customer.updated": {
+        const customerUpdated = event.data.object;
+        logger.debug({ customerUpdated }, "Customer updated event received");
         await handleCustomerUpdated(customerUpdated);
-        return Response.json(null, { status: 200 });
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          logger.error({ err: err.message }, "Error handling customer update");
-          if (err.message.includes("Unknown argument `stripeCustomerId`")) {
-            return Response.json(
-              {
-                error:
-                  "Prisma schema mismatch: stripeCustomerId field is missing",
-              },
-              { status: 500 }
-            );
-          }
-        } else {
-          logger.error({ err }, "Unknown error handling customer update");
-        }
-        return Response.json(
-          { error: "Internal server error" },
-          { status: 500 }
-        );
+        break;
       }
-    }
-
-    case "price.updated": {
-      const price = event.data.object;
-      logger.debug({ price }, "price.updated");
-      try {
+      case "price.updated": {
+        const price = event.data.object;
+        logger.debug({ price }, "Price updated event received");
         await handlePriceUpdated(price);
-        return Response.json(null, { status: 200 });
-      } catch (err: unknown) {
-        logger.error(err, "Failed to handle price update");
-        return Response.json(err, { status: 500 });
+        break;
+      }
+      case "invoice.payment_succeeded": {
+        const invoicePaymentSucceeded = event.data.object;
+        logger.debug(
+          { invoicePaymentSucceeded },
+          "Invoice payment succeeded event received"
+        );
+        await handleInvoicePaymentSucceeded(invoicePaymentSucceeded);
+        break;
+      }
+      default: {
+        logger.info({ eventType: event.type }, "Unhandled event type");
       }
     }
 
-    case "invoice.payment_succeeded": {
-      //
-      const invoicePaymentSucceeded = event.data.object;
-      logger.debug({ invoicePaymentSucceeded }, "TODO");
-      return Response.json(null, { status: 200 });
-    }
-
-    default: {
-      // TODO: Handle other events
-      // const object = event.data.object;
-      // logger.debug({ type: event.type, data: object });
-      return Response.json(null, { status: 200 });
-    }
+    logger.info({ eventType: event.type }, "Webhook processed successfully");
+    return new Response(JSON.stringify({ received: true }), { status: 200 });
+  } catch (err: unknown) {
+    logger.error(
+      { err, eventType: event.type },
+      "Error processing webhook event"
+    );
+    return new Response(
+      JSON.stringify({ error: "Error processing webhook event" }),
+      { status: 500 }
+    );
   }
 };
