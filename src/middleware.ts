@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "./lib/jwt";
 import { Role, TokenType } from "./lib/types";
 import logger from "./lib/logger";
+import { hasRole } from "./lib/utils";
 
 const guestPaths = [
   "/quiz",
@@ -51,11 +52,11 @@ export const middleware = async (req: NextRequest) => {
 
   try {
     const decoded = await verifyToken(token);
-    const { role } = decoded as { email: string; role: string };
+    const { roles } = decoded as { email: string; roles: string[] };
 
-    const isAdmin = role === Role.ADMIN;
-    const isStudent = role === Role.STUDENT;
-    const isTeacher = role === Role.TEACHER;
+    const isAdmin = hasRole(roles, Role.ADMIN);
+    const isStudent = hasRole(roles, Role.STUDENT);
+    const isTeacher = hasRole(roles, Role.TEACHER);
 
     if (isAdmin) {
       return NextResponse.next();

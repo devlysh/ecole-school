@@ -13,3 +13,7 @@ export const groupByCurrency = (plans: Plan[]): PlansMap => {
     return plansMap;
   }, new Map());
 };
+
+export const hasRole = (userRoles: string[], requiredRole: string) => {
+  return userRoles.includes(requiredRole);
+};

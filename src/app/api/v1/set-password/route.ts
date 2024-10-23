@@ -39,7 +39,7 @@ export const POST = async (request: Request) => {
 
     const tokenData: AccessTokenPayload = {
       email,
-      role: Role.STUDENT,
+      roles: [Role.STUDENT],
     };
 
     const accessToken = await signToken(tokenData, "1h");

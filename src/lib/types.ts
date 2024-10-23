@@ -93,7 +93,7 @@ export interface AccessTokenPayload {
   exp?: number;
   iat?: number;
   email: string;
-  role: Role;
+  roles: string[];
 }
 
 export interface RegistrationTokenPayload {
