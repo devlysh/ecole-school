@@ -93,6 +93,7 @@ export interface AccessTokenPayload {
   exp?: number;
   iat?: number;
   email: string;
+  name: string;
   roles: string[];
 }
 
