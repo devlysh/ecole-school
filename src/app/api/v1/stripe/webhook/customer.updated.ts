@@ -13,27 +13,39 @@ export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
   try {
     const existingUser = await prisma.user.findUnique({
       where: { email },
+      include: {
+        student: true,
+      },
     });
 
     if (!existingUser) {
-      await prisma.user.create({
+      logger.warn(
+        { email, stripeCustomerId },
+        "Received customer.updated event for non-existent user"
+      );
+      return;
+    }
+
+    if (!existingUser.student) {
+      logger.warn(
+        { email, stripeCustomerId },
+        "Received customer.updated event for user without student record"
+      );
+      return;
+    }
+
+    // Only update if the stripeCustomerId has changed
+    if (existingUser.student.stripeCustomerId !== stripeCustomerId) {
+      await prisma.student.update({
+        where: { userId: existingUser.id },
         data: {
-          email,
-          passwordHash: "",
-          name: eventData.name ?? "Unknown",
-          dateJoined: new Date(),
-          isActive: false,
           stripeCustomerId,
         },
       });
-    } else {
-      await prisma.user.update({
-        where: { id: existingUser.id },
-        data: {
-          stripeCustomerId,
-          name: eventData.name ?? "Unknown",
-        },
-      });
+      logger.info(
+        { email, stripeCustomerId },
+        "Updated student's Stripe customer ID"
+      );
     }
   } catch (err) {
     logger.error({ err, email }, "Error handling customer update");

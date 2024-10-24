@@ -13,11 +13,16 @@ import logger from "@/lib/logger";
 import { PreAuthTokenPayload, Language, Plan, TokenType } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
 
-const Checkout = ({ languages }: { languages: Language[] }) => {
+interface CheckoutProps {
+  email: string;
+  name: string;
+  selectedPrice: Plan;
+  languages: Language[];
+}
+
+const Checkout = ({ email, name, selectedPrice, languages }: CheckoutProps) => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
   const [language, setLanguage] = useState<Language["code"]>();
-  const [selectedPrice, setSelectedPrice] = useState<Plan>();
 
   const handleSuccessfulPayment = useCallback(async () => {
     await submitCheckoutRequest();
@@ -50,15 +55,14 @@ const Checkout = ({ languages }: { languages: Language[] }) => {
         !decodedPreAuthToken ||
         !decodedPreAuthToken.language ||
         !decodedPreAuthToken.selectedPrice ||
-        !decodedPreAuthToken.email
+        !decodedPreAuthToken.email ||
+        !decodedPreAuthToken.name
       ) {
         router.push("/pricing");
         return;
       }
 
       setLanguage(decodedPreAuthToken.language);
-      setSelectedPrice(JSON.parse(decodedPreAuthToken.selectedPrice));
-      setEmail(decodedPreAuthToken.email);
     } catch (err) {
       logger.error(err, "Failed to parse checkout data from cookies");
     }
@@ -72,6 +76,7 @@ const Checkout = ({ languages }: { languages: Language[] }) => {
           {selectedPrice ? (
             <CheckoutForm
               email={email}
+              name={name}
               selectedPrice={selectedPrice}
               onSuccessfulPayment={handleSuccessfulPayment}
             />

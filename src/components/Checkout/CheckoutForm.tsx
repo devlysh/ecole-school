@@ -8,12 +8,14 @@ import { createSubscriptionRequest } from "@/app/api/v1/stripe/create-subscripti
 
 interface CheckoutFormProps {
   email: string;
+  name: string;
   selectedPrice: Plan;
   onSuccessfulPayment: () => void;
 }
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   email,
+  name,
   selectedPrice,
   onSuccessfulPayment,
 }) => {
@@ -57,6 +59,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       try {
         const { clientSecret } = await createSubscriptionRequest(
           email,
+          name,
           selectedPrice.id,
           paymentMethodId
         );

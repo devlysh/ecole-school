@@ -8,21 +8,18 @@ generator client {
 }
 
 model User {
-  id                   Int            @id @default(autoincrement())
-  email                String         @unique
-  passwordHash         String         @map("password_hash")
-  name                 String         @map("name")
-  dateJoined           DateTime       @default(now()) @map("date_joined")
-  isActive             Boolean        @default(true) @map("is_active")
-  stripeCustomerId     String         @unique @map("stripe_customer_id")
-  stripeSubscriptionId String?        @unique @map("stripe_subscription_id")
-  roles                UserRole[]
-  credits              Credit[]
-  notifications        Notification[]
-  payments             Payment[]
-  lessonNotes          LessonNote[]
-  student              Student?
-  teacher              Teacher?
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  passwordHash  String?        @map("password_hash")
+  name          String?        @map("name")
+  dateJoined    DateTime       @default(now()) @map("date_joined")
+  isActive      Boolean        @default(true) @map("is_active")
+  roles         UserRole[]
+  notifications Notification[]
+  lessonNotes   LessonNote[]
+  student       Student?
+  teacher       Teacher?
+  credits       Credit[]
 
   @@index([email], name: "idx_user_email")
   @@index([isActive], name: "idx_user_is_active")
@@ -58,7 +55,6 @@ model Currency {
   name String @unique
 
   subscriptionPlans SubscriptionPlan[]
-  payments          Payment[]
 
   @@map("currencies")
 }
@@ -87,8 +83,10 @@ model Credit {
   status         String
   lessonId       Int?      @unique @map("lesson_id")
 
-  user   User          @relation(fields: [userId], references: [id])
-  lesson BookedLesson? @relation("LessonCredit")
+  user          User          @relation(fields: [userId], references: [id])
+  lesson        BookedLesson? @relation("lesson_credit")
+  student       Student?      @relation(fields: [studentUserId], references: [userId])
+  studentUserId Int?
 
   @@index([userId], name: "idx_credit_user_id")
   @@index([status], name: "idx_credit_status")
@@ -121,9 +119,12 @@ model Teacher {
 }
 
 model Student {
-  userId            Int   @id @map("user_id")
-  assignedTeacherId Int?  @map("assigned_teacher_id")
-  settings          Json?
+  userId               Int      @id @map("user_id")
+  assignedTeacherId    Int?     @map("assigned_teacher_id")
+  settings             Json?
+  stripeCustomerId     String   @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?  @unique @map("stripe_subscription_id")
+  credits              Credit[]
 
   user    User           @relation(fields: [userId], references: [id])
   teacher Teacher?       @relation(fields: [assignedTeacherId], references: [userId])
@@ -174,7 +175,7 @@ model BookedLesson {
 
   student Student @relation(fields: [studentId], references: [userId])
   teacher Teacher @relation(fields: [teacherId], references: [userId])
-  credit  Credit? @relation("LessonCredit", fields: [creditId], references: [id])
+  credit  Credit? @relation("lesson_credit", fields: [creditId], references: [id])
 
   notes LessonNote[]
 
@@ -212,25 +213,6 @@ model LessonNote {
   @@index([lessonId], name: "idx_lesson_notes_lesson_id")
   @@index([userId], name: "idx_lesson_notes_user_id")
   @@map("lesson_notes")
-}
-
-model Payment {
-  id                    Int      @id @default(autoincrement())
-  userId                Int      @map("user_id")
-  amount                Float
-  currencyId            Int      @map("currency_id")
-  paymentDate           DateTime @default(now()) @map("payment_date")
-  paymentMethod         String   @map("payment_method")
-  stripePaymentIntentId String?  @unique @map("stripe_payment_intent_id")
-  status                String
-  description           String?
-
-  user     User     @relation(fields: [userId], references: [id])
-  currency Currency @relation(fields: [currencyId], references: [id])
-
-  @@index([userId], name: "idx_payments_user_id")
-  @@index([paymentDate], name: "idx_payments_payment_date")
-  @@map("payments")
 }
 
 model SystemSetting {

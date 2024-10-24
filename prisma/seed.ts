@@ -23,6 +23,23 @@ const main = async () => {
 
   console.log("Currencies table populated!");
 
+  // Seed roles
+  const roles = [
+    { name: "admin", description: "Administrator role" },
+    { name: "student", description: "Student role" },
+    { name: "teacher", description: "Teacher role" },
+  ];
+
+  for (const role of roles) {
+    await prisma.role.upsert({
+      where: { name: role.name },
+      update: {},
+      create: role,
+    });
+  }
+
+  console.log("Roles table populated!");
+
   // Seed languages
   const languages = [
     { code: "en", name: "English" },

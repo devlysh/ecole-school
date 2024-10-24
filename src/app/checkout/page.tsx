@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import Checkout from "@/components/Checkout";
-import { PreAuthTokenPayload, TokenType } from "@/lib/types";
+import { Plan, PreAuthTokenPayload, TokenType } from "@/lib/types";
 import { getLanguagesRequest } from "../api/v1/languages/request";
 
 const ChecokutPage = async () => {
@@ -14,17 +14,28 @@ const ChecokutPage = async () => {
     redirect("/quiz");
   }
 
-  const decodedPreAuthToken = (await verifyToken(
+  const { selectedPrice, name, email } = (await verifyToken(
     preAuthToken.value
-  )) as PreAuthTokenPayload;
+  )) as unknown as PreAuthTokenPayload;
 
-  if (!decodedPreAuthToken.selectedPrice) {
+  if (!name || !email) {
+    redirect("/quiz");
+  }
+
+  if (!selectedPrice) {
     redirect("/pricing");
   }
 
   const languages = await getLanguagesRequest();
 
-  return <Checkout languages={languages} />;
+  return (
+    <Checkout
+      languages={languages}
+      name={name}
+      email={email}
+      selectedPrice={JSON.parse(selectedPrice) as Plan}
+    />
+  );
 };
 
 export default ChecokutPage;

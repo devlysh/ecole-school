@@ -6,9 +6,11 @@ import { cookies } from "next/headers";
 import {
   PreAuthTokenPayload,
   RegistrationTokenPayload,
+  Role,
   TokenType,
 } from "@/lib/types";
 import { signToken, verifyToken } from "@/lib/jwt";
+import prisma from "@/lib/prisma";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not set in the environment variables");
@@ -20,10 +22,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export const POST = async (request: NextRequest) => {
   try {
-    const { email, planId, paymentMethodId } =
+    const { email, name, planId, paymentMethodId } =
       (await request.json()) as CreateSubscriptionRequest;
 
-    const customer = await getOrCreateCustomer(email);
+    const cookieStore = cookies();
+    const preAuthToken = cookieStore.get(TokenType.PRE_AUTH);
+
+    if (!preAuthToken) {
+      return Response.json({ error: "Token is missing" }, { status: 400 });
+    }
+
+    const decodedPreAuthToken = (await verifyToken(
+      preAuthToken.value
+    )) as unknown as PreAuthTokenPayload;
+
+    if (!decodedPreAuthToken.email || !decodedPreAuthToken.name) {
+      return Response.json({ error: "Invalid token" }, { status: 400 });
+    }
+
+    const customer = await getOrCreateCustomer(email, name);
     await setupCustomerPaymentMethod(customer.id, paymentMethodId);
     const subscription = await createSubscription(customer.id, planId);
 
@@ -41,27 +58,11 @@ export const POST = async (request: NextRequest) => {
       );
     }
 
-    const cookieStore = cookies();
-    const preAuthToken = cookieStore.get(TokenType.PRE_AUTH);
-
-    if (!preAuthToken) {
-      return Response.json({ error: "Token is missing" }, { status: 400 });
-    }
-
-    const decodedPreAuthToken = (await verifyToken(
-      preAuthToken.value
-    )) as PreAuthTokenPayload;
-
-    if (!decodedPreAuthToken.email || !decodedPreAuthToken.name) {
-      return Response.json({ error: "Invalid token" }, { status: 400 });
-    }
-
-    const tokenData: RegistrationTokenPayload = {
+    const registrationTokenData: RegistrationTokenPayload = {
       email: decodedPreAuthToken.email,
-      name: decodedPreAuthToken.name,
     };
 
-    const registrationToken = await signToken(tokenData, "5m");
+    const registrationToken = await signToken(registrationTokenData, "5m");
 
     cookieStore.set(TokenType.REGISTRATION, registrationToken, {
       maxAge: 60 * 5, // 5 minutes
@@ -83,12 +84,50 @@ export const POST = async (request: NextRequest) => {
   }
 };
 
-const getOrCreateCustomer = async (email: string): Promise<Stripe.Customer> => {
+const getOrCreateCustomer = async (
+  email: string,
+  name: string
+): Promise<Stripe.Customer> => {
   const existingCustomers = await stripe.customers.list({ email });
+  let stripeCustomer: Stripe.Customer;
+
   if (existingCustomers.data.length) {
-    return existingCustomers.data[0];
+    stripeCustomer = existingCustomers.data[0];
+  } else {
+    stripeCustomer = await stripe.customers.create({ email });
   }
-  return await stripe.customers.create({ email });
+
+  await prisma.user.upsert({
+    where: { email },
+    create: {
+      email,
+      name,
+      roles: {
+        create: {
+          role: {
+            connect: {
+              name: Role.STUDENT,
+            },
+          },
+        },
+      },
+      student: {
+        create: {
+          stripeCustomerId: stripeCustomer.id,
+        },
+      },
+    },
+    update: {
+      student: {
+        upsert: {
+          create: { stripeCustomerId: stripeCustomer.id },
+          update: { stripeCustomerId: stripeCustomer.id },
+        },
+      },
+    },
+  });
+
+  return stripeCustomer;
 };
 
 const setupCustomerPaymentMethod = async (

@@ -8,12 +8,14 @@ if (!NEXT_PUBLIC_BASE_URL) {
 
 export interface CreateSubscriptionRequest {
   email: string;
+  name: string;
   planId: string;
   paymentMethodId: string;
 }
 
 export const createSubscriptionRequest = async (
   email: string,
+  name: string,
   planId: string,
   paymentMethodId: string
 ): Promise<{ clientSecret: string }> => {
@@ -24,6 +26,7 @@ export const createSubscriptionRequest = async (
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email,
+        name,
         planId,
         paymentMethodId,
       } as CreateSubscriptionRequest),

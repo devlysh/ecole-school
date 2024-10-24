@@ -100,7 +100,6 @@ export interface RegistrationTokenPayload {
   exp?: number;
   iat?: number;
   email: string;
-  name: string;
 }
 
 export interface PreAuthTokenPayload {
@@ -108,8 +107,8 @@ export interface PreAuthTokenPayload {
   iat?: number;
   token?: string;
   registrationToken?: string;
-  name?: string;
-  email?: string;
+  name: string;
+  email: string;
   currency?: string;
   language?: string;
   selectedPrice?: string;

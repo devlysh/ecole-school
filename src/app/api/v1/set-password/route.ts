@@ -2,8 +2,7 @@ import { signToken, verifyToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import {
   AccessTokenPayload,
-  PreAuthTokenPayload,
-  Role,
+  RegistrationTokenPayload,
   TokenType,
 } from "@/lib/types";
 import { cookies } from "next/headers";
@@ -20,10 +19,28 @@ export const POST = async (request: Request) => {
   const { token, password } = await request.json();
 
   try {
-    const { name, email } = (await verifyToken(token)) as PreAuthTokenPayload;
+    const { email } = (await verifyToken(
+      token
+    )) as unknown as RegistrationTokenPayload;
 
     if (!email) {
       return Response.json({ error: "Invalid token" }, { status: 401 });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        roles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!existingUser) {
+      logger.error({ email }, "User not found during password set");
+      return Response.json({ error: "User not found" }, { status: 404 });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -33,13 +50,14 @@ export const POST = async (request: Request) => {
       data: {
         passwordHash,
         isActive: true,
-        name,
       },
     });
 
+    const userRoles = existingUser.roles.map((userRole) => userRole.role.name);
+
     const tokenData: AccessTokenPayload = {
       email,
-      roles: [Role.STUDENT],
+      roles: userRoles,
     };
 
     const accessToken = await signToken(tokenData, "1h");

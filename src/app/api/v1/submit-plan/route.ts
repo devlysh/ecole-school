@@ -24,7 +24,7 @@ export const GET = async () => {
 
     const decodedPreAuthToken = (await verifyToken(
       existingPreAuthToken.value
-    )) as PreAuthTokenPayload;
+    )) as unknown as PreAuthTokenPayload;
 
     if (!decodedPreAuthToken) {
       redirect("/quiz");

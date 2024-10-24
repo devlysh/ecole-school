@@ -21,10 +21,11 @@ export const syncStripeCustomers = async () => {
       const customers = await stripe.customers.list({
         limit: 100,
         starting_after: startingAfter,
+        expand: ["data.subscriptions"],
       });
 
       for (const customer of customers.data) {
-        const { id: stripeCustomerId, email, name } = customer;
+        const { id: stripeCustomerId, email, name, subscriptions } = customer;
 
         if (!email) {
           console.warn(
@@ -33,21 +34,52 @@ export const syncStripeCustomers = async () => {
           continue;
         }
 
-        await prisma.user.upsert({
+        const stripeSubscriptionId = subscriptions?.data[0]?.id;
+
+        const existingUser = await prisma.user.findUnique({
           where: { email },
-          update: {
-            stripeCustomerId,
-            name: name ?? "Unknown",
-          },
-          create: {
-            email,
-            passwordHash: "",
-            name: name ?? "Unknown",
-            dateJoined: new Date(),
-            isActive: false,
-            stripeCustomerId,
-          },
+          include: { student: true },
         });
+
+        if (!existingUser) {
+          // Create new user and student
+          await prisma.user.create({
+            data: {
+              email,
+              passwordHash: "",
+              name,
+              dateJoined: new Date(),
+              isActive: false,
+              student: {
+                create: {
+                  stripeCustomerId,
+                  stripeSubscriptionId,
+                  settings: {},
+                },
+              },
+            },
+          });
+        } else if (!existingUser.student) {
+          // User exists but is not a student yet
+          await prisma.student.create({
+            data: {
+              userId: existingUser.id,
+              stripeCustomerId,
+              stripeSubscriptionId,
+              settings: {},
+            },
+          });
+        } else {
+          // Update existing student
+          await prisma.student.update({
+            where: { userId: existingUser.id },
+            data: {
+              stripeCustomerId,
+              stripeSubscriptionId,
+            },
+          });
+        }
+
         console.log(`Synced customer: ${email} (${stripeCustomerId})`);
       }
 

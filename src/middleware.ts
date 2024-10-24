@@ -28,8 +28,6 @@ export const middleware = async (req: NextRequest) => {
   const token = req.cookies.get(TokenType.ACCESS)?.value;
   const pathname = req.nextUrl.pathname;
 
-  logger.debug({ pathname }, "Pathname");
-
   const isGuestPath = guestPaths.some((path) =>
     req.nextUrl.pathname.startsWith(path)
   );

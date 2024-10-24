@@ -20,7 +20,7 @@ const PricingPage = async () => {
   try {
     const decodedPreAuthToken = (await verifyToken(
       preAuthToken.value
-    )) as PreAuthTokenPayload;
+    )) as unknown as PreAuthTokenPayload;
 
     if (!decodedPreAuthToken.name || !decodedPreAuthToken.email) {
       redirect("/quiz");

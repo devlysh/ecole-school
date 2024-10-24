@@ -2,7 +2,7 @@ import { verifyToken } from "@/lib/jwt";
 import { redirect } from "next/navigation";
 
 import SetPasswordStep from "@/components/Quiz/Steps/SetPasswordStep";
-import { PreAuthTokenPayload, TokenType } from "@/lib/types";
+import { RegistrationTokenPayload, TokenType } from "@/lib/types";
 import logger from "@/lib/logger";
 
 const SetPasswordPage = async ({
@@ -17,11 +17,11 @@ const SetPasswordPage = async ({
   }
 
   try {
-    const decodedPreAuthToken = (await verifyToken(
+    const decodedRegistrationToken = (await verifyToken(
       registrationToken
-    )) as PreAuthTokenPayload;
+    )) as unknown as RegistrationTokenPayload;
 
-    if (!decodedPreAuthToken.email || !decodedPreAuthToken.name) {
+    if (!decodedRegistrationToken.email) {
       redirect("/quiz");
     }
 
