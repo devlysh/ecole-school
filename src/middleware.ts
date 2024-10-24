@@ -20,36 +20,24 @@ const studentPaths = [
 
 const teacherPaths = ["/account", "/account/teacher"];
 
-const adminPaths = ["/admin"];
-
-const protectedPaths = [...studentPaths, ...teacherPaths, ...adminPaths];
-
 export const middleware = async (req: NextRequest) => {
-  const token = req.cookies.get(TokenType.ACCESS)?.value;
+  const accessToken = req.cookies.get(TokenType.ACCESS)?.value;
   const pathname = req.nextUrl.pathname;
 
   const isGuestPath = guestPaths.some((path) =>
     req.nextUrl.pathname.startsWith(path)
   );
 
-  const isProtectedPath = protectedPaths.some((path) =>
-    pathname.startsWith(path)
-  );
-
-  if (!token && isGuestPath) {
+  if (!accessToken && isGuestPath) {
     return NextResponse.next();
   }
 
-  if (!token && isProtectedPath) {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
-
-  if (!token) {
+  if (!accessToken) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
   try {
-    const decoded = await verifyToken(token);
+    const decoded = await verifyToken(accessToken);
     const { roles } = decoded as { email: string; roles: string[] };
 
     const isAdmin = hasRole(roles, Role.ADMIN);
