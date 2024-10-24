@@ -57,6 +57,7 @@ export const POST = async (request: Request) => {
 
     const tokenData: AccessTokenPayload = {
       email,
+      name: existingUser.name ?? "Anonymous",
       roles: userRoles,
     };
 

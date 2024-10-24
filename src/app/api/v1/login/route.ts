@@ -50,6 +50,7 @@ export const POST = async (request: Request) => {
 
     const tokenData = {
       email: user.email,
+      name: user.name ?? "Anonymous",
       roles: userRoles,
     };
 
