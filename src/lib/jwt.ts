@@ -1,6 +1,8 @@
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import logger from "./logger";
-import { TokenPayload } from "./types";
+import { AccessTokenPayload, TokenPayload, TokenType } from "./types";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -9,6 +11,21 @@ if (!JWT_SECRET) {
 }
 
 const secretKey = new TextEncoder().encode(JWT_SECRET);
+
+export const signToken = async (
+  payload: TokenPayload,
+  expiresIn?: string | number
+) => {
+  let token = new SignJWT(payload as unknown as JWTPayload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt();
+
+  if (expiresIn) {
+    token = token.setExpirationTime(expiresIn);
+  }
+
+  return await token.sign(secretKey);
+};
 
 export const verifyToken = async (token: string) => {
   try {
@@ -28,17 +45,20 @@ export const verifyToken = async (token: string) => {
   }
 };
 
-export const signToken = async (
-  payload: TokenPayload,
-  expiresIn?: string | number
-) => {
-  let token = new SignJWT(payload as JWTPayload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt();
+export const verifyAccessToken = async () => {
+  try {
+    const cookieStore = cookies();
+    const accessToken = cookieStore.get(TokenType.ACCESS);
 
-  if (expiresIn) {
-    token = token.setExpirationTime(expiresIn);
+    if (!accessToken) {
+      redirect("/login");
+    }
+
+    return (await verifyToken(
+      accessToken.value
+    )) as unknown as AccessTokenPayload;
+  } catch (err: unknown) {
+    logger.error({ error: err }, "Error during access token verification");
+    redirect("/login");
   }
-
-  return await token.sign(secretKey);
 };
