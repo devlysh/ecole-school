@@ -54,24 +54,7 @@ model Currency {
   code String @unique
   name String @unique
 
-  subscriptionPlans SubscriptionPlan[]
-
   @@map("currencies")
-}
-
-model SubscriptionPlan {
-  id              Int    @id @default(autoincrement())
-  name            String
-  cost            Int
-  currencyId      Int    @map("currency_id")
-  credits         Int
-  stripeProductId String @map("stripe_product_id")
-  stripePriceId   String @unique @map("stripe_price_id")
-  discount        Float?
-
-  currency Currency @relation(fields: [currencyId], references: [id])
-
-  @@map("subscription_plans")
 }
 
 model Credit {
@@ -113,7 +96,7 @@ model Teacher {
   availableHours AvailableHour[]
   students       Student[]
   languages      TeacherLanguage[]
-  BookedLesson   BookedLesson[]
+  bookedLesson   BookedLesson[]
 
   @@map("teachers")
 }

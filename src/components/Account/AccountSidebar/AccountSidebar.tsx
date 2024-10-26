@@ -1,7 +1,6 @@
 import React from "react";
 import AccountSidebarItem from "./AccountSidebarItem";
 import { Role } from "@/lib/types";
-import logger from "@/lib/logger";
 
 interface SidebarProps {
   name: string;
@@ -20,6 +19,13 @@ const AccountSidebar: React.FC<SidebarProps> = ({ name, roles }) => {
           <AccountSidebarItem href="/account/teachers" label="Teachers" />
         )}
 
+        {isTeacher && (
+          <AccountSidebarItem
+            href="/account/teachers-guide"
+            label="How to use Ecole"
+          />
+        )}
+
         {isStudent && (
           <AccountSidebarItem href="/account/my-classes" label="My Classes" />
         )}
@@ -29,20 +35,13 @@ const AccountSidebar: React.FC<SidebarProps> = ({ name, roles }) => {
             label="Book Classes"
           />
         )}
+
         {isStudent && (
           <AccountSidebarItem
             href="/account/how-to-use"
             label="How to use Ecole"
           />
         )}
-
-        {isStudent ||
-          (isTeacher && (
-            <AccountSidebarItem
-              href="/account/how-to-use"
-              label="How to use Ecole"
-            />
-          ))}
 
         <AccountSidebarItem href="/account/settings" label="Settings" />
       </ul>

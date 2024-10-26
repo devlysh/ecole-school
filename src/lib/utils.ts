@@ -17,3 +17,7 @@ export const groupByCurrency = (plans: Plan[]): PlansMap => {
 export const hasRole = (userRoles: string[], requiredRole: string) => {
   return userRoles.includes(requiredRole);
 };
+
+export const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};

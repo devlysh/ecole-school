@@ -1,5 +1,5 @@
 import React from "react";
-import AccountSidebar from "../AccountSidebar";
+import AccountSidebar from "./AccountSidebar";
 import { redirect } from "next/navigation";
 import { verifyAccessToken } from "@/lib/jwt";
 

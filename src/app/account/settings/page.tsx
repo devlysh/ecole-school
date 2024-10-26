@@ -1,5 +1,5 @@
 import React from "react";
-import AccountLayout from "@/components/Account/AccountLayout";
+import AccountLayout from "@/components/Account/layout";
 import AccountSettings from "@/components/Account/AccountSettings";
 
 const AccountSettingsPage = async () => {
