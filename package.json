@@ -20,7 +20,7 @@
     "prisma:seed": "ts-node prisma/seed.ts",
     "sync": "npm run stripe:sync",
     "sync:local": "npx dotenv -e .env.local -- npm run sync",
-    "stripe:sync": "npm run stripe:sync:plans && npm run stripe:sync:customers",
+    "stripe:sync": "npm run stripe:sync:customers",
     "stripe:sync:plans": "tsx scripts/sync-stripe-plans.ts",
     "stripe:sync:customers": "tsx scripts/sync-stripe-customers.ts",
     "stripe:login": "stripe login",
