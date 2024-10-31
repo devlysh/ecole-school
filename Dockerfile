@@ -35,7 +35,6 @@ EXPOSE 3000
 CMD ["sh", "-c", "npx prisma migrate deploy && \
     npx dotenv -e .env -- tsx prisma/seed.ts && \
     npx dotenv -e .env -- tsx prisma/seed-admin.ts && \
-    npx dotenv -e .env -- tsx scripts/sync-stripe-plans.ts && \
     npx dotenv -e .env -- tsx scripts/sync-stripe-customers.ts && \
     npx dotenv -e .env -- npm start"]
 # End of Selection
