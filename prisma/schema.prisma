@@ -8,18 +8,15 @@ generator client {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique
-  passwordHash  String?        @map("password_hash")
-  name          String?        @map("name")
-  dateJoined    DateTime       @default(now()) @map("date_joined")
-  isActive      Boolean        @default(true) @map("is_active")
-  roles         UserRole[]
-  notifications Notification[]
-  lessonNotes   LessonNote[]
-  student       Student?
-  teacher       Teacher?
-  credits       Credit[]
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String?    @map("password_hash")
+  name         String?    @map("name")
+  dateJoined   DateTime   @default(now()) @map("date_joined")
+  isActive     Boolean    @default(true) @map("is_active")
+  roles        UserRole[]
+  student      Student?
+  teacher      Teacher?
 
   @@index([email], name: "idx_user_email")
   @@index([isActive], name: "idx_user_is_active")
@@ -57,27 +54,6 @@ model Currency {
   @@map("currencies")
 }
 
-model Credit {
-  id             Int       @id @default(autoincrement())
-  userId         Int       @map("user_id")
-  issuedDate     DateTime  @default(now()) @map("issued_date")
-  expirationDate DateTime  @map("expiration_date")
-  usedDate       DateTime?
-  status         String
-  lessonId       Int?      @unique @map("lesson_id")
-
-  user          User          @relation(fields: [userId], references: [id])
-  lesson        BookedLesson? @relation("lesson_credit")
-  student       Student?      @relation(fields: [studentUserId], references: [userId])
-  studentUserId Int?
-
-  @@index([userId], name: "idx_credit_user_id")
-  @@index([status], name: "idx_credit_status")
-  @@index([issuedDate], name: "idx_credit_issued_date")
-  @@index([expirationDate], name: "idx_credit_expiration_date")
-  @@map("credits")
-}
-
 model Language {
   id   Int     @id @default(autoincrement())
   name String  @unique
@@ -92,26 +68,22 @@ model Teacher {
   userId   Int   @id @map("user_id")
   settings Json?
 
-  user           User              @relation(fields: [userId], references: [id])
-  availableHours AvailableHour[]
-  students       Student[]
-  languages      TeacherLanguage[]
-  bookedLesson   BookedLesson[]
+  user      User              @relation(fields: [userId], references: [id])
+  students  Student[]
+  languages TeacherLanguage[]
 
   @@map("teachers")
 }
 
 model Student {
-  userId               Int      @id @map("user_id")
-  assignedTeacherId    Int?     @map("assigned_teacher_id")
+  userId               Int     @id @map("user_id")
+  assignedTeacherId    Int?    @map("assigned_teacher_id")
   settings             Json?
-  stripeCustomerId     String   @unique @map("stripe_customer_id")
-  stripeSubscriptionId String?  @unique @map("stripe_subscription_id")
-  credits              Credit[]
+  stripeCustomerId     String  @unique @map("stripe_customer_id")
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
 
-  user    User           @relation(fields: [userId], references: [id])
-  teacher Teacher?       @relation(fields: [assignedTeacherId], references: [userId])
-  lessons BookedLesson[]
+  user    User     @relation(fields: [userId], references: [id])
+  teacher Teacher? @relation(fields: [assignedTeacherId], references: [userId])
 
   @@index([assignedTeacherId], name: "idx_student_assigned_teacher_id")
   @@map("students")
@@ -126,76 +98,6 @@ model TeacherLanguage {
 
   @@id([teacherId, languageId])
   @@map("teacher_languages")
-}
-
-model AvailableHour {
-  id             Int      @id @default(autoincrement())
-  teacherId      Int      @map("teacher_id")
-  startTime      DateTime @map("start_time")
-  endTime        DateTime @map("end_time")
-  recurrenceRule String?
-  timezone       String?
-
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-
-  @@index([teacherId], name: "idx_available_hours_teacher_id")
-  @@index([startTime], name: "idx_available_hours_start_time")
-  @@index([endTime], name: "idx_available_hours_end_time")
-  @@map("available_hours")
-}
-
-model BookedLesson {
-  id            Int      @id @default(autoincrement())
-  studentId     Int      @map("student_id")
-  teacherId     Int      @map("teacher_id")
-  scheduledTime DateTime @map("scheduled_time")
-  duration      Int
-  status        String
-  zoomLink      String?
-  creditId      Int?     @unique @map("credit_id")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @default(now()) @map("updated_at")
-
-  student Student @relation(fields: [studentId], references: [userId])
-  teacher Teacher @relation(fields: [teacherId], references: [userId])
-  credit  Credit? @relation("lesson_credit", fields: [creditId], references: [id])
-
-  notes LessonNote[]
-
-  @@index([studentId], name: "idx_booked_lessons_student_id")
-  @@index([teacherId], name: "idx_booked_lessons_teacher_id")
-  @@index([scheduledTime], name: "idx_booked_lessons_scheduled_time")
-  @@map("booked_lessons")
-}
-
-model Notification {
-  id               Int       @id @default(autoincrement())
-  userId           Int       @map("user_id")
-  message          String
-  notificationType String    @map("notification_type")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  readAt           DateTime?
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@index([userId], name: "idx_notifications_user_id")
-  @@index([notificationType], name: "idx_notifications_type")
-  @@map("notifications")
-}
-
-model LessonNote {
-  id        Int      @id @default(autoincrement())
-  lessonId  Int      @map("lesson_id")
-  userId    Int      @map("user_id")
-  noteText  String?
-  createdAt DateTime @default(now()) @map("created_at")
-
-  lesson BookedLesson @relation(fields: [lessonId], references: [id])
-  user   User         @relation(fields: [userId], references: [id])
-
-  @@index([lessonId], name: "idx_lesson_notes_lesson_id")
-  @@index([userId], name: "idx_lesson_notes_user_id")
-  @@map("lesson_notes")
 }
 
 model SystemSetting {
