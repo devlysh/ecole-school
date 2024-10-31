@@ -2,7 +2,6 @@ import { JWTPayload, jwtVerify, SignJWT } from "jose";
 import logger from "./logger";
 import { AccessTokenPayload, TokenPayload, TokenType } from "./types";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -51,7 +50,7 @@ export const verifyAccessToken = async () => {
     const accessToken = cookieStore.get(TokenType.ACCESS);
 
     if (!accessToken) {
-      redirect("/login");
+      throw new Error("Access token is missing");
     }
 
     return (await verifyToken(
@@ -59,6 +58,6 @@ export const verifyAccessToken = async () => {
     )) as unknown as AccessTokenPayload;
   } catch (err: unknown) {
     logger.error({ error: err }, "Error during access token verification");
-    redirect("/login");
+    throw err;
   }
 };
