@@ -127,3 +127,12 @@ export type TokenPayload =
   | AccessTokenPayload
   | PreAuthTokenPayload
   | RegistrationTokenPayload;
+
+export interface Teacher {
+  id: number;
+  name: string;
+  email: string;
+  avatar?: string;
+  roles: { name: string }[];
+  languages?: Language[];
+}

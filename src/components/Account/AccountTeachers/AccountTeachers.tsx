@@ -1,7 +1,6 @@
 "use client";
 
-import UsersList from "@/components/UsersList";
-import { teachers } from "./data";
+import { useCallback, useMemo } from "react";
 import {
   Button,
   Dropdown,
@@ -11,12 +10,17 @@ import {
   User,
 } from "@nextui-org/react";
 import { VerticalDotsIcon } from "@/icons";
-import { useCallback, useMemo } from "react";
-import logger from "@/lib/logger";
+import UsersList from "@/components/UsersList";
+import { Teacher } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
-type Teacher = (typeof teachers)[number];
+interface AccountTeachersProps {
+  teachers: Teacher[];
+}
 
-const AccountTeachers: React.FC = () => {
+const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
+  const router = useRouter();
+
   const INITIAL_VISIBLE_COLUMNS = useMemo(
     () => [
       "name",
@@ -42,7 +46,7 @@ const AccountTeachers: React.FC = () => {
             classNames={{
               description: "text-default-500",
             }}
-            description={user.role}
+            description={user.roles.map((r) => r.name).join(", ")}
             name={user.name}
           />
         ),
@@ -57,24 +61,25 @@ const AccountTeachers: React.FC = () => {
         name: "Language",
         uid: "language",
         sortable: true,
-        render: (user: Teacher) => user.language,
+        render: (user: Teacher) =>
+          user.languages?.map((l) => l.name).join(", "),
       },
       {
         name: "Class History",
         uid: "classHistory",
         sortable: true,
-        render: (user: Teacher) => <a>View</a>,
+        render: () => <a>View</a>,
       },
       {
         name: "Comments",
         uid: "comments",
         sortable: true,
-        render: (user: Teacher) => <a>View</a>,
+        render: () => <a>View</a>,
       },
       {
         name: "Actions",
         uid: "actions",
-        render: (user: Teacher) => (
+        render: () => (
           <div className="relative flex justify-end items-center gap-2">
             <Dropdown className="bg-background border-1 border-default-200">
               <DropdownTrigger>
@@ -96,9 +101,9 @@ const AccountTeachers: React.FC = () => {
   );
 
   const handleNew = useCallback(() => {
-    logger.debug("New teacher");
+    router.push("/account/teachers/add");
     return teachers;
-  }, []);
+  }, [teachers]);
 
   return (
     <UsersList
