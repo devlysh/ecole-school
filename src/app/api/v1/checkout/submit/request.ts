@@ -8,7 +8,7 @@ if (!NEXT_PUBLIC_BASE_URL) {
 
 export const submitCheckoutRequest = async () => {
   const response = await fetch(
-    `${NEXT_PUBLIC_BASE_URL}/api/v1/submit-checkout`
+    `${NEXT_PUBLIC_BASE_URL}/api/v1/checkout/submit`
   );
 
   if (!response.ok) {

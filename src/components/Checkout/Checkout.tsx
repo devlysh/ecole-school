@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import jwt from "jsonwebtoken";
 
-import { submitCheckoutRequest } from "@/app/api/v1/submit-checkout/request";
+import { submitCheckoutRequest } from "@/app/api/v1/checkout/submit/request";
 import logger from "@/lib/logger";
 import { PreAuthTokenPayload, Language, Plan, TokenType } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
