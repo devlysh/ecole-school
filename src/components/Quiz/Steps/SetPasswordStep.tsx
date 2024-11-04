@@ -2,7 +2,7 @@
 
 import FormStep from "./FormStep";
 import { useCallback, useState, useEffect } from "react";
-import { setPasswordRequest } from "@/app/api/v1/set-password/request";
+import { setPasswordRequest } from "@/app/api/v1/password/set/request";
 import logger from "@/lib/logger";
 import { useRouter } from "next/navigation";
 import { setPasswordStep } from "@/lib/set-password-step.model";

@@ -9,7 +9,7 @@ if (!NEXT_PUBLIC_BASE_URL) {
 export const setPasswordRequest = async (password: string, token: string) => {
   try {
     const response = await fetch(
-      `${NEXT_PUBLIC_BASE_URL}/api/v1/set-password`,
+      `${NEXT_PUBLIC_BASE_URL}/api/v1/password/set`,
       {
         method: "POST",
         body: JSON.stringify({ token, password }),
