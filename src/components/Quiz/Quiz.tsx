@@ -11,7 +11,7 @@ import QuestionStep from "./Steps/QuestionStep";
 import FormStep from "./Steps/FormStep";
 import logger from "@/lib/logger";
 import Cookies from "js-cookie";
-import { checkEmailRequest } from "@/app/api/v1/check-email/request";
+import { checkEmailRequest } from "@/app/api/v1/email/check/request";
 import { submitQuizRequest } from "@/app/api/v1/submit-quiz/request";
 
 const Quiz = () => {

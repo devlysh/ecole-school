@@ -68,11 +68,24 @@ model Teacher {
   userId   Int   @id @map("user_id")
   settings Json?
 
-  user      User              @relation(fields: [userId], references: [id])
-  students  Student[]
-  languages TeacherLanguage[]
+  user           User              @relation(fields: [userId], references: [id])
+  students       Student[]
+  languages      TeacherLanguage[]
+  availableHours AvailableHour[]
 
   @@map("teachers")
+}
+
+model AvailableHour {
+  id             Int      @id @default(autoincrement())
+  startTime      DateTime @map("start_time")
+  endTime        DateTime @map("end_time")
+  recurrenceRule String?  @map("recurrence_rule")
+  timezone       String
+  teacher        Teacher  @relation(fields: [teacherId], references: [userId])
+  teacherId      Int      @map("teacher_id")
+
+  @@map("available_hours")
 }
 
 model Student {

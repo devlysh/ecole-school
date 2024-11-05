@@ -79,7 +79,7 @@ const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
       {
         name: "Actions",
         uid: "actions",
-        render: () => (
+        render: (user: Teacher) => (
           <div className="relative flex justify-end items-center gap-2">
             <Dropdown className="bg-background border-1 border-default-200">
               <DropdownTrigger>
@@ -88,8 +88,13 @@ const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem>View</DropdownItem>
-                <DropdownItem>Edit</DropdownItem>
+                <DropdownItem
+                  onClick={() =>
+                    router.push(`/account/teachers/edit/${user.email}`)
+                  }
+                >
+                  Edit
+                </DropdownItem>
                 <DropdownItem>Delete</DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -103,7 +108,7 @@ const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
   const handleNew = useCallback(() => {
     router.push("/account/teachers/add");
     return teachers;
-  }, [teachers]);
+  }, [router, teachers]);
 
   return (
     <UsersList

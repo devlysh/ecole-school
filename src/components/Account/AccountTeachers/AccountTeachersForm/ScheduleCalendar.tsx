@@ -19,7 +19,7 @@ export enum EndCondition {
   AFTER = "after",
 }
 
-interface AccountTeachersAddCalendarProps {
+interface ScheduleCalendarProps {
   timeSlots: EventInput[];
   setTimeSlots: (timeSlots: EventInput[]) => void;
 }
@@ -58,10 +58,10 @@ const useRecurrenceRule = (initialRule: RRule) => {
   };
 };
 
-const AccountTeachersAddCalendar = ({
+const ScheduleCalendar = ({
   timeSlots,
   setTimeSlots,
-}: AccountTeachersAddCalendarProps) => {
+}: ScheduleCalendarProps) => {
   const [makeRecurrent, setMakeRecurrent] = useState<boolean>(true);
   const [endCondition, setEndCondition] = useState<EndCondition>(
     EndCondition.NEVER
@@ -180,4 +180,4 @@ const AccountTeachersAddCalendar = ({
   );
 };
 
-export default AccountTeachersAddCalendar;
+export default ScheduleCalendar;

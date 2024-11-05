@@ -1,3 +1,4 @@
+import { EventInput } from "@fullcalendar/core/index.js";
 import { SVGProps } from "react";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -136,3 +137,14 @@ export interface Teacher {
   roles: { name: string }[];
   languages?: Language[];
 }
+
+export interface TeacherFormValues {
+  name: string;
+  email: string;
+  password: string;
+  timezone: string;
+}
+
+export type TeacherFormWithTimeSlots = TeacherFormValues & {
+  timeSlots: EventInput[];
+};

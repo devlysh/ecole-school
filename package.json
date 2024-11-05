@@ -16,6 +16,8 @@
     "migrate:local": "npx dotenv -e .env.local -- npm run migrate",
     "seed": "npm run prisma:seed",
     "seed:local": "npx dotenv -e .env.local -- npm run seed",
+    "seed:admin": "tsx prisma/seed-admin.ts",
+    "seed:admin:local": "npx dotenv -e .env.local -- npm run seed:admin",
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:seed": "ts-node prisma/seed.ts",
     "sync": "npm run stripe:sync",
@@ -28,8 +30,10 @@
     "stripe:trigger:payment_succeeded": "stripe trigger invoice.payment_succeeded",
     "start:prod": "NODE_ENV=production dotenv -e .env.production -- next start",
     "build:prod": "NODE_ENV=production dotenv -e .env.production -- next build",
-    "seed:admin": "tsx prisma/seed-admin.ts",
-    "seed:admin:local": "npx dotenv -e .env.local -- npm run seed:admin"
+    "db:deploy:local": "cd infrastructure/local && docker-compose up -d && ../../",
+    "db:destroy:local": "cd infrastructure/local && docker-compose down && npm run db:rm-volume:local && ../../",
+    "db:rm-volume:local": "docker volume rm local_postgres_data",
+    "db:init:local": "npm run migrate:local && npm run seed:local && npm run seed:admin:local && npm run sync:local"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.15",

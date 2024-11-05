@@ -7,7 +7,7 @@ import {
   SelectItem,
 } from "@nextui-org/react";
 import { RRule, WeekdayStr, Options } from "rrule";
-import { EndCondition } from "./AccountTeachersAddCalendar";
+import { EndCondition } from "./ScheduleCalendar";
 
 interface RecurrenceOptionsProps {
   makeRecurrent: boolean;
