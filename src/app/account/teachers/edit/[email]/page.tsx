@@ -6,6 +6,7 @@ import AccountTeachersForm from "@/components/Account/AccountTeachers/AccountTea
 import logger from "@/lib/logger";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { convertToRruleDate } from "@/lib/utils";
 
 interface AccountTeachersEditPageProps {
   params: {
@@ -33,8 +34,13 @@ const AccountTeachersEditPage = async ({
     const timeSlots = teacher?.teacher?.availableHours.map((hour) => ({
       start: hour.startTime,
       end: hour.endTime,
-      rrule: hour.recurrenceRule || undefined,
+      rrule: hour.rrule || undefined,
       timezone: hour.timezone,
+      extendedProps: {
+        rrule: hour.rrule || undefined,
+        dtStart: convertToRruleDate(hour.startTime) || undefined,
+        dtEnd: convertToRruleDate(hour.endTime) || undefined,
+      },
     }));
 
     logger.debug({ teacher, timeSlots }, "Teacher and time slots");

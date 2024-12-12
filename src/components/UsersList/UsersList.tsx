@@ -2,6 +2,7 @@
 
 import React, {
   ChangeEvent,
+  Key,
   ReactNode,
   useCallback,
   useMemo,
@@ -28,7 +29,7 @@ import { PlusIcon } from "@/icons";
 import { ChevronDownIcon } from "@/icons";
 import { SearchIcon } from "@/icons";
 import { capitalize } from "@/lib/utils";
-import logger from "@/lib/logger";
+import { Teacher } from "@/lib/types";
 
 interface UsersListProps<T> {
   columns: {
@@ -37,12 +38,12 @@ interface UsersListProps<T> {
     sortable?: boolean;
     render: (user: T) => ReactNode;
   }[];
-  initialVisibleColumns: string[];
   list: T[];
-  onNew: () => T[];
+  initialVisibleColumns: string[];
+  onNew?: () => T[];
 }
 
-const UsersList = <T extends Record<string, any>>({
+const UsersList = <T extends Record<string, unknown> | Teacher>({
   columns,
   list,
   initialVisibleColumns,
@@ -72,19 +73,24 @@ const UsersList = <T extends Record<string, any>>({
     return columns.filter((column) =>
       Array.from(visibleColumns).includes(column.uid)
     );
-  }, [visibleColumns]);
+  }, [columns, visibleColumns]);
 
   const filteredItems = useMemo(() => {
     let filteredUsers = [...list];
 
     if (hasSearchFilter) {
-      filteredUsers = filteredUsers.filter((user) =>
-        user.name.toLowerCase().includes(filterValue.toLowerCase())
-      );
+      filteredUsers = filteredUsers.filter((user) => {
+        const name = user.name as string;
+        const email = user.email as string;
+        return (
+          name.toLowerCase().includes(filterValue.toLowerCase()) ||
+          email.toLowerCase().includes(filterValue.toLowerCase())
+        );
+      });
     }
 
     return filteredUsers;
-  }, [list, filterValue]);
+  }, [list, hasSearchFilter, filterValue]);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -120,10 +126,15 @@ const UsersList = <T extends Record<string, any>>({
     }
   }, []);
 
-  const renderCell = useCallback((item: T, columnKey: string) => {
-    const column = columns.find((c) => c.uid === columnKey);
-    return column?.render ? column.render(item) : item[columnKey as keyof T];
-  }, []);
+  const renderCell = useCallback(
+    (item: T, columnKey: string): ReactNode => {
+      const column = columns.find((c) => c.uid === columnKey);
+      return column?.render
+        ? column.render(item)
+        : String(item[columnKey as keyof T]);
+    },
+    [columns]
+  );
 
   const topContent = useMemo(() => {
     return (
@@ -135,7 +146,7 @@ const UsersList = <T extends Record<string, any>>({
               base: "w-full sm:max-w-[44%]",
               inputWrapper: "border-1",
             }}
-            placeholder="Search by name..."
+            placeholder="Search by name or email..."
             size="sm"
             startContent={<SearchIcon className="text-default-300" />}
             value={filterValue}
@@ -173,7 +184,7 @@ const UsersList = <T extends Record<string, any>>({
               color="primary"
               endContent={<PlusIcon />}
               size="sm"
-              onClick={() => onNew()}
+              onClick={() => onNew && onNew()}
             >
               Add New
             </Button>
@@ -199,11 +210,12 @@ const UsersList = <T extends Record<string, any>>({
     );
   }, [
     filterValue,
-    visibleColumns,
     onSearchChange,
-    onRowsPerPageChange,
+    visibleColumns,
+    columns,
     list.length,
-    hasSearchFilter,
+    onRowsPerPageChange,
+    onNew,
   ]);
 
   const bottomContent = useMemo(() => {
@@ -223,7 +235,7 @@ const UsersList = <T extends Record<string, any>>({
         />
       </div>
     );
-  }, [items.length, page, pages, hasSearchFilter]);
+  }, [page, pages, hasSearchFilter]);
 
   return (
     <Table
@@ -255,7 +267,7 @@ const UsersList = <T extends Record<string, any>>({
       </TableHeader>
       <TableBody emptyContent={"No users found"} items={sortedItems}>
         {(item) => (
-          <TableRow key={item.id}>
+          <TableRow key={item.id as Key}>
             {(columnKey) => (
               <TableCell>{renderCell(item, columnKey.toString())}</TableCell>
             )}

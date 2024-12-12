@@ -89,9 +89,9 @@ const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
               </DropdownTrigger>
               <DropdownMenu>
                 <DropdownItem
-                  onClick={() =>
-                    router.push(`/account/teachers/edit/${user.email}`)
-                  }
+                  onClick={() => {
+                    router.push(`/account/teachers/edit/${user.email}`);
+                  }}
                 >
                   Edit
                 </DropdownItem>

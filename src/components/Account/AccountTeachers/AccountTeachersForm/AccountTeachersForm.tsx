@@ -27,9 +27,11 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
 }) => {
   const router = useRouter();
   const [timeSlots, setTimeSlots] = useState<EventInput[]>(
-    initialTimeSlots ?? []
+    shapeTimeSlots(initialTimeSlots ?? [])
   );
   const emailInputRef = useRef<HTMLInputElement>(null);
+
+  logger.debug({ initialTimeSlots, timeSlots }, "Time slots");
 
   const handleSubmit = useCallback(
     async (values: TeacherFormValues) => {
@@ -45,10 +47,10 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
 
         if (isTaken) {
           const result = await updateTeacher(teacher);
-          logger.debug({ result }, "Teacher updated successfully");
+          logger.debug({ result, teacher }, "Teacher updated successfully");
         } else {
           const result = await addTeacher(teacher);
-          logger.debug({ result }, "Teacher added successfully");
+          logger.debug({ result, teacher }, "Teacher added successfully");
         }
 
         router.push("/account/teachers");
@@ -68,6 +70,26 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
     },
     onSubmit: handleSubmit,
   });
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await fetch("/api/v1/teachers");
+  //       const data = await response.json();
+  //       setTimeSlots(shapeTimeSlots(data.timeSlots ?? []));
+  //       formik.setValues({
+  //         name: data.name ?? "",
+  //         email: data.email ?? "",
+  //         password: data.email ? "********" : "",
+  //         timezone: data.timezone ?? "utc",
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching teacher data:", error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [formik]);
 
   return (
     <div className="w-full">
@@ -130,3 +152,23 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
 };
 
 export default AccountTeachersForm;
+
+const shapeTimeSlots = (timeSlots: EventInput[]) => {
+  return timeSlots.map((slot, index) => {
+    const start = new Date(slot.start as Date);
+    const end = new Date(slot.end as Date);
+    const duration = {
+      hours: (end.getTime() - start.getTime()) / (1000 * 60 * 60),
+    };
+
+    return {
+      ...slot,
+      id: index.toString(),
+      title: slot.rrule ? "Recurring Event" : "Single Event",
+      start: start.toISOString(),
+      end: end.toISOString(),
+      color: "grey",
+      duration,
+    };
+  });
+};

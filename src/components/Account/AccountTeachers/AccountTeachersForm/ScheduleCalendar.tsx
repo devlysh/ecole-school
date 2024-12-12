@@ -12,6 +12,7 @@ import {
 } from "@fullcalendar/core/index.js";
 import RecurrenceOptions from "./RecurrenceOptions"; // Import the new component
 import { Checkbox } from "@nextui-org/react";
+import { convertToRruleDate } from "@/lib/utils";
 
 export enum EndCondition {
   NEVER = "never",
@@ -87,16 +88,17 @@ const ScheduleCalendar = ({
       const calendarApi = selectInfo.view.calendar;
       calendarApi.unselect();
 
+      const dtStart = convertToRruleDate(selectInfo.start);
+      const rrule = `${recurrenceRule.toString()}`;
+      const rruleWithStart = `DTSTART:${dtStart}\n${rrule}`;
+
       const event: EventInput = {
         id: String(timeSlots.length + 1),
         title: makeRecurrent ? "Recurring Event" : "Single Event",
         start: selectInfo.startStr,
         end: selectInfo.endStr,
         ...(makeRecurrent && {
-          rrule: `DTSTART:${selectInfo.start
-            .toISOString()
-            .replace(/[.:-]/g, "")
-            .replace(/...(?=Z)/, "")}\n${recurrenceRule.toString()}`,
+          rrule: rruleWithStart,
           duration: {
             hours: Math.floor(
               (new Date(selectInfo.endStr).getTime() -
@@ -105,6 +107,9 @@ const ScheduleCalendar = ({
             ),
           },
         }),
+        extendedProps: {
+          rrule,
+        },
       };
 
       setTimeSlots([...timeSlots, event]);
@@ -167,13 +172,19 @@ const ScheduleCalendar = ({
           initialView="timeGridWeek"
           selectable={true}
           select={handleDateSelect}
-          events={timeSlots}
+          events={timeSlots.map((slot) => {
+            if (slot.rrule && slot.extendedProps?.dtStart) {
+              slot.rrule = `DTSTART:${slot.extendedProps?.dtStart}\n${slot.rrule}`;
+            }
+            return slot;
+          })}
           eventClick={handleEventClick}
           allDaySlot={false}
           timeZone="UTC"
           nowIndicator
           firstDay={1}
           selectOverlap={false}
+          locale="en-US"
         />
       </div>
     </>

@@ -36,11 +36,11 @@ export const PUT = async (
           update: {
             settings: { timezone },
             availableHours: {
-              deleteMany: {}, // Clear existing time slots
+              deleteMany: {},
               create: timeSlots.map((slot) => ({
                 startTime: slot.start as string,
                 endTime: slot.end as string,
-                recurrenceRule: slot.rrule as string,
+                rrule: slot.extendedProps?.rrule,
                 timezone: "UTC",
               })),
             },

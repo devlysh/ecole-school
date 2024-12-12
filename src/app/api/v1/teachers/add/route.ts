@@ -39,7 +39,7 @@ export const POST = async (request: Request) => {
               create: timeSlots.map((slot) => ({
                 startTime: slot.start as string,
                 endTime: slot.end as string,
-                recurrenceRule: slot.rrule as string,
+                rrule: slot.rrule as string,
                 timezone: "UTC",
               })),
             },

@@ -30,8 +30,8 @@
     "stripe:trigger:payment_succeeded": "stripe trigger invoice.payment_succeeded",
     "start:prod": "NODE_ENV=production dotenv -e .env.production -- next start",
     "build:prod": "NODE_ENV=production dotenv -e .env.production -- next build",
-    "db:deploy:local": "cd infrastructure/local && docker-compose up -d && ../../",
-    "db:destroy:local": "cd infrastructure/local && docker-compose down && npm run db:rm-volume:local && ../../",
+    "db:deploy:local": "cd infrastructure/local && docker-compose up -d && cd ../../",
+    "db:destroy:local": "cd infrastructure/local && docker-compose down && npm run db:rm-volume:local && cd ../../",
     "db:rm-volume:local": "docker volume rm local_postgres_data",
     "db:init:local": "npm run migrate:local && npm run seed:local && npm run seed:admin:local && npm run sync:local"
   },
