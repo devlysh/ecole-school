@@ -2,18 +2,21 @@ import React, { ChangeEvent } from "react";
 import {
   Checkbox,
   CheckboxGroup,
+  DatePicker,
   Input,
   Select,
   SelectItem,
 } from "@nextui-org/react";
 import { RRule, WeekdayStr, Options } from "rrule";
 import { EndCondition } from "./ScheduleCalendar";
+import { parseDate } from "@internationalized/date";
+import config from "@/lib/config";
 
 interface RecurrenceOptionsProps {
   makeRecurrent: boolean;
   recurrenceRule: RRule;
   updateRecurrenceRule: (options: Partial<Options>) => void;
-  handleFrequencyChange: (event: ChangeEvent<HTMLSelectElement>) => void;
+  handleFrequencyChange?: (event: ChangeEvent<HTMLSelectElement>) => void;
   endCondition: EndCondition;
   handleEndConditionChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   untilValue: string | undefined;
@@ -36,28 +39,30 @@ const RecurrenceOptions: React.FC<RecurrenceOptionsProps> = ({
 
   return (
     <div className="w-full p-2">
-      <div className="flex flex-row gap-2 w-1/2">
-        <Input
-          label="Repeat every"
-          name="interval"
-          type="number"
-          min={1}
-          value={recurrenceRule.options.interval.toString()}
-          onChange={(e) =>
-            updateRecurrenceRule({ interval: Number(e.target.value) })
-          }
-        />
-        <Select
-          label="Repeats"
-          name="freq"
-          onChange={handleFrequencyChange}
-          defaultSelectedKeys={[recurrenceRule.options.freq.toString()]}
-        >
-          <SelectItem key={RRule.DAILY.toString()}>Day</SelectItem>
-          <SelectItem key={RRule.WEEKLY.toString()}>Week</SelectItem>
-          <SelectItem key={RRule.MONTHLY.toString()}>Month</SelectItem>
-        </Select>
-      </div>
+      {config.showFrequencyOptions && (
+        <div className="flex flex-row gap-2 w-1/2">
+          <Input
+            label="Repeat every"
+            name="interval"
+            type="number"
+            min={1}
+            value={recurrenceRule.options.interval.toString()}
+            onChange={(e) =>
+              updateRecurrenceRule({ interval: Number(e.target.value) })
+            }
+          />
+          <Select
+            label="Repeats"
+            name="freq"
+            onChange={handleFrequencyChange}
+            defaultSelectedKeys={[recurrenceRule.options.freq.toString()]}
+          >
+            <SelectItem key={RRule.DAILY.toString()}>Day</SelectItem>
+            <SelectItem key={RRule.WEEKLY.toString()}>Week</SelectItem>
+            <SelectItem key={RRule.MONTHLY.toString()}>Month</SelectItem>
+          </Select>
+        </div>
+      )}
       {recurrenceRule.options.freq === RRule.WEEKLY && (
         <div className="flex flex-row gap-2 w-1/2">
           <CheckboxGroup
@@ -94,18 +99,19 @@ const RecurrenceOptions: React.FC<RecurrenceOptionsProps> = ({
             After (N occurrences)
           </SelectItem>
         </Select>
-        {endCondition === "on" && (
-          <Input
+        {endCondition === EndCondition.ON && (
+          <DatePicker
             label="End Date"
             name="until"
-            type="date"
-            value={untilValue}
+            value={untilValue ? parseDate(untilValue) : undefined}
             onChange={(e) =>
-              updateRecurrenceRule({ until: new Date(e.target.value) })
+              updateRecurrenceRule({
+                until: e ? e.toDate("UTC") : undefined,
+              })
             }
           />
         )}
-        {endCondition === "after" && (
+        {endCondition === EndCondition.AFTER && (
           <Input
             label="Occurrences"
             type="number"

@@ -148,3 +148,12 @@ export interface TeacherFormValues {
 export type TeacherFormWithTimeSlots = TeacherFormValues & {
   timeSlots: EventInput[];
 };
+
+export interface AvailableHour {
+  day: number;
+  hour: number;
+}
+
+export type AvailableHourWithTeacher = AvailableHour & {
+  teacherId: number;
+};

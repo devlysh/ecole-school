@@ -53,9 +53,9 @@ const fetchTeachers = async () => {
       id: true,
       name: true,
       email: true,
+      settings: true,
       teacher: {
         select: {
-          settings: true,
           languages: {
             select: {
               language: {

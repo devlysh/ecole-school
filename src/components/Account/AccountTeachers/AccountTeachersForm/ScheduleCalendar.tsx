@@ -4,15 +4,16 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import rrulePlugin from "@fullcalendar/rrule";
-import { ALL_WEEKDAYS, Options, RRule, WeekdayStr } from "rrule";
+import { ALL_WEEKDAYS, RRule } from "rrule";
 import {
   DateSelectArg,
   EventApi,
   EventInput,
 } from "@fullcalendar/core/index.js";
-import RecurrenceOptions from "./RecurrenceOptions"; // Import the new component
+import RecurrenceOptions from "./RecurrenceOptions";
 import { Checkbox } from "@nextui-org/react";
 import { convertToRruleDate } from "@/lib/utils";
+import useRecurrenceRule from "@/hooks/useRecurrenceRule";
 
 export enum EndCondition {
   NEVER = "never",
@@ -30,40 +31,11 @@ const DEFAULT_RECURRENCE_RULE = new RRule({
   byweekday: [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR],
 });
 
-const useRecurrenceRule = (initialRule: RRule) => {
-  const [recurrenceRule, setRecurrenceRule] = useState<RRule>(initialRule);
-  const [savedWeekdays, setSavedWeekdays] = useState<WeekdayStr[]>([]);
-
-  const updateRecurrenceRule = (options: Partial<Options>) => {
-    setRecurrenceRule((prev) => new RRule({ ...prev.origOptions, ...options }));
-  };
-
-  const handleFrequencyChange = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) => {
-      const value = Number(event.target.value);
-      updateRecurrenceRule({ freq: value });
-      if (value !== RRule.WEEKLY) {
-        setSavedWeekdays(recurrenceRule.origOptions.byweekday as WeekdayStr[]);
-        updateRecurrenceRule({ byweekday: undefined });
-      } else {
-        updateRecurrenceRule({ byweekday: savedWeekdays });
-      }
-    },
-    [recurrenceRule, savedWeekdays]
-  );
-
-  return {
-    recurrenceRule,
-    updateRecurrenceRule,
-    handleFrequencyChange,
-  };
-};
-
 const ScheduleCalendar = ({
   timeSlots,
   setTimeSlots,
 }: ScheduleCalendarProps) => {
-  const [makeRecurrent, setMakeRecurrent] = useState<boolean>(true);
+  const [isRecurrent, setIsRecurrent] = useState<boolean>(true);
   const [endCondition, setEndCondition] = useState<EndCondition>(
     EndCondition.NEVER
   );
@@ -94,10 +66,10 @@ const ScheduleCalendar = ({
 
       const event: EventInput = {
         id: String(timeSlots.length + 1),
-        title: makeRecurrent ? "Recurring Event" : "Single Event",
+        title: isRecurrent ? "Recurring Event" : "Single Event",
         start: selectInfo.startStr,
         end: selectInfo.endStr,
-        ...(makeRecurrent && {
+        ...(isRecurrent && {
           rrule: rruleWithStart,
           duration: {
             hours: Math.floor(
@@ -108,13 +80,15 @@ const ScheduleCalendar = ({
           },
         }),
         extendedProps: {
-          rrule,
+          ...(isRecurrent && {
+            rrule,
+          }),
         },
       };
 
       setTimeSlots([...timeSlots, event]);
     },
-    [makeRecurrent, recurrenceRule, setTimeSlots, timeSlots]
+    [isRecurrent, recurrenceRule, setTimeSlots, timeSlots]
   );
 
   const handleEventClick = useCallback(
@@ -143,14 +117,14 @@ const ScheduleCalendar = ({
     <>
       <div className="w-full p-2">
         <Checkbox
-          defaultSelected={makeRecurrent}
-          onChange={(e) => setMakeRecurrent(e.target.checked)}
+          defaultSelected={isRecurrent}
+          onChange={(e) => setIsRecurrent(e.target.checked)}
         >
           Recurrent event
         </Checkbox>
       </div>
       <RecurrenceOptions
-        makeRecurrent={makeRecurrent}
+        makeRecurrent={isRecurrent}
         recurrenceRule={recurrenceRule}
         updateRecurrenceRule={updateRecurrenceRule}
         handleFrequencyChange={handleFrequencyChange}
@@ -179,10 +153,10 @@ const ScheduleCalendar = ({
             return slot;
           })}
           eventClick={handleEventClick}
-          allDaySlot={false}
+          allDaySlot={true}
           timeZone="UTC"
           nowIndicator
-          firstDay={1}
+          firstDay={0}
           selectOverlap={false}
           locale="en-US"
         />

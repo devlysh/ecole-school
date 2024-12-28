@@ -32,10 +32,10 @@ export const POST = async (request: Request) => {
         name: `${name}`,
         email,
         passwordHash,
+        settings: { timezone },
         teacher: {
           create: {
-            settings: { timezone },
-            availableHours: {
+            availableSlots: {
               create: timeSlots.map((slot) => ({
                 startTime: slot.start as string,
                 endTime: slot.end as string,

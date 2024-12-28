@@ -50,11 +50,11 @@ export const syncStripeCustomers = async () => {
               name,
               dateJoined: new Date(),
               isActive: false,
+              settings: {},
               student: {
                 create: {
                   stripeCustomerId,
                   stripeSubscriptionId,
-                  settings: {},
                 },
               },
             },
@@ -66,7 +66,6 @@ export const syncStripeCustomers = async () => {
               userId: existingUser.id,
               stripeCustomerId,
               stripeSubscriptionId,
-              settings: {},
             },
           });
         } else {

@@ -32,10 +32,10 @@ export const PUT = async (
       where: { email: params.email },
       data: {
         name: `${name}`,
+        settings: { timezone },
         teacher: {
           update: {
-            settings: { timezone },
-            availableHours: {
+            availableSlots: {
               deleteMany: {},
               create: timeSlots.map((slot) => ({
                 startTime: slot.start as string,

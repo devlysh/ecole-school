@@ -102,7 +102,7 @@ const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
         ),
       },
     ],
-    []
+    [router]
   );
 
   const handleNew = useCallback(() => {

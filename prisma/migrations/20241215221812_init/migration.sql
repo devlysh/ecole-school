@@ -6,6 +6,7 @@ CREATE TABLE "users" (
     "name" TEXT,
     "date_joined" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "settings" JSONB,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -48,9 +49,16 @@ CREATE TABLE "languages" (
 -- CreateTable
 CREATE TABLE "teachers" (
     "user_id" INTEGER NOT NULL,
-    "settings" JSONB,
 
     CONSTRAINT "teachers_pkey" PRIMARY KEY ("user_id")
+);
+
+-- CreateTable
+CREATE TABLE "teacher_languages" (
+    "teacher_id" INTEGER NOT NULL,
+    "language_id" INTEGER NOT NULL,
+
+    CONSTRAINT "teacher_languages_pkey" PRIMARY KEY ("teacher_id","language_id")
 );
 
 -- CreateTable
@@ -69,19 +77,10 @@ CREATE TABLE "available_hours" (
 CREATE TABLE "students" (
     "user_id" INTEGER NOT NULL,
     "assigned_teacher_id" INTEGER,
-    "settings" JSONB,
     "stripe_customer_id" TEXT NOT NULL,
     "stripe_subscription_id" TEXT,
 
     CONSTRAINT "students_pkey" PRIMARY KEY ("user_id")
-);
-
--- CreateTable
-CREATE TABLE "teacher_languages" (
-    "teacher_id" INTEGER NOT NULL,
-    "language_id" INTEGER NOT NULL,
-
-    CONSTRAINT "teacher_languages_pkey" PRIMARY KEY ("teacher_id","language_id")
 );
 
 -- CreateTable
@@ -145,6 +144,12 @@ ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_role_id_fkey" FOREIGN KEY ("
 ALTER TABLE "teachers" ADD CONSTRAINT "teachers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "teacher_languages" ADD CONSTRAINT "teacher_languages_teacher_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "teacher_languages" ADD CONSTRAINT "teacher_languages_language_id_fkey" FOREIGN KEY ("language_id") REFERENCES "languages"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "available_hours" ADD CONSTRAINT "available_hours_teacher_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -152,9 +157,3 @@ ALTER TABLE "students" ADD CONSTRAINT "students_user_id_fkey" FOREIGN KEY ("user
 
 -- AddForeignKey
 ALTER TABLE "students" ADD CONSTRAINT "students_assigned_teacher_id_fkey" FOREIGN KEY ("assigned_teacher_id") REFERENCES "teachers"("user_id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "teacher_languages" ADD CONSTRAINT "teacher_languages_teacher_id_fkey" FOREIGN KEY ("teacher_id") REFERENCES "teachers"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "teacher_languages" ADD CONSTRAINT "teacher_languages_language_id_fkey" FOREIGN KEY ("language_id") REFERENCES "languages"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

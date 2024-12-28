@@ -20,18 +20,18 @@ const AccountTeachersEditPage = async ({
   const email = decodeURIComponent(params.email);
 
   try {
-    const teacher = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
       include: {
         teacher: {
           include: {
-            availableHours: true,
+            availableSlots: true,
           },
         },
       },
     });
 
-    const timeSlots = teacher?.teacher?.availableHours.map((hour) => ({
+    const timeSlots = user?.teacher?.availableSlots.map((hour) => ({
       start: hour.startTime,
       end: hour.endTime,
       rrule: hour.rrule || undefined,
@@ -43,9 +43,7 @@ const AccountTeachersEditPage = async ({
       },
     }));
 
-    logger.debug({ teacher, timeSlots }, "Teacher and time slots");
-
-    if (!teacher || !teacher.name || !teacher.email || !timeSlots) {
+    if (!user || !user.name || !user.email || !timeSlots) {
       return notFound();
     }
 
@@ -55,8 +53,8 @@ const AccountTeachersEditPage = async ({
           <div className="w-full">
             <h1>Edit Teacher</h1>
             <AccountTeachersForm
-              name={teacher.name}
-              email={teacher.email}
+              name={user.name}
+              email={user.email}
               timeSlots={timeSlots}
             />
           </div>
