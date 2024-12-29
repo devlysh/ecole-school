@@ -10,7 +10,8 @@ export const GET = async (request: Request) => {
     const endDateParam = url.searchParams.get("endDate");
     const selectedSlotsParam = url.searchParams.get("selectedSlots");
     const fixedScheduleParam = url.searchParams.get("fixedSchedule");
-    const isFixedSchedule = fixedScheduleParam === "true";
+
+    const isFixedSchedule: boolean = fixedScheduleParam === "true";
 
     const selectedSlots = selectedSlotsParam
       ? selectedSlotsParam.split(",").map((slot) => {

@@ -229,7 +229,7 @@ const WeekNavigation: React.FC<{
       </button>
     )}
     <div>
-      {!oneWeek &&
+      {oneWeek &&
         `${formatDate(currentWeekStart)} - ${formatDate(
           addDays(currentWeekStart, 6)
         )}`}
@@ -268,7 +268,7 @@ const CalendarGrid: React.FC<{
   renderSlot: (date: Date, hour: number) => JSX.Element;
 }> = ({ weekDates, hourRange, renderDayHeader, renderSlot }) => (
   <div className="flex flex-col gap-2 w-full">
-    <div className="flex gap-2 text-xs">{weekDates.map(renderDayHeader)}</div>
+    <div className="flex gap-2">{weekDates.map(renderDayHeader)}</div>
     <div className="flex flex-row gap-2 w-full">
       {weekDates.map((date) => (
         <div className="flex flex-col gap-2 w-full" key={date.getTime()}>
