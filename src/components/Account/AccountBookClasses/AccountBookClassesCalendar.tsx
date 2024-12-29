@@ -3,39 +3,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
 import { AvailableHour } from "@/lib/types";
-
-/** Just an example helper. You may replace it with date-fns or dayjs */
-function addDays(base: Date, days: number): Date {
-  const copy = new Date(base);
-  copy.setDate(copy.getDate() + days);
-  return copy;
-}
-
-function formatDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+import { addDays, format, startOfWeek, getDay } from "date-fns";
 
 function convertTo12Hours(hour: number): string {
   return `${hour % 12 || 12} ${hour < 12 ? "am" : "pm"}`;
 }
 
-function getWeekDates(weekStart: Date): Date[] {
-  const arr: Date[] = [];
-  for (let i = 0; i < 7; i++) {
-    arr.push(addDays(weekStart, i));
-  }
-  return arr;
-}
-
 function dayLabel(date: Date, hideDates = false): string {
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   if (hideDates) {
-    return dayNames[date.getDay()];
+    return dayNames[getDay(date)];
   }
-  return `${dayNames[date.getDay()]} ${date.getMonth() + 1}/${date.getDate()}`;
+  return `${dayNames[getDay(date)]} ${format(date, "M/d")}`;
 }
 
 interface AccountBookClassesCalendarProps {
@@ -59,14 +38,7 @@ export const AccountBookClassesCalendar: React.FC<
 }) => {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
     const now = new Date();
-    if (oneWeek) {
-      // Start from Sunday
-      now.setUTCDate(now.getUTCDate() - now.getUTCDay());
-    } else {
-      // Start from tomorrow
-      now.setUTCDate(now.getUTCDate() + 1);
-    }
-    return now;
+    return oneWeek ? startOfWeek(now) : addDays(now, 1);
   });
 
   const [hourRange, setHourRange] = useState<number[]>(() => hours);
@@ -103,8 +75,8 @@ export const AccountBookClassesCalendar: React.FC<
         );
 
         const response = await getAvailableHoursRequest(
-          formatDate(start),
-          formatDate(endOfWeek),
+          format(start, "yyyy-MM-dd"),
+          format(endOfWeek, "yyyy-MM-dd"),
           selectedSlotsParam,
           oneWeek
         );
@@ -115,7 +87,9 @@ export const AccountBookClassesCalendar: React.FC<
     })();
   }, [currentWeekStart, selectedSlots, setAvailableSlots, oneWeek]);
 
-  const weekDates = getWeekDates(currentWeekStart);
+  const weekDates = Array.from({ length: 7 }, (_, i) =>
+    addDays(currentWeekStart, i)
+  );
 
   const renderHour = (hour: number) => (
     <div
@@ -135,7 +109,7 @@ export const AccountBookClassesCalendar: React.FC<
     </div>
   );
 
-  const getWeekdayNumber = (date: Date) => date.getDay();
+  const getWeekdayNumber = (date: Date) => getDay(date);
 
   const renderSlot = (date: Date, hour: number) => {
     const dayOfWeek = getWeekdayNumber(date);
@@ -230,8 +204,9 @@ const WeekNavigation: React.FC<{
     )}
     <div>
       {oneWeek &&
-        `${formatDate(currentWeekStart)} - ${formatDate(
-          addDays(currentWeekStart, 6)
+        `${format(currentWeekStart, "yyyy-MM-dd")} - ${format(
+          addDays(currentWeekStart, 6),
+          "yyyy-MM-dd"
         )}`}
     </div>
     {!oneWeek && <button onClick={handleNextWeek}>Next Week &rarr;</button>}

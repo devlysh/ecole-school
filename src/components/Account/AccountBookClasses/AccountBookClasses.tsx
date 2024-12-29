@@ -6,6 +6,7 @@ import { AccountBookClassesCalendar } from "./AccountBookClassesCalendar";
 import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
 import { bookClasses } from "@/app/api/v1/book-classes/request";
 import { AvailableHour } from "@/lib/types";
+import { addDays, startOfWeek, format } from "date-fns";
 
 const AccountBookClasses: React.FC = () => {
   const [availableSlots, setAvailableSlots] = useState<AvailableHour[]>([]);
@@ -18,19 +19,12 @@ const AccountBookClasses: React.FC = () => {
     const fetchInitialSlots = async () => {
       try {
         const now = new Date();
-        const startOfWeek = new Date(
-          Date.UTC(
-            now.getUTCFullYear(),
-            now.getUTCMonth(),
-            now.getUTCDate() - now.getUTCDay()
-          )
-        );
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
+        const startOfWeekDate = startOfWeek(now);
+        const endOfWeekDate = addDays(startOfWeekDate, 6);
 
         const data = await getAvailableHoursRequest(
-          startOfWeek.toISOString().split("T")[0],
-          endOfWeek.toISOString().split("T")[0],
+          format(startOfWeekDate, "yyyy-MM-dd"),
+          format(endOfWeekDate, "yyyy-MM-dd"),
           undefined,
           isFixedSchedule
         );
@@ -49,19 +43,12 @@ const AccountBookClasses: React.FC = () => {
       setSelectedSlots([]);
 
       const now = new Date();
-      const startOfWeek = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate() - now.getUTCDay()
-        )
-      );
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
+      const startOfWeekDate = startOfWeek(now);
+      const endOfWeekDate = addDays(startOfWeekDate, 6);
 
       const fresh = await getAvailableHoursRequest(
-        startOfWeek.toISOString().split("T")[0],
-        endOfWeek.toISOString().split("T")[0],
+        format(startOfWeekDate, "yyyy-MM-dd"),
+        format(endOfWeekDate, "yyyy-MM-dd"),
         undefined,
         isFixedSchedule
       );
