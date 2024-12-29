@@ -56,11 +56,6 @@ export const GET = async (request: Request) => {
           logger.warn(
             `No dates generated for slot ${availableSlot.id} with rule: ${availableSlot.rrule}`
           );
-        } else {
-          logger.info(
-            `Generated dates for slot ${availableSlot.id}:`,
-            dates.map((date) => date.toISOString())
-          );
         }
       } else {
         const slotDate = new Date(availableSlot.startTime);

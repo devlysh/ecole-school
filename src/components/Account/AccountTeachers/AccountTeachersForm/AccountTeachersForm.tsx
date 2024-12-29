@@ -31,8 +31,6 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
   );
   const emailInputRef = useRef<HTMLInputElement>(null);
 
-  logger.debug({ initialTimeSlots, timeSlots }, "Time slots");
-
   const handleSubmit = useCallback(
     async (values: TeacherFormValues) => {
       try {
@@ -47,10 +45,12 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
 
         if (isTaken) {
           const result = await updateTeacher(teacher);
-          logger.debug({ result, teacher }, "Teacher updated successfully");
+          // TODO: Make this a toast
+          logger.info({ result, teacher }, "Teacher updated successfully");
         } else {
           const result = await addTeacher(teacher);
-          logger.debug({ result, teacher }, "Teacher added successfully");
+          // TODO: Make this a toast
+          logger.info({ result, teacher }, "Teacher added successfully");
         }
 
         router.push("/account/teachers");

@@ -3,7 +3,6 @@ import AccountLayout from "@/components/Account/layout";
 import AccountTeachers from "@/components/Account/AccountTeachers";
 import { Language, Role, Teacher } from "@/lib/types";
 import prisma from "@/lib/prisma";
-import logger from "@/lib/logger";
 
 const AccountTeachersPage = async () => {
   const users = await prisma.user.findMany({
@@ -57,8 +56,6 @@ const AccountTeachersPage = async () => {
     roles: user.roles.map((r) => r.role),
     languages: user.teacher?.languages.map((l) => l.language as Language),
   }));
-
-  logger.debug({ teachers }, "Teachers");
 
   return (
     <AccountLayout>

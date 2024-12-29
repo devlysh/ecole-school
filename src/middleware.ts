@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "./lib/jwt";
 import { Role, TokenType } from "./lib/types";
 import logger from "./lib/logger";
-import { hasRole } from "./lib/utils";
+
+const rolePaths: Record<Role, string[]> = {
+  [Role.ADMIN]: ["/account", "/account/teachers", "/admin"],
+  [Role.STUDENT]: ["/account", "/account/book-classes", "/account/my-classes"],
+  [Role.TEACHER]: ["/account", "/account/teacher"],
+};
 
 const guestPaths = [
   "/quiz",
@@ -12,62 +17,34 @@ const guestPaths = [
   "/set-password",
 ];
 
-const studentPaths = [
-  "/account",
-  "/account/book-classes",
-  "/account/my-classes",
-];
-
-const teacherPaths = ["/account", "/account/teacher"];
-
 export const middleware = async (req: NextRequest) => {
   const accessToken = req.cookies.get(TokenType.ACCESS)?.value;
   const pathname = req.nextUrl.pathname;
 
-  const isGuestPath = guestPaths.some((path) =>
-    req.nextUrl.pathname.startsWith(path)
-  );
-
-  if (!accessToken && isGuestPath) {
-    return NextResponse.next();
-  }
-
   if (!accessToken) {
+    const isGuestPath = guestPaths.some((path) => pathname.startsWith(path));
+    if (isGuestPath) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL("/", req.url));
   }
 
   try {
     const decoded = await verifyToken(accessToken);
-    const { roles } = decoded as { email: string; roles: string[] };
+    const { roles } = decoded as { email: string; roles: Role[] };
 
-    const isAdmin = hasRole(roles, Role.ADMIN);
-    const isStudent = hasRole(roles, Role.STUDENT);
-    const isTeacher = hasRole(roles, Role.TEACHER);
+    console.log("Pathname:", pathname);
+    console.log("User Roles:", roles);
 
-    if (isAdmin) {
+    const hasAccess = roles.some((role) => {
+      const allowedPaths = rolePaths[role] || [];
+      return allowedPaths.some((path) => pathname === path);
+    });
+
+    console.log("Has Access:", hasAccess);
+
+    if (hasAccess) {
       return NextResponse.next();
-    }
-
-    if (isStudent) {
-      const isStudentPath = studentPaths.some((path) =>
-        pathname.startsWith(path)
-      );
-      if (isStudentPath) {
-        return NextResponse.next();
-      } else {
-        return NextResponse.redirect(new URL("/account", req.url));
-      }
-    }
-
-    if (isTeacher) {
-      const isTeacherPath = teacherPaths.some((path) =>
-        pathname.startsWith(path)
-      );
-      if (isTeacherPath) {
-        return NextResponse.next();
-      } else {
-        return NextResponse.redirect(new URL("/account", req.url));
-      }
     }
 
     return NextResponse.redirect(new URL("/", req.url));
