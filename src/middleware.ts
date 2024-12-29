@@ -33,15 +33,10 @@ export const middleware = async (req: NextRequest) => {
     const decoded = await verifyToken(accessToken);
     const { roles } = decoded as { email: string; roles: Role[] };
 
-    console.log("Pathname:", pathname);
-    console.log("User Roles:", roles);
-
     const hasAccess = roles.some((role) => {
       const allowedPaths = rolePaths[role] || [];
       return allowedPaths.some((path) => pathname === path);
     });
-
-    console.log("Has Access:", hasAccess);
 
     if (hasAccess) {
       return NextResponse.next();
