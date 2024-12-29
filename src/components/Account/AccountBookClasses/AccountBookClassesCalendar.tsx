@@ -5,18 +5,6 @@ import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
 import { AvailableHour } from "@/lib/types";
 import { addDays, format, startOfWeek, getDay } from "date-fns";
 
-function convertTo12Hours(hour: number): string {
-  return `${hour % 12 || 12} ${hour < 12 ? "am" : "pm"}`;
-}
-
-function dayLabel(date: Date, hideDates = false): string {
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  if (hideDates) {
-    return dayNames[getDay(date)];
-  }
-  return `${dayNames[getDay(date)]} ${format(date, "M/d")}`;
-}
-
 interface AccountBookClassesCalendarProps {
   availableSlots: AvailableHour[];
   selectedSlots: AvailableHour[];
@@ -105,7 +93,7 @@ export const AccountBookClassesCalendar: React.FC<
       className="w-full h-8 flex justify-center items-center"
       key={date.getTime()}
     >
-      {dayLabel(date, oneWeek)}
+      {getDayLabel(date, oneWeek)}
     </div>
   );
 
@@ -243,7 +231,7 @@ const CalendarGrid: React.FC<{
   renderSlot: (date: Date, hour: number) => JSX.Element;
 }> = ({ weekDates, hourRange, renderDayHeader, renderSlot }) => (
   <div className="flex flex-col gap-2 w-full">
-    <div className="flex gap-2">{weekDates.map(renderDayHeader)}</div>
+    <div className="flex gap-2 text-xs">{weekDates.map(renderDayHeader)}</div>
     <div className="flex flex-row gap-2 w-full">
       {weekDates.map((date) => (
         <div className="flex flex-col gap-2 w-full" key={date.getTime()}>
@@ -253,3 +241,15 @@ const CalendarGrid: React.FC<{
     </div>
   </div>
 );
+
+function convertTo12Hours(hour: number): string {
+  return `${hour % 12 || 12} ${hour < 12 ? "am" : "pm"}`;
+}
+
+function getDayLabel(date: Date, hideDates = false): string {
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  if (hideDates) {
+    return dayNames[getDay(date)];
+  }
+  return `${dayNames[getDay(date)]} ${format(date, "M/d")}`;
+}
