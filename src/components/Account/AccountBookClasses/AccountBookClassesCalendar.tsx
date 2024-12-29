@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
+import React, { useCallback, useState } from "react";
 import { AvailableHour } from "@/lib/types";
 import { addDays, format, startOfWeek, getDay } from "date-fns";
 
@@ -10,20 +9,12 @@ interface AccountBookClassesCalendarProps {
   selectedSlots: AvailableHour[];
   hours: number[];
   setSelectedSlots: React.Dispatch<React.SetStateAction<AvailableHour[]>>;
-  setAvailableSlots: React.Dispatch<React.SetStateAction<AvailableHour[]>>;
   oneWeek: boolean;
 }
 
 export const AccountBookClassesCalendar: React.FC<
   AccountBookClassesCalendarProps
-> = ({
-  availableSlots,
-  selectedSlots,
-  hours,
-  setSelectedSlots,
-  setAvailableSlots,
-  oneWeek,
-}) => {
+> = ({ availableSlots, selectedSlots, hours, setSelectedSlots, oneWeek }) => {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
     const now = new Date();
     return oneWeek ? startOfWeek(now) : addDays(now, 1);
@@ -50,30 +41,6 @@ export const AccountBookClassesCalendar: React.FC<
   const handleHourScrollDown = useCallback(() => {
     setHourRange((prev) => prev.map((h) => h + 1));
   }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const start = oneWeek ? new Date() : currentWeekStart;
-        start.setHours(0, 0, 0, 0);
-
-        const endOfWeek = addDays(start, 6);
-        const selectedSlotsParam = selectedSlots.map(
-          (slot) => `${slot.day}-${slot.hour}`
-        );
-
-        const response = await getAvailableHoursRequest(
-          format(start, "yyyy-MM-dd"),
-          format(endOfWeek, "yyyy-MM-dd"),
-          selectedSlotsParam,
-          oneWeek
-        );
-        setAvailableSlots(response);
-      } catch (error) {
-        console.error("Error fetching updated available slots:", error);
-      }
-    })();
-  }, [currentWeekStart, selectedSlots, setAvailableSlots, oneWeek]);
 
   const weekDates = Array.from({ length: 7 }, (_, i) =>
     addDays(currentWeekStart, i)

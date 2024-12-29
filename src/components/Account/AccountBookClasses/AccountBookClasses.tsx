@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Switch } from "@nextui-org/react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AccountBookClassesCalendar } from "./AccountBookClassesCalendar";
 import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
 import { bookClasses } from "@/app/api/v1/book-classes/request";
@@ -15,49 +15,43 @@ const AccountBookClasses: React.FC = () => {
 
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
-  useEffect(() => {
-    const fetchInitialSlots = async () => {
-      try {
-        const now = new Date();
-        const startOfWeekDate = startOfWeek(now);
-        const endOfWeekDate = addDays(startOfWeekDate, 6);
-
-        const data = await getAvailableHoursRequest(
-          format(startOfWeekDate, "yyyy-MM-dd"),
-          format(endOfWeekDate, "yyyy-MM-dd"),
-          undefined,
-          isFixedSchedule
-        );
-        setAvailableSlots(data);
-      } catch (error) {
-        console.error("Error fetching initial slots:", error);
-      }
-    };
-    fetchInitialSlots();
-  }, [isFixedSchedule]);
-
-  const handleBook = async () => {
+  const handleBook = useCallback(async () => {
     try {
       await bookClasses(selectedSlots);
       alert("Booking(s) successful!");
       setSelectedSlots([]);
-
-      const now = new Date();
-      const startOfWeekDate = startOfWeek(now);
-      const endOfWeekDate = addDays(startOfWeekDate, 6);
-
-      const fresh = await getAvailableHoursRequest(
-        format(startOfWeekDate, "yyyy-MM-dd"),
-        format(endOfWeekDate, "yyyy-MM-dd"),
-        undefined,
-        isFixedSchedule
-      );
-      setAvailableSlots(fresh);
     } catch (error) {
       console.error("Error booking classes:", error);
       alert("Booking failed. Check console.");
     }
-  };
+  }, [selectedSlots]);
+
+  const fetchAvailableSlots = useCallback(async () => {
+    try {
+      const now = new Date();
+      const start = isFixedSchedule ? new Date() : startOfWeek(now);
+      start.setHours(0, 0, 0, 0);
+
+      const endOfWeek = addDays(start, 6);
+      const selectedSlotsParam = selectedSlots.map(
+        (slot) => `${slot.day}-${slot.hour}`
+      );
+
+      const response = await getAvailableHoursRequest(
+        format(start, "yyyy-MM-dd"),
+        format(endOfWeek, "yyyy-MM-dd"),
+        selectedSlotsParam,
+        isFixedSchedule
+      );
+      setAvailableSlots(response);
+    } catch (error) {
+      console.error("Error fetching available slots:", error);
+    }
+  }, [isFixedSchedule, selectedSlots]);
+
+  useEffect(() => {
+    fetchAvailableSlots();
+  }, [fetchAvailableSlots]);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -83,7 +77,6 @@ const AccountBookClasses: React.FC = () => {
         selectedSlots={selectedSlots}
         hours={hours}
         setSelectedSlots={setSelectedSlots}
-        setAvailableSlots={setAvailableSlots}
         oneWeek={isFixedSchedule}
       />
     </div>
