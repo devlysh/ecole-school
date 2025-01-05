@@ -1,4 +1,5 @@
 import logger from "@/lib/logger";
+import { AvailableHour } from "@/lib/types";
 
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -9,7 +10,7 @@ if (!NEXT_PUBLIC_BASE_URL) {
 export const getAvailableHoursRequest = async (
   startDate: string,
   endDate: string,
-  selectedSlots?: string[],
+  selectedSlots?: AvailableHour[],
   fixedSchedule?: boolean
 ) => {
   const url = new URL(`${NEXT_PUBLIC_BASE_URL}/api/v1/available-hours`);
@@ -17,7 +18,10 @@ export const getAvailableHoursRequest = async (
   url.searchParams.append("endDate", endDate);
 
   if (selectedSlots && selectedSlots.length) {
-    url.searchParams.append("selectedSlots", selectedSlots.join(","));
+    url.searchParams.append(
+      "selectedSlots",
+      selectedSlots.map((slot) => `${slot.day}-${slot.hour}`).join(",")
+    );
   }
 
   if (fixedSchedule) {

@@ -15,7 +15,8 @@ export const loginRequest = async (email: string, password: string) => {
     });
 
     if (!response.ok) {
-      logger.error({ response }, "Error during login");
+      const { error } = await response.json();
+      logger.error(error, "Error during login");
     }
 
     return response;

@@ -3,10 +3,19 @@ import { verifyToken } from "./lib/jwt";
 import { Role, TokenType } from "./lib/types";
 import logger from "./lib/logger";
 
-const rolePaths: Record<Role, string[]> = {
-  [Role.ADMIN]: ["/account", "/account/teachers", "/admin"],
-  [Role.STUDENT]: ["/account", "/account/book-classes", "/account/my-classes"],
-  [Role.TEACHER]: ["/account", "/account/teacher"],
+const rolePaths: Record<Role, RegExp[]> = {
+  [Role.ADMIN]: [
+    /^\/account$/,
+    /^\/account\/teachers$/,
+    /^\/account\/teachers\/.+$/,
+    /^\/admin$/,
+  ],
+  [Role.STUDENT]: [
+    /^\/account$/,
+    /^\/account\/book-classes$/,
+    /^\/account\/my-classes$/,
+  ],
+  [Role.TEACHER]: [/^\/account$/, /^\/account\/teacher$/],
 };
 
 const guestPaths = [
@@ -35,7 +44,7 @@ export const middleware = async (req: NextRequest) => {
 
     const hasAccess = roles.some((role) => {
       const allowedPaths = rolePaths[role] || [];
-      return allowedPaths.some((path) => pathname === path);
+      return allowedPaths.some((regex) => regex.test(pathname));
     });
 
     if (hasAccess) {

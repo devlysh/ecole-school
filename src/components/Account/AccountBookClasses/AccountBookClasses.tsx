@@ -7,24 +7,22 @@ import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
 import { bookClasses } from "@/app/api/v1/book-classes/request";
 import { AvailableHour } from "@/lib/types";
 import { addDays, startOfWeek, format } from "date-fns";
+import logger from "@/lib/logger";
 
 const AccountBookClasses: React.FC = () => {
   const [availableSlots, setAvailableSlots] = useState<AvailableHour[]>([]);
-  const [selectedSlots, setSelectedSlots] = useState<AvailableHour[]>([]);
+  const [selectedSlots, setSelectedSlots] = useState<Date[]>([]);
   const [isFixedSchedule, setIsFixedSchedule] = useState<boolean>(true);
 
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
   const handleBook = useCallback(async () => {
     try {
-      await bookClasses(selectedSlots);
-      alert("Booking(s) successful!");
-      setSelectedSlots([]);
+      await bookClasses(selectedSlots, isFixedSchedule);
     } catch (error) {
-      console.error("Error booking classes:", error);
-      alert("Booking failed. Check console.");
+      logger.error(error, "Error booking classes");
     }
-  }, [selectedSlots]);
+  }, [selectedSlots, isFixedSchedule]);
 
   const fetchAvailableSlots = useCallback(async () => {
     try {
@@ -33,17 +31,17 @@ const AccountBookClasses: React.FC = () => {
       start.setHours(0, 0, 0, 0);
 
       const endOfWeek = addDays(start, 6);
-      const selectedSlotsParam = selectedSlots.map(
-        (slot) => `${slot.day}-${slot.hour}`
-      );
 
-      const response = await getAvailableHoursRequest(
+      const fetchedData = await getAvailableHoursRequest(
         format(start, "yyyy-MM-dd"),
         format(endOfWeek, "yyyy-MM-dd"),
-        selectedSlotsParam,
+        selectedSlots.map((slot) => ({
+          day: slot.getDay(),
+          hour: slot.getHours(),
+        })),
         isFixedSchedule
       );
-      setAvailableSlots(response);
+      setAvailableSlots(fetchedData.hourSlots);
     } catch (error) {
       console.error("Error fetching available slots:", error);
     }

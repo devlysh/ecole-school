@@ -6,9 +6,9 @@ import { addDays, format, startOfWeek, getDay } from "date-fns";
 
 interface AccountBookClassesCalendarProps {
   availableSlots: AvailableHour[];
-  selectedSlots: AvailableHour[];
+  selectedSlots: Date[];
   hours: number[];
-  setSelectedSlots: React.Dispatch<React.SetStateAction<AvailableHour[]>>;
+  setSelectedSlots: React.Dispatch<React.SetStateAction<Date[]>>;
   oneWeek: boolean;
 }
 
@@ -35,11 +35,17 @@ export const AccountBookClassesCalendar: React.FC<
   }, [oneWeek]);
 
   const handleHourScrollUp = useCallback(() => {
-    setHourRange((prev) => prev.map((h) => h - 1));
+    setHourRange((prev) => {
+      const newRange = prev.map((h) => h - 1);
+      return newRange[0] < 0 ? prev : newRange;
+    });
   }, []);
 
   const handleHourScrollDown = useCallback(() => {
-    setHourRange((prev) => prev.map((h) => h + 1));
+    setHourRange((prev) => {
+      const newRange = prev.map((h) => h + 1);
+      return newRange[newRange.length - 1] > 23 ? prev : newRange;
+    });
   }, []);
 
   const weekDates = Array.from({ length: 7 }, (_, i) =>
@@ -70,7 +76,7 @@ export const AccountBookClassesCalendar: React.FC<
     const dayOfWeek = getWeekdayNumber(date);
 
     const isSelected = selectedSlots.some(
-      (slot) => slot.day === dayOfWeek && slot.hour === hour
+      (slot) => slot.getTime() === new Date(date).setHours(hour, 0, 0, 0)
     );
     const isAvailable = availableSlots.some(
       (slot) => slot.day === dayOfWeek && slot.hour === hour
@@ -95,16 +101,18 @@ export const AccountBookClassesCalendar: React.FC<
       if (!isAvailable) return;
 
       setSelectedSlots((prev) => {
+        const slotDate = new Date(date);
+        slotDate.setHours(hour, 0, 0, 0);
+
         const alreadySelected = prev.some(
-          (slot) => slot.day === dayOfWeek && slot.hour === hour
+          (slot) => slot.getTime() === slotDate.getTime()
         );
-        if (alreadySelected) {
-          return prev.filter(
-            (slot) => !(slot.day === dayOfWeek && slot.hour === hour)
-          );
-        } else {
-          return [...prev, { day: dayOfWeek, hour }];
+
+        if (!alreadySelected) {
+          return [...prev, slotDate];
         }
+
+        return prev.filter((slot) => slot.getTime() !== slotDate.getTime());
       });
     };
 
@@ -158,7 +166,7 @@ const WeekNavigation: React.FC<{
       </button>
     )}
     <div>
-      {oneWeek &&
+      {!oneWeek &&
         `${format(currentWeekStart, "yyyy-MM-dd")} - ${format(
           addDays(currentWeekStart, 6),
           "yyyy-MM-dd"
