@@ -93,7 +93,6 @@ model AvailableSlot {
   startTime DateTime @map("start_time")
   endTime   DateTime @map("end_time")
   rrule     String?
-  timezone  String
   teacher   Teacher  @relation(fields: [teacherId], references: [userId])
   teacherId Int      @map("teacher_id")
 

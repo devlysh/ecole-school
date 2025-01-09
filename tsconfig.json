@@ -18,7 +18,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@domain/*": ["./domain/*"]
     },
     "baseUrl": "./",
     "noImplicitReturns": true,

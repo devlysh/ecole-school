@@ -73,20 +73,25 @@ export const AccountBookClassesCalendar: React.FC<
   const getWeekdayNumber = (date: Date) => getDay(date);
 
   const renderSlot = (date: Date, hour: number) => {
-    const dayOfWeek = getWeekdayNumber(date);
+    const localDateTime = new Date(date.getTime());
+    localDateTime.setHours(hour, 0, 0, 0);
+
+    const dayOfWeekUTC = localDateTime.getUTCDay();
+    const hourUTC = localDateTime.getUTCHours();
+
+    const isAvailable = availableSlots.some(
+      (slot) => slot.day === dayOfWeekUTC && slot.hour === hourUTC
+    );
 
     const isSelected = selectedSlots.some(
-      (slot) => slot.getTime() === new Date(date).setHours(hour, 0, 0, 0)
-    );
-    const isAvailable = availableSlots.some(
-      (slot) => slot.day === dayOfWeek && slot.hour === hour
+      (slot) => slot.getTime() === localDateTime.getTime()
     );
 
-    const baseClasses = "w-full h-8 text-xs flex justify-center items-center";
-    const selectedClasses = "bg-green-100 border border-green-200 rounded-lg";
+    const baseClasses = "w-full h-8 text-xs flex justify-center items-center rounded-lg";
+    const selectedClasses = "bg-green-100 border border-green-200";
     const availableClasses =
       "bg-blue-100 border border-gray-200 rounded-lg cursor-pointer";
-    const defaultClasses = "bg-gray-100 border border-gray-200 rounded-lg";
+    const defaultClasses = "bg-gray-100 border border-gray-200";
 
     let slotClasses = baseClasses;
     if (isSelected) {
@@ -101,18 +106,17 @@ export const AccountBookClassesCalendar: React.FC<
       if (!isAvailable) return;
 
       setSelectedSlots((prev) => {
-        const slotDate = new Date(date);
-        slotDate.setHours(hour, 0, 0, 0);
-
         const alreadySelected = prev.some(
-          (slot) => slot.getTime() === slotDate.getTime()
+          (slot) => slot.getTime() === localDateTime.getTime()
         );
 
         if (!alreadySelected) {
-          return [...prev, slotDate];
+          return [...prev, localDateTime];
         }
 
-        return prev.filter((slot) => slot.getTime() !== slotDate.getTime());
+        return prev.filter(
+          (slot) => slot.getTime() !== localDateTime.getTime()
+        );
       });
     };
 
@@ -122,7 +126,7 @@ export const AccountBookClassesCalendar: React.FC<
         key={`${date.getTime()}-${hour}`}
         onClick={handleSlotClick}
       >
-        {`${hour}:00-${hour}:55`}
+        {`${format(localDateTime, "HH:mm")}-${format(localDateTime, "HH:55")}`}
       </div>
     );
   };

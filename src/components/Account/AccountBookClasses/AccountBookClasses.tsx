@@ -36,8 +36,8 @@ const AccountBookClasses: React.FC = () => {
         format(start, "yyyy-MM-dd"),
         format(endOfWeek, "yyyy-MM-dd"),
         selectedSlots.map((slot) => ({
-          day: slot.getDay(),
-          hour: slot.getHours(),
+          day: slot.getUTCDay(),
+          hour: slot.getUTCHours(),
         })),
         isFixedSchedule
       );

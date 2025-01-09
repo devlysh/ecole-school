@@ -35,7 +35,6 @@ const AccountTeachersEditPage = async ({
       start: hour.startTime,
       end: hour.endTime,
       rrule: hour.rrule || undefined,
-      timezone: hour.timezone,
       extendedProps: {
         rrule: hour.rrule || undefined,
         dtStart: convertToRruleDate(hour.startTime) || undefined,
