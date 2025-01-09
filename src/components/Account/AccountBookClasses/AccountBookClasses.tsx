@@ -4,10 +4,11 @@ import { Button, Switch } from "@nextui-org/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { AccountBookClassesCalendar } from "./AccountBookClassesCalendar";
 import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
-import { bookClasses } from "@/app/api/v1/book-classes/request";
+import { BookClassesService } from "@domain/book-classes/BookClassesService";
 import { AvailableHour } from "@/lib/types";
 import { addDays, startOfWeek, format } from "date-fns";
 import logger from "@/lib/logger";
+import { bookClassesRequest } from "@/app/api/v1/book-classes/request";
 
 const AccountBookClasses: React.FC = () => {
   const [availableSlots, setAvailableSlots] = useState<AvailableHour[]>([]);
@@ -18,9 +19,13 @@ const AccountBookClasses: React.FC = () => {
 
   const handleBook = useCallback(async () => {
     try {
-      await bookClasses(selectedSlots, isFixedSchedule);
+      await bookClassesRequest(
+        selectedSlots.map((slot) => slot.toISOString()),
+        isFixedSchedule
+      );
+      logger.info("Classes booked successfully");
     } catch (error) {
-      logger.error(error, "Error booking classes");
+      logger.error({ error }, "Failed to book classes");
     }
   }, [selectedSlots, isFixedSchedule]);
 
