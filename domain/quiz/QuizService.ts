@@ -1,4 +1,4 @@
-import { QuizState, QuizStep } from "./types";
+import { QuizState, QuizStep, StepType } from "@/lib/types";
 
 export const QuizService = {
   initializeQuiz: (steps: QuizStep[]): QuizState => ({
@@ -43,12 +43,9 @@ export const QuizService = {
     (state.currentStep / (state.steps.length - 1)) * 100,
 };
 
-export default QuizService;
-
 export const pipe =
   (prevState: QuizState) =>
-  (...methods: ((state: QuizState) => QuizState)[]) => {
-    return methods.reduce((state, method) => {
+  (...methods: ((state: QuizState) => QuizState)[]) =>
+    methods.reduce((state, method) => {
       return method(state);
-    }, prevState);
-  };
+    }, prevState); 

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
-import { steps } from "@/lib/quiz.model";
-import QuizService, { pipe } from "@/lib/quiz.service";
+import { steps } from "@domain/quiz/QuizModel";
+import { QuizService, pipe } from "@domain/quiz/QuizService";
 import { useRouter } from "next/navigation";
 import { Progress } from "@nextui-org/progress";
 import { Button } from "@nextui-org/button";

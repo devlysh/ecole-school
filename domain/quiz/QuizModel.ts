@@ -1,11 +1,11 @@
-import { FormFieldType, QuizStep, StepType } from "./types";
+import { FormFieldType, QuizStep, StepType } from "@/lib/types";
 
 export const steps: QuizStep[] = [
   {
     name: "info-1",
     type: StepType.INFO,
     title: "Perfect Teacher Match",
-    text: "We match you with a native - level teacher to fit your goals and schedule",
+    text: "We match you with a native-level teacher to fit your goals and schedule",
     image: { url: "hands-puzzle.png", width: 217, height: 265 },
   },
   {
@@ -129,4 +129,4 @@ export const steps: QuizStep[] = [
     footerText:
       "By providing your email, you acknowledge that you are at least 18 years old and agree to EcoleFamily's Terms and Conditions and Privacy Policy. You also consent to receive emails and updates regarding our services. You can unsubscribe at any time.",
   },
-];
+]; 

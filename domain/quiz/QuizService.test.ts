@@ -1,5 +1,5 @@
-import { QuizService } from "./quiz.service";
-import { QuizStep, QuizState, StepType } from "./types";
+import { QuizService } from "@domain/quiz/QuizService";
+import { QuizStep, QuizState, StepType } from "@/lib/types";
 
 const steps: QuizStep[] = [
   {
