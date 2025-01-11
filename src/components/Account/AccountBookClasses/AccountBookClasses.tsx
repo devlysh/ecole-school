@@ -4,57 +4,63 @@ import { Button, Switch } from "@nextui-org/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { AccountBookClassesCalendar } from "./AccountBookClassesCalendar";
 import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
-import { BookClassesService } from "@domain/book-classes/BookClassesService";
-import { AvailableHour } from "@/lib/types";
+import { BookClassesService } from "@domain/services/book-classes/BookClassesService";
+import { AvailableCalendarSlot } from "@/lib/types";
 import { addDays, startOfWeek, format } from "date-fns";
 import logger from "@/lib/logger";
 import { bookClassesRequest } from "@/app/api/v1/book-classes/request";
+import { expandTime } from "@/lib/utils";
 
 const AccountBookClasses: React.FC = () => {
-  const [availableSlots, setAvailableSlots] = useState<AvailableHour[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<AvailableCalendarSlot[]>(
+    []
+  );
   const [selectedSlots, setSelectedSlots] = useState<Date[]>([]);
-  const [isFixedSchedule, setIsFixedSchedule] = useState<boolean>(true);
+  const [isRecurrentSchedule, setIsRecurrentSchedule] = useState<boolean>(true);
 
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
   const handleBook = useCallback(async () => {
     try {
       await bookClassesRequest(
-        selectedSlots.map((slot) => slot.toISOString()),
-        isFixedSchedule
+        selectedSlots.map((slot) => slot.getTime()),
+        isRecurrentSchedule
       );
       logger.info("Classes booked successfully");
     } catch (error) {
       logger.error({ error }, "Failed to book classes");
     }
-  }, [selectedSlots, isFixedSchedule]);
+  }, [selectedSlots, isRecurrentSchedule]);
 
-  const fetchAvailableSlots = useCallback(async () => {
-    try {
-      const now = new Date();
-      const start = isFixedSchedule ? new Date() : startOfWeek(now);
-      start.setHours(0, 0, 0, 0);
-
-      const endOfWeek = addDays(start, 6);
-
-      const fetchedData = await getAvailableHoursRequest(
-        format(start, "yyyy-MM-dd"),
-        format(endOfWeek, "yyyy-MM-dd"),
-        selectedSlots.map((slot) => ({
-          day: slot.getUTCDay(),
-          hour: slot.getUTCHours(),
-        })),
-        isFixedSchedule
-      );
-      setAvailableSlots(fetchedData.hourSlots);
-    } catch (error) {
-      console.error("Error fetching available slots:", error);
-    }
-  }, [isFixedSchedule, selectedSlots]);
+  const fetchAvailableSlots = useCallback(
+    async (start: Date, end: Date) => {
+      try {
+        const fetchedData = await getAvailableHoursRequest(
+          format(start, "yyyy-MM-dd"),
+          format(end, "yyyy-MM-dd"),
+          selectedSlots,
+          isRecurrentSchedule
+        );
+        const slots = fetchedData.map((slot: number) => {
+          const date = new Date(expandTime(slot));
+          return { day: date.getDay(), hour: date.getHours() };
+        });
+        setAvailableSlots(slots);
+      } catch (error) {
+        console.error("Error fetching available slots:", error);
+      }
+    },
+    [isRecurrentSchedule, selectedSlots]
+  );
 
   useEffect(() => {
-    fetchAvailableSlots();
-  }, [fetchAvailableSlots]);
+    const now = new Date();
+    const start = isRecurrentSchedule
+      ? startOfWeek(now, { weekStartsOn: 0 })
+      : startOfWeek(now);
+    const endOfWeek = addDays(start, 6);
+    fetchAvailableSlots(start, endOfWeek);
+  }, [fetchAvailableSlots, isRecurrentSchedule]);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -68,10 +74,10 @@ const AccountBookClasses: React.FC = () => {
         <div className="flex flex-col gap-2">
           <Button onClick={handleBook}>Book</Button>
           <Switch
-            isSelected={isFixedSchedule}
-            onValueChange={setIsFixedSchedule}
+            isSelected={isRecurrentSchedule}
+            onValueChange={setIsRecurrentSchedule}
           >
-            Fixed schedule
+            Recurrent schedule
           </Switch>
         </div>
       </div>
@@ -80,7 +86,8 @@ const AccountBookClasses: React.FC = () => {
         selectedSlots={selectedSlots}
         hours={hours}
         setSelectedSlots={setSelectedSlots}
-        oneWeek={isFixedSchedule}
+        oneWeek={isRecurrentSchedule}
+        fetchAvailableSlots={fetchAvailableSlots}
       />
     </div>
   );

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import logger from "@/lib/logger";
-import { AvailableHoursService } from "@domain/available-hours/AvailableHoursService";
+import { AvailableHoursService } from "@domain/services/available-hours/AvailableHoursService";
+import { verifyAccessToken } from "@/lib/jwt";
+import { UserRepository } from "@domain/repositories/UserRepository";
+import { expandTime } from "@/lib/utils";
 
 export const GET = async (request: Request) => {
   return handleGetAvailableHoursRequest(request);
@@ -15,8 +18,8 @@ export const handleGetAvailableHoursRequest = async (
     const endDateParam = parsedUrl.searchParams.get("endDate") ?? undefined;
     const selectedSlotsParam =
       parsedUrl.searchParams.get("selectedSlots") ?? undefined;
-    const fixedScheduleParam =
-      parsedUrl.searchParams.get("fixedSchedule") ?? undefined;
+    const recurrentScheduleParam =
+      parsedUrl.searchParams.get("recurrentSchedule") ?? undefined;
 
     if (!startDateParam || !endDateParam) {
       return NextResponse.json(
@@ -25,13 +28,27 @@ export const handleGetAvailableHoursRequest = async (
       );
     }
 
+    const decodedToken = await verifyAccessToken();
+    const email = decodedToken?.email;
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Unauthorized - no email in token" },
+        { status: 401 }
+      );
+    }
+
+    const isRecurrentSchedule = recurrentScheduleParam === "true";
+    const selectedSlots = parseSelectedSlots(selectedSlotsParam);
+
     // Use the service to retrieve data
     const service = new AvailableHoursService();
     const hourSlots = await service.getAvailableHours({
-      startDateParam,
-      endDateParam,
-      selectedSlotsParam,
-      fixedScheduleParam,
+      startDate: new Date(startDateParam),
+      endDate: new Date(endDateParam),
+      selectedSlots,
+      isRecurrentSchedule,
+      email,
     });
 
     return NextResponse.json(hourSlots, { status: 200 });
@@ -42,4 +59,11 @@ export const handleGetAvailableHoursRequest = async (
       { status: 500 }
     );
   }
+};
+
+export const parseSelectedSlots = (param?: string): Date[] => {
+  if (!param) return [];
+  return param.split(",").map((slot) => {
+    return new Date(expandTime(Number(slot)));
+  });
 };

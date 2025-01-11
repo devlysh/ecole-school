@@ -1,5 +1,5 @@
 import logger from "@/lib/logger";
-import { AvailableHour } from "@/lib/types";
+import { compressTime } from "@/lib/utils";
 
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -10,8 +10,8 @@ if (!NEXT_PUBLIC_BASE_URL) {
 export const getAvailableHoursRequest = async (
   startDate: string,
   endDate: string,
-  selectedSlots?: AvailableHour[],
-  fixedSchedule?: boolean
+  selectedSlots?: Date[],
+  recurrentSchedule?: boolean
 ) => {
   const url = new URL(`${NEXT_PUBLIC_BASE_URL}/api/v1/available-hours`);
   url.searchParams.append("startDate", startDate);
@@ -20,12 +20,12 @@ export const getAvailableHoursRequest = async (
   if (selectedSlots && selectedSlots.length) {
     url.searchParams.append(
       "selectedSlots",
-      selectedSlots.map((slot) => `${slot.day}-${slot.hour}`).join(",")
+      selectedSlots.map((slot) => compressTime(slot.getTime())).join(",")
     );
   }
 
-  if (fixedSchedule) {
-    url.searchParams.append("fixedSchedule", "true");
+  if (recurrentSchedule) {
+    url.searchParams.append("recurrentSchedule", "true");
   }
 
   const response = await fetch(url.toString());

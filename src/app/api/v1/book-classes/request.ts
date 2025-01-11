@@ -1,4 +1,4 @@
-export async function bookClassesRequest(dates: string[], isFixedSchedule: boolean) {
+export async function bookClassesRequest(dates: number[], isFixedSchedule: boolean) {
   const response = await fetch("/api/v1/book-classes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

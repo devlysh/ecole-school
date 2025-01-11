@@ -1,20 +1,28 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
-import { AvailableHour } from "@/lib/types";
+import { AvailableCalendarSlot } from "@/lib/types";
 import { addDays, format, startOfWeek, getDay } from "date-fns";
 
 interface AccountBookClassesCalendarProps {
-  availableSlots: AvailableHour[];
+  availableSlots: AvailableCalendarSlot[];
   selectedSlots: Date[];
   hours: number[];
   setSelectedSlots: React.Dispatch<React.SetStateAction<Date[]>>;
   oneWeek: boolean;
+  fetchAvailableSlots: (startDate: Date, endDate: Date) => void;
 }
 
 export const AccountBookClassesCalendar: React.FC<
   AccountBookClassesCalendarProps
-> = ({ availableSlots, selectedSlots, hours, setSelectedSlots, oneWeek }) => {
+> = ({
+  availableSlots,
+  selectedSlots,
+  hours,
+  setSelectedSlots,
+  oneWeek,
+  fetchAvailableSlots,
+}) => {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
     const now = new Date();
     return oneWeek ? startOfWeek(now) : addDays(now, 1);
@@ -24,15 +32,25 @@ export const AccountBookClassesCalendar: React.FC<
 
   const handleNextWeek = useCallback(() => {
     if (!oneWeek) {
-      setCurrentWeekStart((prev) => addDays(prev, 7));
+      setCurrentWeekStart((prev) => {
+        const newDate = addDays(prev, 7);
+        const endOfWeek = addDays(newDate, 6);
+        fetchAvailableSlots(newDate, endOfWeek);
+        return newDate;
+      });
     }
-  }, [oneWeek]);
+  }, [oneWeek, fetchAvailableSlots]);
 
   const handlePrevWeek = useCallback(() => {
     if (!oneWeek) {
-      setCurrentWeekStart((prev) => addDays(prev, -7));
+      setCurrentWeekStart((prev) => {
+        const newDate = addDays(prev, -7);
+        const endOfWeek = addDays(newDate, 6);
+        fetchAvailableSlots(newDate, endOfWeek);
+        return newDate;
+      });
     }
-  }, [oneWeek]);
+  }, [oneWeek, fetchAvailableSlots]);
 
   const handleHourScrollUp = useCallback(() => {
     setHourRange((prev) => {
@@ -73,21 +91,21 @@ export const AccountBookClassesCalendar: React.FC<
   const getWeekdayNumber = (date: Date) => getDay(date);
 
   const renderSlot = (date: Date, hour: number) => {
-    const localDateTime = new Date(date.getTime());
-    localDateTime.setHours(hour, 0, 0, 0);
+    date.setHours(hour, 0, 0, 0);
 
-    const dayOfWeekUTC = localDateTime.getUTCDay();
-    const hourUTC = localDateTime.getUTCHours();
+    const dayOfWeekUTC = date.getDay();
+    const hourUTC = date.getHours();
 
     const isAvailable = availableSlots.some(
       (slot) => slot.day === dayOfWeekUTC && slot.hour === hourUTC
     );
 
     const isSelected = selectedSlots.some(
-      (slot) => slot.getTime() === localDateTime.getTime()
+      (slot) => slot.getTime() === date.getTime()
     );
 
-    const baseClasses = "w-full h-8 text-xs flex justify-center items-center rounded-lg";
+    const baseClasses =
+      "w-full h-8 text-xs flex justify-center items-center rounded-lg";
     const selectedClasses = "bg-green-100 border border-green-200";
     const availableClasses =
       "bg-blue-100 border border-gray-200 rounded-lg cursor-pointer";
@@ -107,16 +125,14 @@ export const AccountBookClassesCalendar: React.FC<
 
       setSelectedSlots((prev) => {
         const alreadySelected = prev.some(
-          (slot) => slot.getTime() === localDateTime.getTime()
+          (slot) => slot.getTime() === date.getTime()
         );
 
         if (!alreadySelected) {
-          return [...prev, localDateTime];
+          return [...prev, date];
         }
 
-        return prev.filter(
-          (slot) => slot.getTime() !== localDateTime.getTime()
-        );
+        return prev.filter((slot) => slot.getTime() !== date.getTime());
       });
     };
 
@@ -126,7 +142,7 @@ export const AccountBookClassesCalendar: React.FC<
         key={`${date.getTime()}-${hour}`}
         onClick={handleSlotClick}
       >
-        {`${format(localDateTime, "HH:mm")}-${format(localDateTime, "HH:55")}`}
+        {`${format(date, "HH:mm")}-${format(date, "HH:55")}`}
       </div>
     );
   };

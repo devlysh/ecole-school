@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BookClassesService } from "@domain/book-classes/BookClassesService";
+import { BookClassesService } from "@domain/services/book-classes/BookClassesService";
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 
@@ -15,7 +15,7 @@ export const POST = async (request: Request) => {
       );
     }
 
-    const { dates, isFixedSchedule } = await request.json();
+    const { dates, isRecurrent } = await request.json();
 
     if (!dates || !Array.isArray(dates) || dates.length === 0) {
       return NextResponse.json(
@@ -24,10 +24,12 @@ export const POST = async (request: Request) => {
       );
     }
 
-    const result = await BookClassesService.bookClasses(
+    const bookClassesService = new BookClassesService();
+
+    const result = await bookClassesService.bookClasses(
       email,
       dates,
-      isFixedSchedule
+      isRecurrent
     );
 
     return NextResponse.json(result, { status: 201 });
