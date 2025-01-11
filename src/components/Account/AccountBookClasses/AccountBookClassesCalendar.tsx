@@ -90,7 +90,8 @@ export const AccountBookClassesCalendar: React.FC<
 
   const getWeekdayNumber = (date: Date) => getDay(date);
 
-  const renderSlot = (date: Date, hour: number) => {
+  const renderSlot = (originalDate: Date, hour: number) => {
+    const date = new Date(originalDate.getTime());
     date.setHours(hour, 0, 0, 0);
 
     const dayOfWeekUTC = date.getDay();

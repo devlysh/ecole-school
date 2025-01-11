@@ -22,7 +22,7 @@ describe("IsAssignedTeacherStrategy", () => {
     expect(
       strategy.isAvailable({
         slot,
-        teacherId: student.assignedTeacherId ?? undefined,
+        assignedTeacherId: student.assignedTeacherId ?? undefined,
       })
     ).toBe(true);
   });
@@ -47,7 +47,7 @@ describe("IsAssignedTeacherStrategy", () => {
     expect(
       strategy.isAvailable({
         slot,
-        teacherId: student.assignedTeacherId ?? undefined,
+        assignedTeacherId: student.assignedTeacherId ?? undefined,
       })
     ).toBe(false);
   });

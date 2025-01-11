@@ -97,7 +97,7 @@ describe("BookedClassStrategy", () => {
     const strategy = new IsSlotBookedStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
-    expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
+    expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
   });
 });
 
@@ -211,7 +211,7 @@ describe("IsSlotBookedStrategy Additional Tests", () => {
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
   });
 
-  it("should return true for slots with recurrence pattern but no bookings", () => {
+  it("should return false for slots with recurrence pattern but no bookings", () => {
     const bookedClasses: BookedClass[] = [];
     const availableSlots: AvailableSlot[] = [
       {
@@ -225,6 +225,138 @@ describe("IsSlotBookedStrategy Additional Tests", () => {
     const strategy = new IsSlotBookedStrategy();
     const slot: AvailableSlot = availableSlots[0];
     const dateTime = new Date("2023-01-01T09:00:00Z");
+    expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
+  });
+});
+
+describe("IsSlotBookedStrategy - Weekly Recurrence", () => {
+  it("should return false for a slot booked on Monday at 08:00", () => {
+    const bookedClasses: BookedClass[] = [
+      {
+        id: 1,
+        date: new Date("2025-01-06T08:00:00Z"), // Monday
+        studentId: 1,
+        teacherId: 105,
+        recurring: true,
+      },
+    ];
+    const availableSlots: AvailableSlot[] = [
+      {
+        id: 285,
+        teacherId: 105,
+        startTime: new Date("2025-01-05T00:00:00Z"),
+        endTime: new Date("2025-01-06T00:00:00Z"),
+        rrule: "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+      },
+    ];
+    const dateTime = new Date("2025-01-06T08:00:00Z");
+
+    const strategy = new IsSlotBookedStrategy();
+    const slot: AvailableSlot = availableSlots[0];
+
+    expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
+  });
+
+  it("should return false for a slot booked on Friday at 08:00", () => {
+    const bookedClasses: BookedClass[] = [
+      {
+        id: 2,
+        date: new Date("2025-01-10T08:00:00Z"), // Friday
+        studentId: 1,
+        teacherId: 105,
+        recurring: true,
+      },
+    ];
+    const availableSlots: AvailableSlot[] = [
+      {
+        id: 285,
+        teacherId: 105,
+        startTime: new Date("2025-01-05T00:00:00Z"),
+        endTime: new Date("2025-01-06T00:00:00Z"),
+        rrule: "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+      },
+    ];
+    const dateTime = new Date("2025-01-10T08:00:00Z");
+
+    const strategy = new IsSlotBookedStrategy();
+    const slot: AvailableSlot = availableSlots[0];
+
+    expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
+  });
+
+  it("should return true for a slot available on Monday at 09:00", () => {
+    const bookedClasses: BookedClass[] = [];
+    const availableSlots: AvailableSlot[] = [
+      {
+        id: 285,
+        teacherId: 105,
+        startTime: new Date("2025-01-05T00:00:00Z"),
+        endTime: new Date("2025-01-06T00:00:00Z"),
+        rrule: "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+      },
+    ];
+    const dateTime = new Date("2025-01-06T09:00:00Z");
+
+    const strategy = new IsSlotBookedStrategy();
+    const slot: AvailableSlot = availableSlots[0];
+
+    expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
+  });
+
+  it("should return true for a slot available on Friday at 09:00", () => {
+    const bookedClasses: BookedClass[] = [];
+    const availableSlots: AvailableSlot[] = [
+      {
+        id: 285,
+        teacherId: 105,
+        startTime: new Date("2025-01-05T00:00:00Z"),
+        endTime: new Date("2025-01-06T00:00:00Z"),
+        rrule: "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+      },
+    ];
+    const dateTime = new Date("2025-01-10T09:00:00Z");
+
+    const strategy = new IsSlotBookedStrategy();
+    const slot: AvailableSlot = availableSlots[0];
+
+    expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
+  });
+
+  it("should return true for a slot available on Tuesday at 08:00", () => {
+    const bookedClasses: BookedClass[] = [];
+    const availableSlots: AvailableSlot[] = [
+      {
+        id: 285,
+        teacherId: 105,
+        startTime: new Date("2025-01-05T00:00:00Z"),
+        endTime: new Date("2025-01-06T00:00:00Z"),
+        rrule: "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+      },
+    ];
+    const dateTime = new Date("2025-01-07T08:00:00Z");
+
+    const strategy = new IsSlotBookedStrategy();
+    const slot: AvailableSlot = availableSlots[0];
+
+    expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
+  });
+
+  it("should return true for a slot available on Saturday at 08:00", () => {
+    const bookedClasses: BookedClass[] = [];
+    const availableSlots: AvailableSlot[] = [
+      {
+        id: 285,
+        teacherId: 105,
+        startTime: new Date("2025-01-05T00:00:00Z"),
+        endTime: new Date("2025-01-06T00:00:00Z"),
+        rrule: "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+      },
+    ];
+    const dateTime = new Date("2025-01-11T08:00:00Z");
+
+    const strategy = new IsSlotBookedStrategy();
+    const slot: AvailableSlot = availableSlots[0];
+
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
   });
 });

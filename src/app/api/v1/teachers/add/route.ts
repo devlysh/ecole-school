@@ -40,7 +40,6 @@ export const POST = async (request: Request) => {
                 startTime: slot.start as string,
                 endTime: slot.end as string,
                 rrule: slot.rrule as string,
-                timezone: "UTC",
               })),
             },
           },

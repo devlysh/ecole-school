@@ -41,7 +41,6 @@ export const PUT = async (
                 startTime: slot.start as string,
                 endTime: slot.end as string,
                 rrule: slot.extendedProps?.rrule,
-                timezone: "UTC",
               })),
             },
           },

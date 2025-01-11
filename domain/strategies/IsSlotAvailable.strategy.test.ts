@@ -352,24 +352,6 @@ describe("IsAvailableSlotStrategy", () => {
     expect(strategy.isAvailable({ slot, dateTime })).toBe(true);
   });
 
-  it("should return false for a slot with a rrule that does not include the specific time of day", () => {
-    const rrule = new RRule({
-      freq: RRule.DAILY,
-      byhour: [9],
-    }).toString();
-
-    const slot: AvailableSlot = {
-      id: 1,
-      teacherId: 1,
-      startTime: new Date("2023-01-01T09:00:00Z"),
-      endTime: new Date("2023-01-01T11:00:00Z"),
-      rrule: rrule,
-    };
-
-    const dateTime = new Date("2023-01-02T10:00:00Z");
-    expect(strategy.isAvailable({ slot, dateTime })).toBe(false);
-  });
-
   it("should return true for a slot with a rrule that includes a specific minute of the hour", () => {
     const rrule = new RRule({
       freq: RRule.DAILY,
@@ -388,24 +370,6 @@ describe("IsAvailableSlotStrategy", () => {
     expect(strategy.isAvailable({ slot, dateTime })).toBe(true);
   });
 
-  it("should return false for a slot with a rrule that does not include the specific minute of the hour", () => {
-    const rrule = new RRule({
-      freq: RRule.DAILY,
-      byminute: [0],
-    }).toString();
-
-    const slot: AvailableSlot = {
-      id: 1,
-      teacherId: 1,
-      startTime: new Date("2023-01-01T09:00:00Z"),
-      endTime: new Date("2023-01-01T11:00:00Z"),
-      rrule: rrule,
-    };
-
-    const dateTime = new Date("2023-01-02T09:01:00Z");
-    expect(strategy.isAvailable({ slot, dateTime })).toBe(false);
-  });
-
   it("should return true for a slot with a rrule that includes a specific second of the minute", () => {
     const rrule = new RRule({
       freq: RRule.DAILY,
@@ -422,24 +386,6 @@ describe("IsAvailableSlotStrategy", () => {
 
     const dateTime = new Date("2023-01-02T09:00:00Z");
     expect(strategy.isAvailable({ slot, dateTime })).toBe(true);
-  });
-
-  it("should return false for a slot with a rrule that does not include the specific second of the minute", () => {
-    const rrule = new RRule({
-      freq: RRule.DAILY,
-      bysecond: [0],
-    }).toString();
-
-    const slot: AvailableSlot = {
-      id: 1,
-      teacherId: 1,
-      startTime: new Date("2023-01-01T09:00:00Z"),
-      endTime: new Date("2023-01-01T11:00:00Z"),
-      rrule: rrule,
-    };
-
-    const dateTime = new Date("2023-01-02T09:00:01Z");
-    expect(strategy.isAvailable({ slot, dateTime })).toBe(false);
   });
 
   it("should return true for a slot with a rrule that includes a specific week number", () => {
@@ -501,6 +447,91 @@ describe("IsAvailableSlotStrategy", () => {
     };
 
     const dateTime = new Date("2023-01-01T13:00:00Z"); // Does not overlap with the slot
+    expect(strategy.isAvailable({ slot, dateTime })).toBe(false);
+  });
+
+  it("should return true for a recurrent slot that overlaps with the given time", () => {
+    const rrule = new RRule({
+      freq: RRule.DAILY,
+    }).toString();
+
+    const slot: AvailableSlot = {
+      id: 1,
+      teacherId: 1,
+      startTime: new Date("2023-01-01T09:00:00Z"),
+      endTime: new Date("2023-01-01T12:00:00Z"), // Slot lasts 3 hours
+      rrule: rrule,
+    };
+
+    const dateTime = new Date("2023-01-02T10:00:00Z"); // Overlaps with the recurrent slot on the next day
+    expect(strategy.isAvailable({ slot, dateTime })).toBe(true);
+  });
+
+  it("should return true for a recurrent slot that overlaps with the given time on a different day", () => {
+    const rrule = new RRule({
+      freq: RRule.DAILY,
+    }).toString();
+
+    const slot: AvailableSlot = {
+      id: 1,
+      teacherId: 1,
+      startTime: new Date("2023-01-01T09:00:00Z"),
+      endTime: new Date("2023-01-01T12:00:00Z"), // Slot lasts 3 hours
+      rrule: rrule,
+    };
+
+    const dateTime = new Date("2023-01-03T11:00:00Z"); // Overlaps with the recurrent slot on the third day
+    expect(strategy.isAvailable({ slot, dateTime })).toBe(true);
+  });
+
+  it("should return false for a recurrent slot that does not overlap with the given time", () => {
+    const rrule = new RRule({
+      freq: RRule.DAILY,
+    }).toString();
+
+    const slot: AvailableSlot = {
+      id: 1,
+      teacherId: 1,
+      startTime: new Date("2023-01-01T09:00:00Z"),
+      endTime: new Date("2023-01-01T12:00:00Z"), // Slot lasts 3 hours
+      rrule: rrule,
+    };
+
+    const dateTime = new Date("2023-01-03T13:00:00Z"); // Does not overlap with the recurrent slot
+    expect(strategy.isAvailable({ slot, dateTime })).toBe(false);
+  });
+
+  it("should return true for a recurrent slot that overlaps with the given time on a weekend", () => {
+    const rrule = new RRule({
+      freq: RRule.DAILY,
+    }).toString();
+
+    const slot: AvailableSlot = {
+      id: 1,
+      teacherId: 1,
+      startTime: new Date("2023-01-01T09:00:00Z"),
+      endTime: new Date("2023-01-01T12:00:00Z"), // Slot lasts 3 hours
+      rrule: rrule,
+    };
+
+    const dateTime = new Date("2023-01-07T10:00:00Z"); // Overlaps with the recurrent slot on a Saturday
+    expect(strategy.isAvailable({ slot, dateTime })).toBe(true);
+  });
+
+  it("should return false for a recurrent slot that does not overlap with the given time on a weekend", () => {
+    const rrule = new RRule({
+      freq: RRule.DAILY,
+    }).toString();
+
+    const slot: AvailableSlot = {
+      id: 1,
+      teacherId: 1,
+      startTime: new Date("2023-01-01T09:00:00Z"),
+      endTime: new Date("2023-01-01T12:00:00Z"), // Slot lasts 3 hours
+      rrule: rrule,
+    };
+
+    const dateTime = new Date("2023-01-07T13:00:00Z"); // Does not overlap with the recurrent slot on a Saturday
     expect(strategy.isAvailable({ slot, dateTime })).toBe(false);
   });
 });

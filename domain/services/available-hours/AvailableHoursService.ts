@@ -3,10 +3,13 @@ import { BookedClassesRepository } from "../../repositories/BookedClassesReposit
 import { AvailableSlot, BookedClass } from "@prisma/client";
 import { UserRepository } from "../../repositories/UserRepository";
 import { compressTime } from "@/lib/utils";
-import { SlotAvailibilityStrategy } from "@domain/strategies/SlotAvailibilityStrategy.interface";
-import logger from "@/lib/logger";
+import {
+  SlotAvailibilityContext,
+  SlotAvailibilityStrategy,
+} from "@domain/strategies/SlotAvailibilityStrategy.interface";
 import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.strategy";
 import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
+import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlotsStrategy.strategy";
 
 interface GetAvailableHoursParams {
   startDate: Date;
@@ -16,106 +19,169 @@ interface GetAvailableHoursParams {
   email: string;
 }
 
+interface ComputeAvailableTimesParams {
+  allSlots: AvailableSlot[];
+  allBookedClasses: BookedClass[];
+  startDate: Date;
+  endDate: Date;
+  selectedSlots?: Date[];
+  assignedTeacherId?: number;
+  strategies: SlotAvailibilityStrategy[];
+}
+
+enum RangeUnit {
+  Day = "Date",
+  Hour = "Hours",
+}
+
 export class AvailableHoursService {
-  private strategies: SlotAvailibilityStrategy[];
   private userRepo: UserRepository;
   private availableHoursRepo: AvailableSlotsRepository;
   private bookClassesRepo: BookedClassesRepository;
+  private strategies: SlotAvailibilityStrategy[];
 
   constructor(
-    strategies?: SlotAvailibilityStrategy[],
     userRepo?: UserRepository,
     availableHoursRepo?: AvailableSlotsRepository,
-    bookClassesRepo?: BookedClassesRepository
+    bookClassesRepo?: BookedClassesRepository,
+    strategies?: SlotAvailibilityStrategy[]
   ) {
+    this.userRepo = userRepo || new UserRepository();
     this.availableHoursRepo =
       availableHoursRepo || new AvailableSlotsRepository();
     this.bookClassesRepo = bookClassesRepo || new BookedClassesRepository();
-    this.userRepo = userRepo || new UserRepository();
-    this.strategies = strategies || [];
+    this.strategies = strategies || [
+      new IsSlotAvailableStrategy(),
+      new IsSlotBookedStrategy(),
+      new HandleSelectedSlotsStrategy(),
+    ];
   }
 
   public async getAvailableHours(
     params: GetAvailableHoursParams
   ): Promise<number[]> {
-    const { email, startDate, endDate, isRecurrentSchedule } = params;
+    this.validateParams(params);
 
-    if (!email) {
-      throw new Error("Email is required");
-    }
+    const { email, startDate, endDate, isRecurrentSchedule, selectedSlots } =
+      params;
 
     const user = await this.userRepo.findByEmail(email);
-    const assignedTeacherId = user?.student?.assignedTeacherId;
+    const assignedTeacherId = user?.student?.assignedTeacherId ?? undefined;
 
-    let availableSlots: AvailableSlot[];
+    let allSlots: AvailableSlot[] = [];
 
-    if (assignedTeacherId) {
-      availableSlots = isRecurrentSchedule
-        ? await this.availableHoursRepo.fetchRecurringByTeacherId(
-            assignedTeacherId
-          )
-        : await this.availableHoursRepo.fetchByTeacherId(assignedTeacherId);
-    } else {
-      availableSlots = isRecurrentSchedule
-        ? await this.availableHoursRepo.fetchRecurringSlots()
-        : await this.availableHoursRepo.fetchAll();
+    const fetchedSlots = await this.fetchSlots(
+      assignedTeacherId,
+      isRecurrentSchedule
+    );
+    if (fetchedSlots) {
+      allSlots = fetchedSlots;
     }
 
-    const bookedClasses: BookedClass[] =
-      await this.bookClassesRepo.fetchAllBookedClasses();
+    const allBookedClasses = await this.bookClassesRepo.fetchAllBookedClasses();
 
-    logger.debug({ user }, "User");
+    return this.computeAvailableTimes({
+      allSlots,
+      allBookedClasses,
+      startDate,
+      endDate,
+      selectedSlots,
+      assignedTeacherId,
+      strategies: this.strategies,
+    });
+  }
 
-    const isSlotAvailable = new IsSlotAvailableStrategy();
-    const isSlotBooked = new IsSlotBookedStrategy();
+  private validateParams(params: GetAvailableHoursParams): void {
+    if (!params.email) {
+      throw new Error("Email is required");
+    }
+  }
 
-    const availableTimes = [];
+  private async fetchSlots(
+    teacherId: number | undefined,
+    isRecurrentSchedule: boolean
+  ): Promise<AvailableSlot[] | null> {
+    if (teacherId) {
+      return isRecurrentSchedule
+        ? this.availableHoursRepo.fetchRecurringByTeacherId(teacherId)
+        : this.availableHoursRepo.fetchByTeacherId(teacherId);
+    } else {
+      return isRecurrentSchedule
+        ? this.availableHoursRepo.fetchRecurringSlots()
+        : this.availableHoursRepo.fetchAll();
+    }
+  }
 
-    for (const slot of availableSlots) {
-      const hourlySlots = this.generateHourlySlots(
+  private computeAvailableTimes(params: ComputeAvailableTimesParams): number[] {
+    const {
+      allSlots,
+      allBookedClasses,
+      startDate,
+      endDate,
+      selectedSlots,
+      assignedTeacherId,
+      strategies,
+    } = params;
+
+    const lockedTeacherIds = new Set<number>();
+    const availableDateTimes: Date[] = [];
+    const dailyRange = this.generateRange(startDate, endDate, RangeUnit.Day);
+
+    for (const slot of allSlots) {
+      const hourlyIncrements = this.generateRange(
         slot.startTime,
-        slot.endTime
+        slot.endTime,
+        RangeUnit.Hour
       );
 
-      logger.debug({ hourlySlots }, "Hourly Slots");
-
-      for (
-        let date = new Date(startDate);
-        date <= endDate;
-        date.setDate(date.getDate() + 1)
-      ) {
-        for (const hourlySlot of hourlySlots) {
-          const dateTime = new Date(date);
+      for (const currentDay of dailyRange) {
+        for (const hourSlot of hourlyIncrements) {
+          const dateTime = new Date(currentDay);
           dateTime.setHours(
-            hourlySlot.getHours(),
-            hourlySlot.getMinutes(),
-            hourlySlot.getSeconds()
+            hourSlot.getHours(),
+            hourSlot.getMinutes(),
+            hourSlot.getSeconds()
           );
 
-          const context = { slot, dateTime, bookedClasses };
+          const context: SlotAvailibilityContext = {
+            slot,
+            dateTime,
+            bookedClasses: allBookedClasses,
+            selectedSlots,
+            assignedTeacherId,
+            lockedTeacherIds,
+          };
 
-          if (
-            isSlotAvailable.isAvailable(context) &&
-            isSlotBooked.isAvailable(context)
-          ) {
-            availableTimes.push(dateTime);
+          if (this.isAvailable(strategies, context)) {
+            availableDateTimes.push(dateTime);
           }
         }
       }
     }
 
-    return availableTimes.map((time) => compressTime(time.getTime()));
+    return availableDateTimes.map((time) => compressTime(time.getTime()));
   }
 
-  private generateHourlySlots(startDate: Date, endDate: Date): Date[] {
-    const hourlySlots: Date[] = [];
-    let currentDate = new Date(startDate);
+  private isAvailable(
+    strategies: SlotAvailibilityStrategy[],
+    context: SlotAvailibilityContext
+  ): boolean {
+    return strategies.every((strategy) => strategy.isAvailable(context));
+  }
 
-    while (currentDate <= endDate) {
-      hourlySlots.push(new Date(currentDate));
-      currentDate.setHours(currentDate.getHours() + 1);
+  private generateRange(
+    startDate: Date,
+    endDate: Date,
+    unit: RangeUnit
+  ): Date[] {
+    const days: Date[] = [];
+    const currentDay = new Date(startDate);
+
+    while (currentDay <= endDate) {
+      days.push(new Date(currentDay));
+      currentDay[`set${unit}`](currentDay[`get${unit}`]() + 1);
     }
 
-    return hourlySlots;
+    return days;
   }
 }

@@ -1,4 +1,4 @@
-import { BookedClass } from "@prisma/client";
+import { AvailableSlot, BookedClass } from "@prisma/client";
 import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,
@@ -7,56 +7,97 @@ import logger from "@/lib/logger";
 import { RRule } from "rrule";
 
 export class IsSlotBookedStrategy implements SlotAvailibilityStrategy {
-  constructor() {}
-
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, dateTime, bookedClasses } = context;
     if (!slot || !dateTime || !bookedClasses) {
       return false;
     }
 
-    const checkBooking = (bookedClass: BookedClass, date: Date) => {
-      const isRecurrent = bookedClass.recurring;
-      const isSameTime = bookedClass.date.getTime() === date.getTime();
-      const isSameTeacher = bookedClass.teacherId === slot.teacherId;
-      const isRecurrentMatch =
-        isRecurrent && this.isRecurrentMatch(bookedClass, date);
-      return (isSameTime || isRecurrentMatch) && isSameTeacher;
-    };
-
     if (slot.rrule) {
-      try {
-        const rule = new RRule({
-          ...RRule.parseString(slot.rrule),
-          dtstart: slot.startTime,
-        });
-        const occurrences = rule.between(
-          new Date(dateTime.getTime() - 1),
-          new Date(dateTime.getTime() + 1),
-          true
-        );
-
-        const isBooked = bookedClasses.some((bookedClass) =>
-          occurrences.some((date) => checkBooking(bookedClass, date))
-        );
-
-        return !isBooked;
-      } catch (err) {
-        // handle the invalid rrule case
-        logger.warn({ err, slot, dateTime }, "Invalid rrule");
-        return false;
-      }
+      return this.isAvailableWithRRule(slot, dateTime, bookedClasses);
     } else {
-      const isBooked = bookedClasses.some((bookedClass) =>
-        checkBooking(bookedClass, dateTime)
-      );
-      return !isBooked;
+      return this.isAvailableWithoutRRule(slot, dateTime, bookedClasses);
     }
   }
 
-  private isRecurrentMatch(bookedClass: BookedClass, dateTime: Date): boolean {
-    // Implement logic to check if the dateTime matches the recurrence pattern of the booked class
-    // For example, check if the day of the week matches
-    return bookedClass.date.getDay() === dateTime.getDay();
+  private isAvailableWithRRule(
+    slot: AvailableSlot,
+    dateTime: Date,
+    bookedClasses: BookedClass[]
+  ): boolean {
+    if (!slot.rrule) {
+      return false;
+    }
+
+    try {
+      const rule = new RRule({
+        ...RRule.parseString(slot.rrule),
+        dtstart: slot.startTime,
+      });
+
+      const duration = slot.endTime.getTime() - slot.startTime.getTime();
+      const searchStart = new Date(dateTime.getTime() - duration);
+      const searchEnd = new Date(dateTime.getTime() + duration);
+      const occurrences = rule.between(searchStart, searchEnd, true);
+
+      const occurrenceMatch = occurrences.find(
+        (occ) =>
+          dateTime >= occ && dateTime < new Date(occ.getTime() + duration)
+      );
+
+      if (!occurrenceMatch) {
+        return false;
+      }
+
+      return !this.isSlotBlocked(bookedClasses, slot, dateTime);
+    } catch (err) {
+      logger.warn({ err, slot, dateTime }, "Invalid rrule");
+      return false;
+    }
+  }
+
+  private isAvailableWithoutRRule(
+    slot: AvailableSlot,
+    dateTime: Date,
+    bookedClasses: BookedClass[]
+  ): boolean {
+    if (dateTime < slot.startTime || dateTime >= slot.endTime) {
+      return false;
+    }
+    return !this.isSlotBlocked(bookedClasses, slot, dateTime);
+  }
+
+  private isSlotBlocked(
+    bookedClasses: BookedClass[],
+    slot: AvailableSlot,
+    dateTime: Date
+  ): boolean {
+    return bookedClasses.some((bookedClass) =>
+      this.checkBooking(bookedClass, slot, dateTime)
+    );
+  }
+
+  private checkBooking(
+    bookedClass: BookedClass,
+    slot: AvailableSlot,
+    dateTime: Date
+  ): boolean {
+    if (bookedClass.teacherId !== slot.teacherId) {
+      return false;
+    }
+    if (
+      bookedClass.recurring &&
+      this.isRecurrentMatch(bookedClass.date, dateTime)
+    ) {
+      return true;
+    }
+    return bookedClass.date.getTime() === dateTime.getTime();
+  }
+
+  private isRecurrentMatch(bookedDate: Date, requestedDate: Date): boolean {
+    return (
+      bookedDate.getUTCDay() === requestedDate.getUTCDay() &&
+      bookedDate.getUTCHours() === requestedDate.getUTCHours()
+    );
   }
 }
