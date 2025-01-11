@@ -9,12 +9,12 @@ export class IsAssignedTeacherStrategy implements SlotAvailibilityStrategy {
   constructor() {}
 
   isAvailable(context: SlotAvailibilityContext): boolean {
-    const { slot, student } = context;
+    const { slot, teacherId } = context;
 
-    if (!slot || !student) {
+    if (!slot || !teacherId) {
       return false;
     }
 
-    return slot.teacherId === student.assignedTeacherId;
+    return slot.teacherId === teacherId;
   }
 }

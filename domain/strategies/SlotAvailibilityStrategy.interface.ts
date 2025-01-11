@@ -3,7 +3,7 @@ import { AvailableSlot, BookedClass, Student } from "@prisma/client";
 export interface SlotAvailibilityContext {
   dateTime?: Date;
   slot?: AvailableSlot;
-  student?: Student;
+  teacherId?: number;
   bookedClasses?: BookedClass[];
 }
 

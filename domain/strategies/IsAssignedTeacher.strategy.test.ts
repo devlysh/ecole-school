@@ -19,7 +19,12 @@ describe("IsAssignedTeacherStrategy", () => {
     };
 
     const strategy = new IsAssignedTeacherStrategy();
-    expect(strategy.isAvailable({ slot, student })).toBe(true);
+    expect(
+      strategy.isAvailable({
+        slot,
+        teacherId: student.assignedTeacherId ?? undefined,
+      })
+    ).toBe(true);
   });
 
   it("should return false if the slot is not assigned to the teacher", () => {
@@ -39,6 +44,11 @@ describe("IsAssignedTeacherStrategy", () => {
     };
 
     const strategy = new IsAssignedTeacherStrategy();
-    expect(strategy.isAvailable({ slot, student })).toBe(false);
+    expect(
+      strategy.isAvailable({
+        slot,
+        teacherId: student.assignedTeacherId ?? undefined,
+      })
+    ).toBe(false);
   });
 });
