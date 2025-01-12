@@ -36,6 +36,7 @@ interface ComputeAvailableTimesParams {
   selectedSlots?: Date[];
   assignedTeacherId?: number;
   strategies: SlotAvailibilityStrategy[];
+  isRecurrentSchedule?: boolean;
 }
 
 enum RangeUnit {
@@ -110,6 +111,7 @@ export class AvailableHoursService {
       assignedTeacherId,
       vacations,
       strategies: this.strategies,
+      isRecurrentSchedule,
     });
   }
 
@@ -144,6 +146,7 @@ export class AvailableHoursService {
       assignedTeacherId,
       vacations,
       strategies,
+      isRecurrentSchedule,
     } = params;
 
     const lockedTeacherIds = new Set<number>();
@@ -174,6 +177,7 @@ export class AvailableHoursService {
             assignedTeacherId,
             lockedTeacherIds,
             vacations,
+            isRecurrentSchedule,
           };
 
           if (this.isAvailable(strategies, context)) {

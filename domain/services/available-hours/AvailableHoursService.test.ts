@@ -7,9 +7,11 @@ import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.stra
 import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
 import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlotsStrategy.strategy";
 import { SlotAvailibilityStrategy } from "@domain/strategies/SlotAvailibilityStrategy.interface";
+import { VacationsRepository } from "@domain/repositories/VacationsRepostiroy";
 
 jest.mock("@domain/repositories/AvailableSlotsRepository");
 jest.mock("@domain/repositories/BookedClassesRepository");
+jest.mock("@domain/repositories/VacationsRepostiroy");
 jest.mock("@domain/repositories/UserRepository");
 
 /**
@@ -71,6 +73,8 @@ const mockFetchByTeacherId = AvailableSlotsRepository.prototype
 const mockFetchRecurringByTeacherId = AvailableSlotsRepository.prototype
   .fetchRecurringByTeacherId as jest.Mock;
 const mockFindByEmail = UserRepository.prototype.findByEmail as jest.Mock;
+const mockFetchAllVacations = VacationsRepository.prototype
+  .fetchAllVacations as jest.Mock;
 
 describe("AvailableHoursService", () => {
   let service: AvailableHoursService;
@@ -84,6 +88,7 @@ describe("AvailableHoursService", () => {
       new HandleSelectedSlotsStrategy(),
     ];
     service = new AvailableHoursService(
+      undefined,
       undefined,
       undefined,
       undefined,

@@ -31,12 +31,26 @@ describe("IsAtPermittedTimeStrategy", () => {
         new Date("2023-01-10T09:00:00Z")
       );
 
+      const slot = {
+        id: 1,
+        startTime: new Date("2023-01-10T09:00:00Z"),
+        endTime: new Date("2023-01-10T10:00:00Z"),
+        teacherId: 1,
+        rrule: null,
+      };
+
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-09T09:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-09T09:00:00Z"),
+          slot,
+        })
       ).toBe(false);
 
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-10T09:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-10T09:00:00Z"),
+          slot,
+        })
       ).toBe(false);
     });
 
@@ -61,8 +75,19 @@ describe("IsAtPermittedTimeStrategy", () => {
         new Date("2023-01-10T09:00:00Z")
       );
 
+      const slot = {
+        id: 1,
+        startTime: new Date("2023-01-10T09:00:00Z"),
+        endTime: new Date("2023-01-10T10:00:00Z"),
+        teacherId: 1,
+        rrule: null,
+      };
+
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-10T13:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-10T13:00:00Z"),
+          slot,
+        })
       ).toBe(false);
     });
   });
@@ -93,12 +118,26 @@ describe("IsAtPermittedTimeStrategy", () => {
         new Date("2023-01-10T09:00:00Z")
       );
 
+      const slot = {
+        id: 1,
+        startTime: new Date("2023-01-10T09:00:00Z"),
+        endTime: new Date("2023-01-10T10:00:00Z"),
+        teacherId: 1,
+        rrule: null,
+      };
+
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-09T09:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-09T09:00:00Z"),
+          slot,
+        })
       ).toBe(false);
 
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-10T10:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-10T10:00:00Z"),
+          slot,
+        })
       ).toBe(false);
     });
 
@@ -123,13 +162,24 @@ describe("IsAtPermittedTimeStrategy", () => {
         new Date("2023-01-10T09:00:00Z")
       );
 
+      const slot = {
+        id: 1,
+        startTime: new Date("2023-01-10T09:00:00Z"),
+        endTime: new Date("2023-01-10T10:00:00Z"),
+        teacherId: 1,
+        rrule: null,
+      };
+
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-10T05:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-10T05:00:00Z"),
+          slot,
+        })
       ).toBe(false);
     });
   });
 
-  it("should return false if dateTime is not provided", () => {
+  it("should return true if dateTime is not provided", () => {
     const strategy = new IsAtPermittedTimeStrategy(
       2,
       PermittedTimeUnit.DAYS,
@@ -137,6 +187,27 @@ describe("IsAtPermittedTimeStrategy", () => {
       new Date("2023-01-10T09:00:00Z")
     );
 
-    expect(strategy.isAvailable({})).toBe(false);
+    const slot = {
+      id: 1,
+      startTime: new Date("2023-01-10T09:00:00Z"),
+      endTime: new Date("2023-01-10T10:00:00Z"),
+      teacherId: 1,
+      rrule: null,
+    };
+
+    expect(strategy.isAvailable({ slot })).toBe(true);
+  });
+
+  it("should return true if  is not provided", () => {
+    const strategy = new IsAtPermittedTimeStrategy(
+      2,
+      PermittedTimeUnit.DAYS,
+      PermittedTimeDirection.AFTER,
+      new Date("2023-01-10T09:00:00Z")
+    );
+
+    expect(
+      strategy.isAvailable({ dateTime: new Date("2023-01-10T09:00:00Z") })
+    ).toBe(true);
   });
 });

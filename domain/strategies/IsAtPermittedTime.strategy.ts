@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,
@@ -22,10 +23,15 @@ export class IsAtPermittedTimeStrategy implements SlotAvailibilityStrategy {
   ) {}
 
   isAvailable(context: SlotAvailibilityContext): boolean {
-    const { dateTime } = context;
+    const { dateTime, slot, isRecurrentSchedule } = context;
 
-    if (!dateTime) {
-      return false;
+    if (!dateTime || !slot || typeof isRecurrentSchedule !== "boolean") {
+      logger.warn("Missing context in IsAtPermittedTimeStrategy");
+      return true;
+    }
+
+    if (isRecurrentSchedule && typeof slot.rrule === "string") {
+      return true;
     }
 
     const compareDate = new Date(this.date);

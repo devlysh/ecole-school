@@ -12,11 +12,12 @@ export class HandleSelectedSlotsStrategy implements SlotAvailibilityStrategy {
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, selectedSlots, lockedTeacherIds } = context;
 
-    if (!slot || !lockedTeacherIds) {
-      return false;
+    if (!slot || !lockedTeacherIds || !selectedSlots) {
+      logger.warn("Missing context in HandleSelectedSlotsStrategy");
+      return true;
     }
 
-    if (!selectedSlots || selectedSlots.length === 0) {
+    if (selectedSlots.length === 0) {
       return true;
     }
 

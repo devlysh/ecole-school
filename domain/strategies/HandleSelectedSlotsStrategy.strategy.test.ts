@@ -9,20 +9,20 @@ describe("HandleSelectedSlotsStrategy", () => {
     strategy = new HandleSelectedSlotsStrategy();
   });
 
-  it("should return false if slot is not defined", () => {
+  it("should return true if slot is not defined", () => {
     const context: SlotAvailibilityContext = {
       selectedSlots: [],
       lockedTeacherIds: new Set(),
     };
-    expect(strategy.isAvailable(context)).toBe(false);
+    expect(strategy.isAvailable(context)).toBe(true);
   });
 
-  it("should return false if lockedTeacherIds is not defined", () => {
+  it("should return true if lockedTeacherIds is not defined", () => {
     const context: SlotAvailibilityContext = {
       slot: { teacherId: 1, rrule: null } as AvailableSlot,
       selectedSlots: [],
     };
-    expect(strategy.isAvailable(context)).toBe(false);
+    expect(strategy.isAvailable(context)).toBe(true);
   });
 
   it("should return true if selectedSlots is empty", () => {

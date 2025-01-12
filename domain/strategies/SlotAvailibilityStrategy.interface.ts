@@ -8,6 +8,7 @@ export interface SlotAvailibilityContext {
   selectedSlots?: Date[];
   lockedTeacherIds?: Set<number>;
   vacations?: Vacation[];
+  isRecurrentSchedule?: boolean;
 }
 
 export interface SlotAvailibilityStrategy {

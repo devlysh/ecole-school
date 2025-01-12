@@ -11,7 +11,8 @@ export class IsSlotAvailableStrategy implements SlotAvailibilityStrategy {
     const { slot, dateTime } = context;
 
     if (!slot || !dateTime) {
-      return false;
+      logger.warn("Missing context in IsSlotAvailableStrategy");
+      return true;
     }
 
     let checkAvailibility;

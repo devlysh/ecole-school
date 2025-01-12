@@ -3,12 +3,15 @@ import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,
 } from "./SlotAvailibilityStrategy.interface";
+import logger from "@/lib/logger";
 
 export class IsSlotBookedStrategy implements SlotAvailibilityStrategy {
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, dateTime, bookedClasses } = context;
+
     if (!slot || !dateTime || !bookedClasses) {
-      return false;
+      logger.warn("Missing context in IsSlotBookedStrategy");
+      return true;
     }
 
     return !this.isBooked(bookedClasses, slot, dateTime);

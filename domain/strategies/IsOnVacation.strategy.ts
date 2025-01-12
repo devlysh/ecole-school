@@ -11,7 +11,7 @@ export class IsOnVacationStrategy implements SlotAvailibilityStrategy {
     const { dateTime, slot, vacations } = context;
 
     if (!dateTime || !slot || !vacations) {
-      logger.warn("No dateTime, slot, or vacations");
+      logger.warn("Missing context in IsOnVacationStrategy");
       return true;
     }
 

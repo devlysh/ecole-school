@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,
@@ -26,6 +27,7 @@ export class IsOutsideRestrictedTimeRangeStrategy
     const { dateTime } = context;
 
     if (!dateTime) {
+      logger.warn("Missing context in IsOutsideRestrictedTimeRangeStrategy");
       return false;
     }
 

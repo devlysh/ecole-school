@@ -12,13 +12,14 @@ export class IsAssignedTeacherStrategy implements SlotAvailibilityStrategy {
     const { slot, assignedTeacherId } = context;
 
     if (!slot) {
-      return false;
+      logger.warn("Missing context in IsAssignedTeacherStrategy");
+      return true;
     }
 
-    if (assignedTeacherId) {
-      return slot.teacherId === assignedTeacherId;
+    if (!assignedTeacherId) {
+      return true;
     }
 
-    return true;
+    return slot.teacherId === assignedTeacherId;
   }
 }
