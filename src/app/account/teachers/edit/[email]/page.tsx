@@ -14,24 +14,33 @@ interface AccountTeachersEditPageProps {
   };
 }
 
-const AccountTeachersEditPage = async ({
+export default async function AccountTeachersEditPage({
   params,
-}: AccountTeachersEditPageProps) => {
+}: AccountTeachersEditPageProps) {
   const email = decodeURIComponent(params.email);
 
   try {
+    // 1) Find the user (teacher) by email
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
         teacher: {
           include: {
+            // 2) Also fetch availableSlots for schedule
             availableSlots: true,
+            // 3) Fetch vacations for this teacher from DB
+            vacations: true,
           },
         },
       },
     });
 
-    const timeSlots = user?.teacher?.availableSlots.map((hour) => ({
+    if (!user || !user.teacher) {
+      return notFound();
+    }
+
+    // 4) Convert each available slot to an EventInput
+    const timeSlots = user.teacher.availableSlots.map((hour) => ({
       start: hour.startTime,
       end: hour.endTime,
       rrule: hour.rrule || undefined,
@@ -42,9 +51,16 @@ const AccountTeachersEditPage = async ({
       },
     }));
 
-    if (!user || !user.name || !user.email || !timeSlots) {
-      return notFound();
-    }
+    // 5) Convert each vacation into an EventInput for FullCalendar
+    const vacations = user.teacher.vacations.map((vac) => ({
+      id: vac.id.toString(),
+      title: "Vacation",
+      start: vac.date,
+      end: vac.date,
+      allDay: true,
+      color: "tomato",
+      vacation: true,
+    }));
 
     return (
       <AccountLayout>
@@ -52,9 +68,10 @@ const AccountTeachersEditPage = async ({
           <div className="w-full">
             <h1>Edit Teacher</h1>
             <AccountTeachersForm
-              name={user.name}
-              email={user.email}
+              name={user.name ?? ""}
+              email={user.email ?? ""}
               timeSlots={timeSlots}
+              vacations={vacations}
             />
           </div>
         </div>
@@ -64,6 +81,4 @@ const AccountTeachersEditPage = async ({
     logger.error(err, "Error fetching teacher by email");
     throw err;
   }
-};
-
-export default AccountTeachersEditPage;
+}

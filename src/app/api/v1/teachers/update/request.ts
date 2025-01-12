@@ -1,6 +1,12 @@
-import { TeacherFormWithTimeSlots } from "@/lib/types";
+import { TeacherFormValues } from "@/lib/types";
+import { EventInput } from "@fullcalendar/core/index.js";
 
-export const updateTeacher = async (teacher: TeacherFormWithTimeSlots) => {
+export const updateTeacher = async (
+  teacher: TeacherFormValues & {
+    timeSlots: EventInput[];
+    vacations: EventInput[];
+  }
+) => {
   try {
     const response = await fetch(`/api/v1/teachers/update/${teacher.email}`, {
       method: "PUT",

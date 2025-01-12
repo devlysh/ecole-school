@@ -18,7 +18,7 @@ export const POST = async (request: Request) => {
     const { name, email, password, timezone, timeSlots } =
       (await request.json()) as TeacherFormWithTimeSlots;
 
-    if (!name || !email || !password || !timezone) {
+    if (!name || !email || !password) {
       return Response.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -32,7 +32,7 @@ export const POST = async (request: Request) => {
         name: `${name}`,
         email,
         passwordHash,
-        settings: { timezone },
+        settings: {},
         teacher: {
           create: {
             availableSlots: {

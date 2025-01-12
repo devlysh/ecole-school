@@ -73,6 +73,7 @@ model Teacher {
   languages      TeacherLanguage[]
   availableSlots AvailableSlot[]
   bookedClasses  BookedClass[]
+  vacations      Vacation[]
 
   @@map("teachers")
 }
@@ -110,6 +111,15 @@ model BookedClass {
 
   @@index([date, teacherId, studentId], name: "idx_booked_class_date_teacher_id_student_id")
   @@map("booked_classes")
+}
+
+model Vacation {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  teacherId Int      @map("teacher_id")
+  teacher   Teacher  @relation(fields: [teacherId], references: [userId])
+
+  @@map("vacations")
 }
 
 model Student {

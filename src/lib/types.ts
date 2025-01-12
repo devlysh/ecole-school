@@ -1,4 +1,5 @@
 import { EventInput } from "@fullcalendar/core/index.js";
+import { Vacation } from "@prisma/client";
 import { SVGProps } from "react";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -144,10 +145,6 @@ export interface TeacherFormValues {
   password: string;
   timezone: string;
 }
-
-export type TeacherFormWithTimeSlots = TeacherFormValues & {
-  timeSlots: EventInput[];
-};
 
 export interface AvailableCalendarSlot {
   day: number;

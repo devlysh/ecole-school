@@ -1,6 +1,6 @@
 import { AvailableSlotsRepository } from "../../repositories/AvailableSlotsRepository";
 import { BookedClassesRepository } from "../../repositories/BookedClassesRepository";
-import { AvailableSlot, BookedClass } from "@prisma/client";
+import { AvailableSlot, BookedClass, Vacation } from "@prisma/client";
 import { UserRepository } from "../../repositories/UserRepository";
 import { compressTime } from "@/lib/utils";
 import {
@@ -11,6 +11,8 @@ import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.stra
 import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
 import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlotsStrategy.strategy";
 import { IsAssignedTeacherStrategy } from "@domain/strategies/IsAssignedTeacher.strategy";
+import { IsOnVacationStrategy } from "@domain/strategies/IsOnVacation.strategy";
+import { VacationsRepository } from "@domain/repositories/VacationsRepostiroy";
 
 interface GetAvailableHoursParams {
   startDate: Date;
@@ -23,6 +25,7 @@ interface GetAvailableHoursParams {
 interface ComputeAvailableTimesParams {
   availableSlots: AvailableSlot[];
   bookedClasses: BookedClass[];
+  vacations: Vacation[];
   startDate: Date;
   endDate: Date;
   selectedSlots?: Date[];
@@ -39,23 +42,27 @@ export class AvailableHoursService {
   private userRepo: UserRepository;
   private availableHoursRepo: AvailableSlotsRepository;
   private bookClassesRepo: BookedClassesRepository;
+  private vacationsRepo: VacationsRepository;
   private strategies: SlotAvailibilityStrategy[];
 
   constructor(
     userRepo?: UserRepository,
     availableHoursRepo?: AvailableSlotsRepository,
     bookClassesRepo?: BookedClassesRepository,
+    vacationsRepo?: VacationsRepository,
     strategies?: SlotAvailibilityStrategy[]
   ) {
     this.userRepo = userRepo || new UserRepository();
     this.availableHoursRepo =
       availableHoursRepo || new AvailableSlotsRepository();
     this.bookClassesRepo = bookClassesRepo || new BookedClassesRepository();
+    this.vacationsRepo = vacationsRepo || new VacationsRepository();
     this.strategies = strategies || [
       new IsSlotAvailableStrategy(),
       new IsSlotBookedStrategy(),
       new HandleSelectedSlotsStrategy(),
       new IsAssignedTeacherStrategy(),
+      new IsOnVacationStrategy(),
     ];
   }
 
@@ -81,6 +88,8 @@ export class AvailableHoursService {
 
     const bookedClasses = await this.bookClassesRepo.fetchAllBookedClasses();
 
+    const vacations = await this.vacationsRepo.fetchAllVacations();
+
     return this.computeAvailableTimes({
       availableSlots,
       bookedClasses,
@@ -88,6 +97,7 @@ export class AvailableHoursService {
       endDate,
       selectedSlots,
       assignedTeacherId,
+      vacations,
       strategies: this.strategies,
     });
   }
@@ -121,6 +131,7 @@ export class AvailableHoursService {
       endDate,
       selectedSlots,
       assignedTeacherId,
+      vacations,
       strategies,
     } = params;
 
@@ -151,6 +162,7 @@ export class AvailableHoursService {
             selectedSlots,
             assignedTeacherId,
             lockedTeacherIds,
+            vacations,
           };
 
           if (this.isAvailable(strategies, context)) {

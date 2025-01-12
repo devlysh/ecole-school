@@ -1,4 +1,4 @@
-import { AvailableSlot, BookedClass } from "@prisma/client";
+import { AvailableSlot, BookedClass, Vacation } from "@prisma/client";
 
 export interface SlotAvailibilityContext {
   dateTime?: Date;
@@ -7,6 +7,7 @@ export interface SlotAvailibilityContext {
   bookedClasses?: BookedClass[];
   selectedSlots?: Date[];
   lockedTeacherIds?: Set<number>;
+  vacations?: Vacation[];
 }
 
 export interface SlotAvailibilityStrategy {

@@ -1,29 +1,31 @@
-import { AvailableSlot } from "@prisma/client";
+import logger from "@/lib/logger";
 import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,
 } from "./SlotAvailibilityStrategy.interface";
 
 export class IsOnVacationStrategy implements SlotAvailibilityStrategy {
-  constructor(
-    private vacations: { teacherId: number; start: Date; end: Date }[],
-    private availableSlots: AvailableSlot[]
-  ) {}
+  constructor() {}
 
   isAvailable(context: SlotAvailibilityContext): boolean {
-    const { dateTime } = context;
+    const { dateTime, slot, vacations } = context;
 
-    if (!dateTime) {
-      return false;
+    if (!dateTime || !slot || !vacations) {
+      logger.warn("No dateTime, slot, or vacations");
+      return true;
     }
 
-    return !this.vacations.some((vacation) =>
-      this.availableSlots.some(
-        (slot) =>
-          vacation.teacherId === slot.teacherId &&
-          vacation.start <= dateTime &&
-          vacation.end >= dateTime
-      )
-    );
+    const allDay = new Date(dateTime.toISOString().split("T")[0]);
+
+    return !vacations.some((vacation) => {
+      if (vacation.date.toISOString() === allDay.toISOString()) {
+        logger.debug(
+          { vacationDate: vacation.date, allDay },
+          "DEBUG: vacationDate, allDay"
+        );
+        return true;
+      }
+      return false;
+    });
   }
 }
