@@ -19,10 +19,6 @@ export class IsOnVacationStrategy implements SlotAvailibilityStrategy {
 
     return !vacations.some((vacation) => {
       if (vacation.date.toISOString() === allDay.toISOString()) {
-        logger.debug(
-          { vacationDate: vacation.date, allDay },
-          "DEBUG: vacationDate, allDay"
-        );
         return true;
       }
       return false;

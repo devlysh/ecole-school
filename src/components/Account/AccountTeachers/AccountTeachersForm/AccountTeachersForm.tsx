@@ -55,8 +55,6 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
           })),
         };
 
-        logger.debug({ timeSlots, vacations }, "DEBUG: timeSlots, vacations");
-
         if (isTaken) {
           const result = await updateTeacher(teacher);
           // TODO: Make this a toast
