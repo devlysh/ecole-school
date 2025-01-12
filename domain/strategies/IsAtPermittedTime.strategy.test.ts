@@ -15,11 +15,17 @@ describe("IsAtPermittedTimeStrategy", () => {
       );
 
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-12T09:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-12T09:00:00Z"),
+          isRecurrentSchedule: false,
+        })
       ).toBe(true);
 
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-13T10:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-13T10:00:00Z"),
+          isRecurrentSchedule: false,
+        })
       ).toBe(true);
     });
 
@@ -43,6 +49,7 @@ describe("IsAtPermittedTimeStrategy", () => {
         strategy.isAvailable({
           dateTime: new Date("2023-01-09T09:00:00Z"),
           slot,
+          isRecurrentSchedule: false,
         })
       ).toBe(false);
 
@@ -50,6 +57,7 @@ describe("IsAtPermittedTimeStrategy", () => {
         strategy.isAvailable({
           dateTime: new Date("2023-01-10T09:00:00Z"),
           slot,
+          isRecurrentSchedule: false,
         })
       ).toBe(false);
     });
@@ -63,7 +71,10 @@ describe("IsAtPermittedTimeStrategy", () => {
       );
 
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-10T14:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-10T14:00:00Z"),
+          isRecurrentSchedule: false,
+        })
       ).toBe(true);
     });
 
@@ -87,6 +98,7 @@ describe("IsAtPermittedTimeStrategy", () => {
         strategy.isAvailable({
           dateTime: new Date("2023-01-10T13:00:00Z"),
           slot,
+          isRecurrentSchedule: false,
         })
       ).toBe(false);
     });
@@ -102,11 +114,17 @@ describe("IsAtPermittedTimeStrategy", () => {
       );
 
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-07T09:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-07T09:00:00Z"),
+          isRecurrentSchedule: false,
+        })
       ).toBe(true);
 
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-08T09:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-08T09:00:00Z"),
+          isRecurrentSchedule: false,
+        })
       ).toBe(true);
     });
 
@@ -130,6 +148,7 @@ describe("IsAtPermittedTimeStrategy", () => {
         strategy.isAvailable({
           dateTime: new Date("2023-01-09T09:00:00Z"),
           slot,
+          isRecurrentSchedule: false,
         })
       ).toBe(false);
 
@@ -137,6 +156,7 @@ describe("IsAtPermittedTimeStrategy", () => {
         strategy.isAvailable({
           dateTime: new Date("2023-01-10T10:00:00Z"),
           slot,
+          isRecurrentSchedule: false,
         })
       ).toBe(false);
     });
@@ -150,7 +170,10 @@ describe("IsAtPermittedTimeStrategy", () => {
       );
 
       expect(
-        strategy.isAvailable({ dateTime: new Date("2023-01-10T04:00:00Z") })
+        strategy.isAvailable({
+          dateTime: new Date("2023-01-10T04:00:00Z"),
+          isRecurrentSchedule: false,
+        })
       ).toBe(true);
     });
 
@@ -174,6 +197,7 @@ describe("IsAtPermittedTimeStrategy", () => {
         strategy.isAvailable({
           dateTime: new Date("2023-01-10T05:00:00Z"),
           slot,
+          isRecurrentSchedule: false,
         })
       ).toBe(false);
     });
@@ -195,7 +219,9 @@ describe("IsAtPermittedTimeStrategy", () => {
       rrule: null,
     };
 
-    expect(strategy.isAvailable({ slot })).toBe(true);
+    expect(strategy.isAvailable({ slot, isRecurrentSchedule: false })).toBe(
+      true
+    );
   });
 
   it("should return true if  is not provided", () => {
@@ -207,7 +233,10 @@ describe("IsAtPermittedTimeStrategy", () => {
     );
 
     expect(
-      strategy.isAvailable({ dateTime: new Date("2023-01-10T09:00:00Z") })
+      strategy.isAvailable({
+        dateTime: new Date("2023-01-10T09:00:00Z"),
+        isRecurrentSchedule: false,
+      })
     ).toBe(true);
   });
 });
