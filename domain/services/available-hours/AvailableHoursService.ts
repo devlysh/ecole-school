@@ -13,6 +13,11 @@ import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSl
 import { IsAssignedTeacherStrategy } from "@domain/strategies/IsAssignedTeacher.strategy";
 import { IsOnVacationStrategy } from "@domain/strategies/IsOnVacation.strategy";
 import { VacationsRepository } from "@domain/repositories/VacationsRepostiroy";
+import {
+  IsAtPermittedTimeStrategy,
+  PermittedTimeDirection,
+  PermittedTimeUnit,
+} from "@domain/strategies/IsAtPermittedTime.strategy";
 
 interface GetAvailableHoursParams {
   startDate: Date;
@@ -63,6 +68,12 @@ export class AvailableHoursService {
       new HandleSelectedSlotsStrategy(),
       new IsAssignedTeacherStrategy(),
       new IsOnVacationStrategy(),
+      new IsAtPermittedTimeStrategy(
+        2,
+        PermittedTimeUnit.DAYS,
+        PermittedTimeDirection.AFTER,
+        new Date()
+      ),
     ];
   }
 
