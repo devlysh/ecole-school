@@ -21,8 +21,8 @@ interface GetAvailableHoursParams {
 }
 
 interface ComputeAvailableTimesParams {
-  allSlots: AvailableSlot[];
-  allBookedClasses: BookedClass[];
+  availableSlots: AvailableSlot[];
+  bookedClasses: BookedClass[];
   startDate: Date;
   endDate: Date;
   selectedSlots?: Date[];
@@ -70,21 +70,20 @@ export class AvailableHoursService {
     const user = await this.userRepo.findByEmail(email);
     const assignedTeacherId = user?.student?.assignedTeacherId ?? undefined;
 
-    let allSlots: AvailableSlot[] = [];
-
-    const fetchedSlots = await this.fetchSlots(
+    const availableSlots = await this.fetchSlots(
       assignedTeacherId,
       isRecurrentSchedule
     );
-    if (fetchedSlots) {
-      allSlots = fetchedSlots;
+
+    if (!availableSlots) {
+      return [];
     }
 
-    const allBookedClasses = await this.bookClassesRepo.fetchAllBookedClasses();
+    const bookedClasses = await this.bookClassesRepo.fetchAllBookedClasses();
 
     return this.computeAvailableTimes({
-      allSlots,
-      allBookedClasses,
+      availableSlots,
+      bookedClasses,
       startDate,
       endDate,
       selectedSlots,
@@ -116,8 +115,8 @@ export class AvailableHoursService {
 
   private computeAvailableTimes(params: ComputeAvailableTimesParams): number[] {
     const {
-      allSlots,
-      allBookedClasses,
+      availableSlots,
+      bookedClasses,
       startDate,
       endDate,
       selectedSlots,
@@ -129,12 +128,13 @@ export class AvailableHoursService {
     const availableDateTimes: Date[] = [];
     const dailyRange = this.generateRange(startDate, endDate, RangeUnit.Day);
 
-    for (const slot of allSlots) {
+    for (const slot of availableSlots) {
       const hourlyIncrements = this.generateRange(
         slot.startTime,
         slot.endTime,
         RangeUnit.Hour
       );
+
       for (const currentDay of dailyRange) {
         for (const hourSlot of hourlyIncrements) {
           const dateTime = new Date(currentDay);
@@ -147,7 +147,7 @@ export class AvailableHoursService {
           const context: SlotAvailibilityContext = {
             slot,
             dateTime,
-            bookedClasses: allBookedClasses,
+            bookedClasses,
             selectedSlots,
             assignedTeacherId,
             lockedTeacherIds,
