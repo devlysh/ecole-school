@@ -18,6 +18,7 @@ import {
   PermittedTimeDirection,
   PermittedTimeUnit,
 } from "@domain/strategies/IsAtPermittedTime.strategy";
+import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.strategy";
 
 interface GetAvailableHoursParams {
   startDate: Date;
@@ -75,6 +76,7 @@ export class AvailableHoursService {
         PermittedTimeDirection.AFTER,
         new Date()
       ),
+      new IsSlotRecurringStrategy(),
     ];
   }
 

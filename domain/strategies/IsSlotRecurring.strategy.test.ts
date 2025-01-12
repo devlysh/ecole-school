@@ -11,10 +11,12 @@ describe("RecurringStrategy", () => {
       endTime: new Date(),
       rrule: "FREQ=WEEKLY;BYDAY=MO",
     };
-    expect(strategy.isAvailable({ slot: recurringSlot })).toBe(true);
+    expect(
+      strategy.isAvailable({ slot: recurringSlot, isRecurrentSchedule: true })
+    ).toBe(true);
   });
 
-  it("should return false if the slot is not recurring", () => {
+  it("should return true if the slot is not recurring", () => {
     const strategy = new IsSlotRecurringStrategy();
     const nonRecurringSlot: AvailableSlot = {
       id: 2,
@@ -23,6 +25,28 @@ describe("RecurringStrategy", () => {
       endTime: new Date(),
       rrule: null,
     };
-    expect(strategy.isAvailable({ slot: nonRecurringSlot })).toBe(false);
+    expect(
+      strategy.isAvailable({
+        slot: nonRecurringSlot,
+        isRecurrentSchedule: false,
+      })
+    ).toBe(true);
+  });
+
+  it("should return false if the isRecurrentSchedule is true and rrule is falsy", () => {
+    const strategy = new IsSlotRecurringStrategy();
+    const nonRecurringSlot: AvailableSlot = {
+      id: 2,
+      teacherId: 1,
+      startTime: new Date(),
+      endTime: new Date(),
+      rrule: null,
+    };
+    expect(
+      strategy.isAvailable({
+        slot: nonRecurringSlot,
+        isRecurrentSchedule: true,
+      })
+    ).toBe(false);
   });
 });

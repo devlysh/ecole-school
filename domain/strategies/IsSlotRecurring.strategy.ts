@@ -9,15 +9,19 @@ import {
 export class IsSlotRecurringStrategy implements SlotAvailibilityStrategy {
   constructor() {}
   isAvailable(context: SlotAvailibilityContext): boolean {
-    const { slot } = context;
+    const { slot, isRecurrentSchedule } = context;
 
     if (!slot) {
       logger.warn("Missing context in IsSlotRecurringStrategy");
       return true;
     }
 
-    if (!slot?.rrule) {
+    if (isRecurrentSchedule && typeof slot.rrule !== "string") {
       return false;
+    }
+
+    if (!slot.rrule) {
+      return true;
     }
 
     try {
