@@ -27,7 +27,7 @@ describe("IsAssignedTeacherStrategy", () => {
     ).toBe(true);
   });
 
-  it("should return false if the slot is not assigned to the teacher", () => {
+  it("should return false if the assigned teacher id is defined but the slot is not assigned to current teacher", () => {
     const slot: AvailableSlot = {
       id: 1,
       teacherId: 2,
@@ -36,18 +36,11 @@ describe("IsAssignedTeacherStrategy", () => {
       rrule: null,
     };
 
-    const student: Student = {
-      userId: 1,
-      assignedTeacherId: 3,
-      stripeCustomerId: "1",
-      stripeSubscriptionId: "1",
-    };
-
     const strategy = new IsAssignedTeacherStrategy();
     expect(
       strategy.isAvailable({
         slot,
-        assignedTeacherId: student.assignedTeacherId ?? undefined,
+        assignedTeacherId: 3,
       })
     ).toBe(false);
   });

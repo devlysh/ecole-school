@@ -11,10 +11,14 @@ export class IsAssignedTeacherStrategy implements SlotAvailibilityStrategy {
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, assignedTeacherId } = context;
 
-    if (!slot || !assignedTeacherId) {
+    if (!slot) {
       return false;
     }
 
-    return slot.teacherId === assignedTeacherId;
+    if (assignedTeacherId) {
+      return slot.teacherId === assignedTeacherId;
+    }
+
+    return true;
   }
 }

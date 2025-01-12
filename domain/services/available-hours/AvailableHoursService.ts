@@ -10,6 +10,7 @@ import {
 import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.strategy";
 import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
 import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlotsStrategy.strategy";
+import { IsAssignedTeacherStrategy } from "@domain/strategies/IsAssignedTeacher.strategy";
 
 interface GetAvailableHoursParams {
   startDate: Date;
@@ -54,6 +55,7 @@ export class AvailableHoursService {
       new IsSlotAvailableStrategy(),
       new IsSlotBookedStrategy(),
       new HandleSelectedSlotsStrategy(),
+      new IsAssignedTeacherStrategy(),
     ];
   }
 
@@ -133,7 +135,6 @@ export class AvailableHoursService {
         slot.endTime,
         RangeUnit.Hour
       );
-
       for (const currentDay of dailyRange) {
         for (const hourSlot of hourlyIncrements) {
           const dateTime = new Date(currentDay);
