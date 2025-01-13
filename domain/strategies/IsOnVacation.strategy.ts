@@ -18,7 +18,10 @@ export class IsOnVacationStrategy implements SlotAvailibilityStrategy {
     const allDay = new Date(dateTime.toISOString().split("T")[0]);
 
     return !vacations.some((vacation) => {
-      if (vacation.date.toISOString() === allDay.toISOString()) {
+      if (
+        vacation.date.toISOString() === allDay.toISOString() &&
+        vacation.teacherId === slot.teacherId
+      ) {
         return true;
       }
       return false;
