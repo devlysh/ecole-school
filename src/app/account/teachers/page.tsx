@@ -50,7 +50,7 @@ const AccountTeachersPage = async () => {
   });
 
   const teachers: Teacher[] = users.map((user) => ({
-    id: user.id,
+    id: user.id.toString(),
     name: user.name || "",
     email: user.email,
     roles: user.roles.map((r) => r.role),

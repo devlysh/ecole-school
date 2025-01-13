@@ -4,11 +4,10 @@ import { Button, Switch } from "@nextui-org/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { AccountBookClassesCalendar } from "./AccountBookClassesCalendar";
 import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
-import { BookClassesService } from "@domain/services/book-classes/BookClassesService";
 import { AvailableCalendarSlot } from "@/lib/types";
 import { addDays, startOfWeek, format } from "date-fns";
 import logger from "@/lib/logger";
-import { bookClassesRequest } from "@/app/api/v1/book-classes/request";
+import { bookClassesRequest } from "@/app/api/v1/booked-classes/request";
 import { expandTime } from "@/lib/utils";
 
 const AccountBookClasses: React.FC = () => {

@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
-import { BookClassesService } from "@domain/services/book-classes/BookClassesService";
+import { BookedClassesService } from "@domain/services/booked-classes/BookedClassesService";
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
+
+export const GET = async () => {
+  try {
+    const decodedToken = await verifyAccessToken();
+    const email = decodedToken?.email;
+
+    const bookedClassesService = new BookedClassesService();
+    const classes = await bookedClassesService.getBookedClassesByEmail(email);
+    return NextResponse.json(classes, { status: 200 });
+  } catch (err) {
+    logger.error(err, "Error fetching booked classes");
+    return NextResponse.json(
+      { error: "Failed to fetch booked classes" },
+      { status: 500 }
+    );
+  }
+};
 
 export const POST = async (request: Request) => {
   try {
@@ -24,9 +41,9 @@ export const POST = async (request: Request) => {
       );
     }
 
-    const bookClassesService = new BookClassesService();
+    const bookedClassesService = new BookedClassesService();
 
-    const result = await bookClassesService.bookClasses(
+    const result = await bookedClassesService.bookClasses(
       email,
       dates.map((date) => new Date(date)),
       isRecurrent

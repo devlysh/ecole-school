@@ -130,13 +130,13 @@ export type TokenPayload =
   | PreAuthTokenPayload
   | RegistrationTokenPayload;
 
-export interface Teacher {
-  id: number;
+export interface Teacher extends Record<string, unknown> {
+  id: string;
   name: string;
   email: string;
-  avatar?: string;
   roles: { name: string }[];
-  languages?: Language[];
+  avatar?: string;
+  languages?: { name: string }[];
 }
 
 export interface TeacherFormValues {

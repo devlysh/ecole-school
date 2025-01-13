@@ -9,4 +9,12 @@ export class BookedClassesRepository {
   async fetchAllBookedClasses(): Promise<BookedClass[]> {
     return prisma.bookedClass.findMany({});
   }
+
+  async fetchBookedClassesByStudentId(
+    studentId: number
+  ): Promise<BookedClass[]> {
+    return prisma.bookedClass.findMany({
+      where: { studentId: studentId },
+    });
+  }
 }

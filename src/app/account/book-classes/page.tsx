@@ -2,7 +2,7 @@ import React from "react";
 import AccountLayout from "@/components/Account/layout";
 import BookClasses from "@/components/Account/AccountBookClasses";
 
-const AccountSettingsPage = async () => {
+const AccountBookClassesPage = async () => {
   return (
     <AccountLayout>
       <BookClasses />
@@ -10,4 +10,4 @@ const AccountSettingsPage = async () => {
   );
 };
 
-export default AccountSettingsPage;
+export default AccountBookClassesPage;

@@ -1,6 +1,9 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
+import GenericTable from "@/components/GenericTable";
+import { Teacher } from "@/lib/types";
+import { useRouter } from "next/navigation";
 import {
   Button,
   Dropdown,
@@ -10,9 +13,6 @@ import {
   User,
 } from "@nextui-org/react";
 import { VerticalDotsIcon } from "@/icons";
-import UsersList from "@/components/UsersList";
-import { Teacher } from "@/lib/types";
-import { useRouter } from "next/navigation";
 
 interface AccountTeachersProps {
   teachers: Teacher[];
@@ -22,15 +22,7 @@ const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
   const router = useRouter();
 
   const INITIAL_VISIBLE_COLUMNS = useMemo(
-    () => [
-      "name",
-      "email",
-      "language",
-      "role",
-      "classHistory",
-      "comments",
-      "actions",
-    ],
+    () => ["name", "email", "language", "role", "actions"],
     []
   );
 
@@ -65,18 +57,6 @@ const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
           user.languages?.map((l) => l.name).join(", "),
       },
       {
-        name: "Class History",
-        uid: "classHistory",
-        sortable: true,
-        render: () => <a>View</a>,
-      },
-      {
-        name: "Comments",
-        uid: "comments",
-        sortable: true,
-        render: () => <a>View</a>,
-      },
-      {
         name: "Actions",
         uid: "actions",
         render: (user: Teacher) => (
@@ -107,11 +87,10 @@ const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
 
   const handleNew = useCallback(() => {
     router.push("/account/teachers/add");
-    return teachers;
-  }, [router, teachers]);
+  }, [router]);
 
   return (
-    <UsersList
+    <GenericTable
       columns={columns}
       list={teachers}
       initialVisibleColumns={INITIAL_VISIBLE_COLUMNS}

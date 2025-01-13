@@ -1,13 +1,4 @@
-"use client";
-
-import React, {
-  ChangeEvent,
-  Key,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import React, { ChangeEvent, Key, ReactNode, useCallback, useMemo, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -29,33 +20,32 @@ import { PlusIcon } from "@/icons";
 import { ChevronDownIcon } from "@/icons";
 import { SearchIcon } from "@/icons";
 import { capitalize } from "@/lib/utils";
-import { Teacher } from "@/lib/types";
 
-interface UsersListProps<T> {
+interface GenericTableProps<T> {
   columns: {
     name: string;
     uid: string;
     sortable?: boolean;
-    render: (user: T) => ReactNode;
+    render: (item: T) => ReactNode;
   }[];
   list: T[];
   initialVisibleColumns: string[];
-  onNew?: () => T[];
+  onNew?: () => void;
 }
 
-const UsersList = <T extends Record<string, unknown> | Teacher>({
+const GenericTable = <T extends Record<string, unknown>>({
   columns,
   list,
   initialVisibleColumns,
   onNew,
-}: UsersListProps<T>) => {
+}: GenericTableProps<T>) => {
   const [filterValue, setFilterValue] = useState("");
   const [visibleColumns, setVisibleColumns] = useState<Selection>(
     new Set(initialVisibleColumns)
   );
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-    column: "age",
+    column: columns[0]?.uid || "",
     direction: "ascending",
   });
   const [page, setPage] = useState(1);
@@ -76,21 +66,19 @@ const UsersList = <T extends Record<string, unknown> | Teacher>({
   }, [columns, visibleColumns]);
 
   const filteredItems = useMemo(() => {
-    let filteredUsers = [...list];
+    let filteredList = [...list];
 
     if (hasSearchFilter) {
-      filteredUsers = filteredUsers.filter((user) => {
-        const name = user.name as string;
-        const email = user.email as string;
-        return (
-          name.toLowerCase().includes(filterValue.toLowerCase()) ||
-          email.toLowerCase().includes(filterValue.toLowerCase())
-        );
+      filteredList = filteredList.filter((item) => {
+        return columns.some((column) => {
+          const value = item[column.uid] as string;
+          return value.toLowerCase().includes(filterValue.toLowerCase());
+        });
       });
     }
 
-    return filteredUsers;
-  }, [list, hasSearchFilter, filterValue]);
+    return filteredList;
+  }, [list, hasSearchFilter, filterValue, columns]);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -101,8 +89,8 @@ const UsersList = <T extends Record<string, unknown> | Teacher>({
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a: T, b: T) => {
-      const first = a[sortDescriptor.column as keyof T] as number;
-      const second = b[sortDescriptor.column as keyof T] as number;
+      const first = a[sortDescriptor.column as keyof T] as string;
+      const second = b[sortDescriptor.column as keyof T] as string;
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
@@ -146,7 +134,7 @@ const UsersList = <T extends Record<string, unknown> | Teacher>({
               base: "w-full sm:max-w-[44%]",
               inputWrapper: "border-1",
             }}
-            placeholder="Search by name or email..."
+            placeholder="Search..."
             size="sm"
             startContent={<SearchIcon className="text-default-300" />}
             value={filterValue}
@@ -180,19 +168,21 @@ const UsersList = <T extends Record<string, unknown> | Teacher>({
                 ))}
               </DropdownMenu>
             </Dropdown>
-            <Button
-              color="primary"
-              endContent={<PlusIcon />}
-              size="sm"
-              onClick={() => onNew && onNew()}
-            >
-              Add New
-            </Button>
+            {onNew && (
+              <Button
+                color="primary"
+                endContent={<PlusIcon />}
+                size="sm"
+                onClick={onNew}
+              >
+                Add New
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-default-400 text-small">
-            Total {list.length} users
+            Total {list.length} items
           </span>
           <label className="flex items-center text-default-400 text-small">
             Rows per page:
@@ -241,7 +231,7 @@ const UsersList = <T extends Record<string, unknown> | Teacher>({
     <Table
       isCompact
       removeWrapper
-      aria-label="Example table with custom cells, pagination and sorting"
+      aria-label="Generic table with custom cells, pagination and sorting"
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       checkboxesProps={{
@@ -265,7 +255,7 @@ const UsersList = <T extends Record<string, unknown> | Teacher>({
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody emptyContent={"No users found"} items={sortedItems}>
+      <TableBody emptyContent={"No items found"} items={sortedItems}>
         {(item) => (
           <TableRow key={item.id as Key}>
             {(columnKey) => (
@@ -278,4 +268,4 @@ const UsersList = <T extends Record<string, unknown> | Teacher>({
   );
 };
 
-export default UsersList;
+export default GenericTable; 

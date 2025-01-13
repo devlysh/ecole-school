@@ -6,7 +6,7 @@ import { AvailableHoursService } from "../available-hours/AvailableHoursService"
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
 import { AvailableSlot } from "@prisma/client";
 
-export class BookClassesService {
+export class BookedClassesService {
   private userRepository: UserRepository;
   private studentRepository: StudentRepository;
   private bookedClassesRepository: BookedClassesRepository;
@@ -98,5 +98,28 @@ export class BookClassesService {
         ? this.availableSlotsRepository.fetchAll()
         : this.availableSlotsRepository.fetchRecurringSlots();
     }
+  }
+
+  public async getBookedClasses() {
+    try {
+      const classes =
+        await this.bookedClassesRepository.fetchAllBookedClasses();
+      return classes;
+    } catch (error) {
+      logger.error(error, "Error fetching booked classes");
+      throw new Error("Failed to fetch booked classes");
+    }
+  }
+
+  public async getBookedClassesByEmail(email: string) {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user || !user.id || !user.student) {
+      throw new Error("User not found");
+    }
+
+    const classes =
+      await this.bookedClassesRepository.fetchBookedClassesByStudentId(user.id);
+    return classes;
   }
 }
