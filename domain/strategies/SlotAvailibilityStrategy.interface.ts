@@ -6,7 +6,7 @@ export interface SlotAvailibilityContext {
   assignedTeacherId?: number;
   bookedClasses?: BookedClass[];
   selectedSlots?: Date[];
-  lockedTeacherIds?: Set<number>;
+  selectedTeacherIds?: Set<number>;
   vacations?: Vacation[];
   isRecurrentSchedule?: boolean;
 }

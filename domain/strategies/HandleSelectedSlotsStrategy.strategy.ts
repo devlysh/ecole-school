@@ -10,30 +10,17 @@ export class HandleSelectedSlotsStrategy implements SlotAvailibilityStrategy {
   constructor() {}
 
   isAvailable(context: SlotAvailibilityContext): boolean {
-    const { slot, selectedSlots, lockedTeacherIds } = context;
+    const { slot, selectedTeacherIds } = context;
 
-    if (!slot || !lockedTeacherIds || !selectedSlots) {
+    if (!slot || !selectedTeacherIds) {
       logger.warn("Missing context in HandleSelectedSlotsStrategy");
       return true;
     }
 
-    if (selectedSlots.length === 0) {
+    if (selectedTeacherIds.size === 0) {
       return true;
     }
 
-    for (const selectedSlot of selectedSlots) {
-      if (this.isSlotAvailable(slot, selectedSlot)) {
-        lockedTeacherIds.add(slot.teacherId);
-        break;
-      }
-    }
-
-    return lockedTeacherIds.has(slot.teacherId);
-  }
-
-  private isSlotAvailable(slot: AvailableSlot, dateTime: Date): boolean {
-    return slot.rrule
-      ? IsSlotAvailableStrategy.isRecurringSlotAvailable(slot, dateTime)
-      : IsSlotAvailableStrategy.isNonRecurringSlotAvailable(slot, dateTime);
+    return selectedTeacherIds.has(slot.teacherId);
   }
 }

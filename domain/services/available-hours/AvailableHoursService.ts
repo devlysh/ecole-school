@@ -19,6 +19,7 @@ import {
   PermittedTimeUnit,
 } from "@domain/strategies/IsAtPermittedTime.strategy";
 import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.strategy";
+import logger from "@/lib/logger";
 
 interface GetAvailableHoursParams {
   startDate: Date;
@@ -64,7 +65,11 @@ export class AvailableHoursService {
       availableHoursRepo || new AvailableSlotsRepository();
     this.bookClassesRepo = bookClassesRepo || new BookedClassesRepository();
     this.vacationsRepo = vacationsRepo || new VacationsRepository();
-    this.strategies = strategies || [
+    this.strategies = strategies || this.defaultStrategies();
+  }
+
+  private defaultStrategies(): SlotAvailibilityStrategy[] {
+    return [
       new IsSlotAvailableStrategy(),
       new IsSlotBookedStrategy(),
       new HandleSelectedSlotsStrategy(),
@@ -101,7 +106,6 @@ export class AvailableHoursService {
     }
 
     const bookedClasses = await this.bookClassesRepo.fetchAllBookedClasses();
-
     const vacations = await this.vacationsRepo.fetchAllVacations();
 
     return this.computeAvailableTimes({
@@ -151,7 +155,20 @@ export class AvailableHoursService {
       isRecurrentSchedule,
     } = params;
 
-    const lockedTeacherIds = new Set<number>();
+    const selectedTeacherIds = new Set<number>(
+      this.collectTeachersForSelectedSlots(
+        availableSlots,
+        selectedSlots ?? [],
+        startDate,
+        endDate
+      )
+    );
+
+    logger.debug(
+      { selectedTeacherIds: Array.from(selectedTeacherIds) },
+      "Selected teacher ids"
+    );
+
     const availableDateTimes: Date[] = [];
     const dailyRange = this.generateRange(startDate, endDate, RangeUnit.Day);
 
@@ -164,12 +181,7 @@ export class AvailableHoursService {
 
       for (const currentDay of dailyRange) {
         for (const hourSlot of hourlyIncrements) {
-          const dateTime = new Date(currentDay);
-          dateTime.setHours(
-            hourSlot.getHours(),
-            hourSlot.getMinutes(),
-            hourSlot.getSeconds()
-          );
+          const dateTime = this.createDateTime(currentDay, hourSlot);
 
           const context: SlotAvailibilityContext = {
             slot,
@@ -177,7 +189,7 @@ export class AvailableHoursService {
             bookedClasses,
             selectedSlots,
             assignedTeacherId,
-            lockedTeacherIds,
+            selectedTeacherIds,
             vacations,
             isRecurrentSchedule,
           };
@@ -190,6 +202,16 @@ export class AvailableHoursService {
     }
 
     return availableDateTimes.map((time) => compressTime(time.getTime()));
+  }
+
+  private createDateTime(currentDay: Date, hourSlot: Date): Date {
+    const dateTime = new Date(currentDay);
+    dateTime.setHours(
+      hourSlot.getHours(),
+      hourSlot.getMinutes(),
+      hourSlot.getSeconds()
+    );
+    return dateTime;
   }
 
   private isAvailable(
@@ -213,5 +235,30 @@ export class AvailableHoursService {
     }
 
     return days;
+  }
+
+  private collectTeachersForSelectedSlots(
+    availableSlots: AvailableSlot[],
+    selectedSlots: Date[],
+    startDate: Date,
+    endDate: Date
+  ): number[] {
+    const dailyRange = this.generateRange(startDate, endDate, RangeUnit.Day);
+    const isSlotAvailableStrategy = new IsSlotAvailableStrategy();
+    const result: number[] = [];
+
+    for (const slot of availableSlots) {
+      for (const currentDay of dailyRange) {
+        for (const selectedSlot of selectedSlots) {
+          const dateTime = this.createDateTime(currentDay, selectedSlot);
+
+          if (isSlotAvailableStrategy.isAvailable({ slot, dateTime })) {
+            result.push(slot.teacherId);
+          }
+        }
+      }
+    }
+
+    return result;
   }
 }
