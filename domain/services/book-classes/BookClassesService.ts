@@ -1,8 +1,8 @@
 import { parseISO } from "date-fns";
 import { RRule } from "rrule";
 import { AvailableSlot } from "@prisma/client";
-import { BookedClassesRepository } from "../../repositories/BookedClassesRepository";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { BookedClassesRepository } from "../../repositories/BookedClasses.repository";
+import { UserRepository } from "@domain/repositories/User.repository";
 
 export class BookClassesService {
   private userRepository: UserRepository;

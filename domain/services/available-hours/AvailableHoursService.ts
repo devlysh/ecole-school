@@ -1,7 +1,7 @@
-import { AvailableSlotsRepository } from "../../repositories/AvailableSlotsRepository";
-import { BookedClassesRepository } from "../../repositories/BookedClassesRepository";
+import { AvailableSlotsRepository } from "../../repositories/AvailableSlots.repository";
+import { BookedClassesRepository } from "../../repositories/BookedClasses.repository";
 import { AvailableSlot, BookedClass, Vacation } from "@prisma/client";
-import { UserRepository } from "../../repositories/UserRepository";
+import { UserRepository } from "../../repositories/User.repository";
 import { compressTime } from "@/lib/utils";
 import {
   SlotAvailibilityContext,
@@ -12,7 +12,7 @@ import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
 import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlotsStrategy.strategy";
 import { IsAssignedTeacherStrategy } from "@domain/strategies/IsAssignedTeacher.strategy";
 import { IsOnVacationStrategy } from "@domain/strategies/IsOnVacation.strategy";
-import { VacationsRepository } from "@domain/repositories/VacationsRepostiroy";
+import { VacationsRepository } from "@domain/repositories/Vacations.repostiroy";
 import {
   IsAtPermittedTimeStrategy,
   PermittedTimeDirection,
@@ -76,7 +76,7 @@ export class AvailableHoursService {
       new IsAssignedTeacherStrategy(),
       new IsOnVacationStrategy(),
       new IsAtPermittedTimeStrategy(
-        2,
+        1,
         PermittedTimeUnit.DAYS,
         PermittedTimeDirection.AFTER,
         new Date()

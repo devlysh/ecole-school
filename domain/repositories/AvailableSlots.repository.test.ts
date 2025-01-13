@@ -1,4 +1,4 @@
-import { AvailableSlotsRepository } from "./AvailableSlotsRepository";
+import { AvailableSlotsRepository } from "./AvailableSlots.repository";
 import prisma from "@/lib/prisma";
 
 jest.mock("@/lib/prisma", () => ({

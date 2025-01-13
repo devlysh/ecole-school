@@ -1,18 +1,18 @@
 import { AvailableHoursService } from "./AvailableHoursService";
-import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlotsRepository";
-import { BookedClassesRepository } from "@domain/repositories/BookedClassesRepository";
-import { UserRepository } from "@domain/repositories/UserRepository";
+import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
+import { BookedClassesRepository } from "@domain/repositories/BookedClasses.repository";
+import { UserRepository } from "@domain/repositories/User.repository";
 import { AvailableSlot, BookedClass, Student, User } from "@prisma/client";
 import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.strategy";
 import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
 import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlotsStrategy.strategy";
 import { SlotAvailibilityStrategy } from "@domain/strategies/SlotAvailibilityStrategy.interface";
-import { VacationsRepository } from "@domain/repositories/VacationsRepostiroy";
+import { VacationsRepository } from "@domain/repositories/Vacations.repostiroy";
 
-jest.mock("@domain/repositories/AvailableSlotsRepository");
-jest.mock("@domain/repositories/BookedClassesRepository");
-jest.mock("@domain/repositories/VacationsRepostiroy");
-jest.mock("@domain/repositories/UserRepository");
+jest.mock("@domain/repositories/AvailableSlots.repository");
+jest.mock("@domain/repositories/BookedClasses.repository");
+jest.mock("@domain/repositories/Vacations.repostiroy");
+jest.mock("@domain/repositories/User.repository");
 
 /**
  * Helper to create a mock user object with optional assignedTeacherId
