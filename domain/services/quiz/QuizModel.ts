@@ -129,4 +129,4 @@ export const steps: QuizStep[] = [
     footerText:
       "By providing your email, you acknowledge that you are at least 18 years old and agree to EcoleFamily's Terms and Conditions and Privacy Policy. You also consent to receive emails and updates regarding our services. You can unsubscribe at any time.",
   },
-]; 
+];

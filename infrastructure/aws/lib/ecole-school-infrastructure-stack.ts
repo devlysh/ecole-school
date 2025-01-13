@@ -131,8 +131,8 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
           port: 3000,
           environmentVariables: {
             DATABASE_URL: databaseUrl,
-            NODE_OPTIONS: '--trace-warnings',
-            DEBUG: '*',
+            NODE_OPTIONS: "--trace-warnings",
+            DEBUG: "*",
           },
         },
         asset: dockerImageAsset,

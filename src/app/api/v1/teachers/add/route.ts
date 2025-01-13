@@ -1,12 +1,9 @@
 import logger from "@/lib/logger";
 import prisma from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/jwt";
-import {
-  AccessTokenPayload,
-  Role,
-  TeacherFormWithTimeSlots,
-} from "@/lib/types";
+import { AccessTokenPayload, Role, TeacherFormValues } from "@/lib/types";
 import bcrypt from "bcrypt";
+import { EventInput } from "@fullcalendar/core/index.js";
 
 export const POST = async (request: Request) => {
   try {
@@ -15,8 +12,8 @@ export const POST = async (request: Request) => {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { name, email, password, timezone, timeSlots } =
-      (await request.json()) as TeacherFormWithTimeSlots;
+    const { name, email, password, timeSlots } =
+      (await request.json()) as TeacherFormValues & { timeSlots: EventInput[] };
 
     if (!name || !email || !password) {
       return Response.json(

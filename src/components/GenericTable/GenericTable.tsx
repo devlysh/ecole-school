@@ -1,4 +1,11 @@
-import React, { ChangeEvent, Key, ReactNode, useCallback, useMemo, useState } from "react";
+import React, {
+  ChangeEvent,
+  Key,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import {
   Table,
   TableHeader,
@@ -268,4 +275,4 @@ const GenericTable = <T extends Record<string, unknown>>({
   );
 };
 
-export default GenericTable; 
+export default GenericTable;

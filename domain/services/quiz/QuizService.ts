@@ -48,4 +48,4 @@ export const pipe =
   (...methods: ((state: QuizState) => QuizState)[]) =>
     methods.reduce((state, method) => {
       return method(state);
-    }, prevState); 
+    }, prevState);

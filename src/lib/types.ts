@@ -1,5 +1,3 @@
-import { EventInput } from "@fullcalendar/core/index.js";
-import { Vacation } from "@prisma/client";
 import { SVGProps } from "react";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {

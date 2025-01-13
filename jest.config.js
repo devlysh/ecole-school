@@ -14,7 +14,7 @@ const config = {
   // Add more setup options before each test is run
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
-    "^@domain/(.*)$": "<rootDir>/domain/$1"
+    "^@domain/(.*)$": "<rootDir>/domain/$1",
   },
 };
 
