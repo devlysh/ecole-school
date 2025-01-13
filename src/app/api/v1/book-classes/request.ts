@@ -1,10 +1,13 @@
-export async function bookClassesRequest(dates: number[], isFixedSchedule: boolean) {
+export async function bookClassesRequest(
+  dates: number[],
+  isRecurrent: boolean
+) {
   const response = await fetch("/api/v1/book-classes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       dates,
-      isFixedSchedule,
+      isRecurrent,
     }),
   });
 

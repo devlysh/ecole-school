@@ -155,19 +155,11 @@ export class AvailableHoursService {
       isRecurrentSchedule,
     } = params;
 
-    const selectedTeacherIds = new Set<number>(
-      this.collectTeachersForSelectedSlots(
+    const selectedTeacherIds =
+      AvailableHoursService.collectTeachersForSelectedSlots(
         availableSlots,
-        selectedSlots ?? [],
-        startDate,
-        endDate
-      )
-    );
-
-    logger.debug(
-      { selectedTeacherIds: Array.from(selectedTeacherIds) },
-      "Selected teacher ids"
-    );
+        selectedSlots ?? []
+      );
 
     const availableDateTimes: Date[] = [];
     const dailyRange = this.generateRange(startDate, endDate, RangeUnit.Day);
@@ -181,7 +173,10 @@ export class AvailableHoursService {
 
       for (const currentDay of dailyRange) {
         for (const hourSlot of hourlyIncrements) {
-          const dateTime = this.createDateTime(currentDay, hourSlot);
+          const dateTime = AvailableHoursService.createDateTime(
+            currentDay,
+            hourSlot
+          );
 
           const context: SlotAvailibilityContext = {
             slot,
@@ -204,7 +199,7 @@ export class AvailableHoursService {
     return availableDateTimes.map((time) => compressTime(time.getTime()));
   }
 
-  private createDateTime(currentDay: Date, hourSlot: Date): Date {
+  public static createDateTime(currentDay: Date, hourSlot: Date): Date {
     const dateTime = new Date(currentDay);
     dateTime.setHours(
       hourSlot.getHours(),
@@ -237,28 +232,40 @@ export class AvailableHoursService {
     return days;
   }
 
-  private collectTeachersForSelectedSlots(
+  public static collectTeachersForSelectedSlots(
     availableSlots: AvailableSlot[],
-    selectedSlots: Date[],
-    startDate: Date,
-    endDate: Date
-  ): number[] {
-    const dailyRange = this.generateRange(startDate, endDate, RangeUnit.Day);
+    selectedSlots: Date[]
+  ): Set<number> {
+    // If there are no selected slots, return an empty set
+    if (!selectedSlots.length) return new Set<number>();
+
     const isSlotAvailableStrategy = new IsSlotAvailableStrategy();
-    const result: number[] = [];
 
-    for (const slot of availableSlots) {
-      for (const currentDay of dailyRange) {
-        for (const selectedSlot of selectedSlots) {
-          const dateTime = this.createDateTime(currentDay, selectedSlot);
-
-          if (isSlotAvailableStrategy.isAvailable({ slot, dateTime })) {
-            result.push(slot.teacherId);
-          }
-        }
+    // 1. Group the available slots by teacherId
+    const teacherSlotsMap = availableSlots.reduce((acc, slot) => {
+      if (!acc.has(slot.teacherId)) {
+        acc.set(slot.teacherId, []);
       }
-    }
+      acc.get(slot.teacherId)!.push(slot);
+      return acc;
+    }, new Map<number, AvailableSlot[]>());
 
-    return result;
+    // 2. For each teacher, check if *every* selectedSlot is matched
+    //    by at least one slot from that teacher (via the strategy).
+    const validTeacherIds = Array.from(teacherSlotsMap.entries())
+      .filter(([_, slots]) =>
+        selectedSlots.every((selectedSlot) =>
+          slots.some((slot) =>
+            isSlotAvailableStrategy.isAvailable({
+              slot,
+              dateTime: selectedSlot,
+            })
+          )
+        )
+      )
+      .map(([teacherId]) => teacherId);
+
+    // Return that set of teacherIds
+    return new Set<number>(validTeacherIds);
   }
 }

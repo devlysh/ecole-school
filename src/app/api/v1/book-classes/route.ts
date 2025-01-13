@@ -28,7 +28,7 @@ export const POST = async (request: Request) => {
 
     const result = await bookClassesService.bookClasses(
       email,
-      dates,
+      dates.map((date) => new Date(date)),
       isRecurrent
     );
 
