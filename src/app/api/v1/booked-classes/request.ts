@@ -29,8 +29,8 @@ export const fetchBookedClasses = async () => {
       throw new Error("Failed to fetch booked classes");
     }
     return await response.json();
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    logger.error({ err }, "Failed to fetch booked classes");
     throw new Error("Failed to fetch booked classes");
   }
 };

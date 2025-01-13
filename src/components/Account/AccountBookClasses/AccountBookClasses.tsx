@@ -45,8 +45,8 @@ const AccountBookClasses: React.FC = () => {
           return { day: date.getDay(), hour: date.getHours() };
         });
         setAvailableSlots(slots);
-      } catch (error) {
-        console.error("Error fetching available slots:", error);
+      } catch (err) {
+        logger.error({ err }, "Error fetching available slots");
       }
     },
     [isRecurrentSchedule, selectedSlots]

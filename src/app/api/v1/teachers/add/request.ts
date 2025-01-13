@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import { TeacherFormValues } from "@/lib/types";
 import { EventInput } from "@fullcalendar/core/index.js";
 
@@ -21,8 +22,8 @@ export const addTeacher = async (
     }
 
     return await response.json();
-  } catch (error) {
-    console.error("Error adding teacher:", error);
-    throw error;
+  } catch (err) {
+    logger.error({ err, teacher }, "Error adding teacher");
+    throw err;
   }
 };

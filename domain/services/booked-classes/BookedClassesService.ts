@@ -122,4 +122,14 @@ export class BookedClassesService {
       await this.bookedClassesRepository.fetchBookedClassesByStudentId(user.id);
     return classes;
   }
+
+  public async deleteBookedClassById(email: string, classId: number) {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user || !user.id || !user.student) {
+      throw new Error("User not found");
+    }
+
+    await this.bookedClassesRepository.deleteByIdAndStudentId(classId, user.id);
+  }
 }

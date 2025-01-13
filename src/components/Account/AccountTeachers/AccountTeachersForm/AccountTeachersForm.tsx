@@ -66,8 +66,8 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
         }
 
         router.push("/account/teachers");
-      } catch (error) {
-        console.error("Error adding/updating teacher:", error);
+      } catch (err) {
+        logger.error({ err }, "Error adding/updating teacher");
       }
     },
     [router, timeSlots, vacations]

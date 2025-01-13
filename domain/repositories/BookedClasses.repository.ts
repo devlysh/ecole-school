@@ -17,4 +17,13 @@ export class BookedClassesRepository {
       where: { studentId: studentId },
     });
   }
+
+  async deleteByIdAndStudentId(id: number, studentId: number) {
+    return prisma.bookedClass.deleteMany({
+      where: {
+        id,
+        studentId: studentId,
+      },
+    });
+  }
 }
