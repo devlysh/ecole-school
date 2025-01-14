@@ -72,32 +72,7 @@ export class BookedClassesService {
       }))
     );
 
-    logger.debug(
-      {
-        selectedTeachers: Array.from(selectedTeachers),
-        teacherToAssign,
-      },
-      "DEBUG!"
-    );
-
     return Response.json({ result }, { status: 200 });
-  }
-
-  private async getAvailableSlots(
-    assignedTeacherId: number | null,
-    isRecurrentSchedule: boolean
-  ): Promise<AvailableSlot[]> {
-    if (assignedTeacherId) {
-      return isRecurrentSchedule
-        ? this.availableSlotsRepository.fetchByTeacherId(assignedTeacherId)
-        : this.availableSlotsRepository.fetchRecurringByTeacherId(
-            assignedTeacherId
-          );
-    } else {
-      return isRecurrentSchedule
-        ? this.availableSlotsRepository.fetchAll()
-        : this.availableSlotsRepository.fetchRecurringSlots();
-    }
   }
 
   public async getBookedClasses() {
@@ -131,5 +106,22 @@ export class BookedClassesService {
     }
 
     await this.bookedClassesRepository.deleteByIdAndStudentId(classId, user.id);
+  }
+
+  private async getAvailableSlots(
+    assignedTeacherId: number | null,
+    isRecurrentSchedule: boolean
+  ): Promise<AvailableSlot[]> {
+    if (assignedTeacherId) {
+      return isRecurrentSchedule
+        ? this.availableSlotsRepository.fetchByTeacherId(assignedTeacherId)
+        : this.availableSlotsRepository.fetchRecurringByTeacherId(
+            assignedTeacherId
+          );
+    } else {
+      return isRecurrentSchedule
+        ? this.availableSlotsRepository.fetchAll()
+        : this.availableSlotsRepository.fetchRecurringSlots();
+    }
   }
 }
