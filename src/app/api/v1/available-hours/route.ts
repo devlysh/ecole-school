@@ -42,8 +42,8 @@ export const handleGetAvailableHoursRequest = async (
     const selectedSlots = parseSelectedSlots(selectedSlotsParam);
 
     // Use the service to retrieve data
-    const service = new AvailableHoursService();
-    const hourSlots = await service.getAvailableHours({
+    const availableHoursService = new AvailableHoursService();
+    const hourSlots = await availableHoursService.getAvailableHours({
       startDate: new Date(startDateParam),
       endDate: new Date(endDateParam),
       selectedSlots,
