@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import GenericTable from "@/components/GenericTable";
 import { Teacher } from "@/lib/types";
 import { useRouter } from "next/navigation";
@@ -13,13 +13,19 @@ import {
   User,
 } from "@nextui-org/react";
 import { VerticalDotsIcon } from "@/icons";
+import { fetchTeachers } from "@/app/api/v1/teachers/request";
 
-interface AccountTeachersProps {
-  teachers: Teacher[];
-}
-
-const AccountTeachers: React.FC<AccountTeachersProps> = ({ teachers }) => {
+const AccountTeachers: React.FC = () => {
   const router = useRouter();
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+
+  useEffect(() => {
+    const fetchTeachersData = async () => {
+      const teachersData = await fetchTeachers();
+      setTeachers(teachersData);
+    };
+    fetchTeachersData();
+  }, []);
 
   const INITIAL_VISIBLE_COLUMNS = useMemo(
     () => ["name", "email", "language", "role", "actions"],
