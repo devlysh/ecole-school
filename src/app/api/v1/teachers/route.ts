@@ -13,8 +13,8 @@ export const GET = async () => {
 
     const teachers = await fetchTeachers();
     return NextResponse.json(teachers);
-  } catch (error) {
-    logger.error({ error }, "Error processing GET request");
+  } catch (err) {
+    logger.error({ err }, "Error fetching teachers");
     return NextResponse.json(
       { error: "Failed to fetch teachers" },
       { status: 500 }
