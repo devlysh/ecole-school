@@ -4,7 +4,6 @@ export async function bookClassesRequest(
   dates: number[],
   isRecurrent: boolean
 ) {
-  logger.debug({ dates, isRecurrent }, "DEBUG1");
   const response = await fetch("/api/v1/booked-classes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
