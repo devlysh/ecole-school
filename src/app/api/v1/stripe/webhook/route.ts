@@ -63,19 +63,19 @@ export const POST = async (request: NextRequest) => {
     switch (event.type) {
       case "customer.updated": {
         const customerUpdated = event.data.object;
-        logger.debug({ customerUpdated }, "Customer updated event received");
+        logger.trace({ customerUpdated }, "Customer updated event received");
         await handleCustomerUpdated(customerUpdated);
         break;
       }
       case "price.updated": {
         const price = event.data.object;
-        logger.debug({ price }, "Price updated event received");
+        logger.trace({ price }, "Price updated event received");
         await handlePriceUpdated(price);
         break;
       }
       case "invoice.payment_succeeded": {
         const invoicePaymentSucceeded = event.data.object;
-        logger.debug(
+        logger.trace(
           { invoicePaymentSucceeded },
           "Invoice payment succeeded event received"
         );
