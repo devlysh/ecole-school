@@ -121,6 +121,43 @@ export class AvailableHoursService {
     });
   }
 
+  public static collectTeachersForSelectedSlots(
+    availableSlots: AvailableSlot[],
+    selectedSlots: Date[]
+  ): Set<number> {
+    // If there are no selected slots, return an empty set
+    if (!selectedSlots.length) return new Set<number>();
+
+    const isSlotAvailableStrategy = new IsSlotAvailableStrategy();
+
+    // 1. Group the available slots by teacherId
+    const teacherSlotsMap = availableSlots.reduce((acc, slot) => {
+      if (!acc.has(slot.teacherId)) {
+        acc.set(slot.teacherId, []);
+      }
+      acc.get(slot.teacherId)!.push(slot);
+      return acc;
+    }, new Map<number, AvailableSlot[]>());
+
+    // 2. For each teacher, check if *every* selectedSlot is matched
+    //    by at least one slot from that teacher (via the strategy).
+    const validTeacherIds = Array.from(teacherSlotsMap.entries())
+      .filter(([_, slots]) =>
+        selectedSlots.every((selectedSlot) =>
+          slots.some((slot) =>
+            isSlotAvailableStrategy.isAvailable({
+              slot,
+              dateTime: selectedSlot,
+            })
+          )
+        )
+      )
+      .map(([teacherId]) => teacherId);
+
+    // Return that set of teacherIds
+    return new Set<number>(validTeacherIds);
+  }
+
   private validateParams(params: GetAvailableHoursParams): void {
     if (!params.email) {
       throw new Error("Email is required");
@@ -199,7 +236,7 @@ export class AvailableHoursService {
     return availableDateTimes.map((time) => compressTime(time.getTime()));
   }
 
-  public static createDateTime(currentDay: Date, hourSlot: Date): Date {
+  private static createDateTime(currentDay: Date, hourSlot: Date): Date {
     const dateTime = new Date(currentDay);
     dateTime.setHours(
       hourSlot.getHours(),
@@ -230,42 +267,5 @@ export class AvailableHoursService {
     }
 
     return days;
-  }
-
-  public static collectTeachersForSelectedSlots(
-    availableSlots: AvailableSlot[],
-    selectedSlots: Date[]
-  ): Set<number> {
-    // If there are no selected slots, return an empty set
-    if (!selectedSlots.length) return new Set<number>();
-
-    const isSlotAvailableStrategy = new IsSlotAvailableStrategy();
-
-    // 1. Group the available slots by teacherId
-    const teacherSlotsMap = availableSlots.reduce((acc, slot) => {
-      if (!acc.has(slot.teacherId)) {
-        acc.set(slot.teacherId, []);
-      }
-      acc.get(slot.teacherId)!.push(slot);
-      return acc;
-    }, new Map<number, AvailableSlot[]>());
-
-    // 2. For each teacher, check if *every* selectedSlot is matched
-    //    by at least one slot from that teacher (via the strategy).
-    const validTeacherIds = Array.from(teacherSlotsMap.entries())
-      .filter(([_, slots]) =>
-        selectedSlots.every((selectedSlot) =>
-          slots.some((slot) =>
-            isSlotAvailableStrategy.isAvailable({
-              slot,
-              dateTime: selectedSlot,
-            })
-          )
-        )
-      )
-      .map(([teacherId]) => teacherId);
-
-    // Return that set of teacherIds
-    return new Set<number>(validTeacherIds);
   }
 }
