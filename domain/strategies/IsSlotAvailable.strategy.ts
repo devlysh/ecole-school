@@ -17,15 +17,15 @@ export class IsSlotAvailableStrategy implements SlotAvailibilityStrategy {
 
     let checkAvailibility;
     if (slot.rrule) {
-      checkAvailibility = IsSlotAvailableStrategy.isRecurringSlotAvailable;
+      checkAvailibility = this.isRecurringSlotAvailable;
     } else {
-      checkAvailibility = IsSlotAvailableStrategy.isNonRecurringSlotAvailable;
+      checkAvailibility = this.isNonRecurringSlotAvailable;
     }
 
     return checkAvailibility(slot, dateTime);
   }
 
-  public static isRecurringSlotAvailable(
+  private isRecurringSlotAvailable(
     slot: AvailableSlot,
     dateTime: Date
   ): boolean {
@@ -60,7 +60,7 @@ export class IsSlotAvailableStrategy implements SlotAvailibilityStrategy {
     }
   }
 
-  public static isNonRecurringSlotAvailable(
+  private isNonRecurringSlotAvailable(
     slot: AvailableSlot,
     dateTime: Date
   ): boolean {
