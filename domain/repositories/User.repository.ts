@@ -1,21 +1,21 @@
 import prisma from "@/lib/prisma";
-import { User } from "@prisma/client";
+import { Student, Teacher, User } from "@prisma/client";
 
 export class UserRepository {
-  public async findByEmail(email: string): Promise<{
-    id: number;
-    student: { assignedTeacherId: number | null } | null;
-  } | null> {
+  public async findStudentByEmail(
+    email: string
+  ): Promise<(User & { student: Student | null }) | null> {
     return prisma.user.findUnique({
       where: { email },
-      select: {
-        id: true,
-        student: { select: { assignedTeacherId: true } },
+      include: {
+        student: true,
       },
     });
   }
 
-  public async findTeacherByEmail(email: string): Promise<User | null> {
+  public async findTeacherByEmail(
+    email: string
+  ): Promise<(User & { teacher: Teacher | null }) | null> {
     return await prisma.user.findUnique({
       where: { email },
       include: {

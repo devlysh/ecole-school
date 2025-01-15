@@ -68,7 +68,8 @@ const mockFetchAllBookedClasses = BookedClassesRepository.prototype
   .fetchAllBookedClasses as jest.Mock;
 const mockFetchByTeacherId = AvailableSlotsRepository.prototype
   .fetchByTeacherId as jest.Mock;
-const mockFindByEmail = UserRepository.prototype.findByEmail as jest.Mock;
+const mockFindByEmail = UserRepository.prototype
+  .findStudentByEmail as jest.Mock;
 const mockFetchAllVacations = VacationsRepository.prototype
   .fetchAllVacations as jest.Mock;
 

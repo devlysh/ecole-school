@@ -24,7 +24,7 @@ export class BookedClassesService {
     selectedSlots: Date[],
     isRecurrentSchedule: boolean
   ) {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findStudentByEmail(email);
 
     if (!user?.student) {
       throw new Error("You must be a student to book classes");
@@ -87,7 +87,7 @@ export class BookedClassesService {
   }
 
   public async getBookedClassesByEmail(email: string) {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findStudentByEmail(email);
 
     if (!user || !user.id || !user.student) {
       throw new Error("User not found");
@@ -99,7 +99,7 @@ export class BookedClassesService {
   }
 
   public async deleteBookedClassById(email: string, classId: number) {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findStudentByEmail(email);
 
     if (!user || !user.id || !user.student) {
       throw new Error("User not found");

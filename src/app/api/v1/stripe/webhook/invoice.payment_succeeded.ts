@@ -15,7 +15,7 @@ export async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     return;
   }
 
-  const user = await userRepository.findByEmail(email);
+  const user = await userRepository.findStudentByEmail(email);
 
   if (!user) {
     logger.error("User not found");

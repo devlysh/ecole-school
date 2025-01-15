@@ -11,7 +11,8 @@ export const GET = async (
   try {
     await verifyAndDecodeToken();
     const userRepository = new UserRepository();
-    const teacher = await userRepository.findByEmail(params.email);
+    const teacher = await userRepository.findTeacherByEmail(params.email);
+    logger.debug({ teacher }, "Teacher fetched from fetchTeacherByEmail");
     return NextResponse.json(teacher);
   } catch (err) {
     logger.error({ err }, "Error fetching teacher by email");

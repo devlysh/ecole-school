@@ -92,7 +92,7 @@ export class AvailableHoursService {
     const { email, startDate, endDate, isRecurrentSchedule, selectedSlots } =
       params;
 
-    const user = await this.userRepo.findByEmail(email);
+    const user = await this.userRepo.findStudentByEmail(email);
     const assignedTeacherId = user?.student?.assignedTeacherId ?? undefined;
 
     const availableSlots = await this.fetchSlots(

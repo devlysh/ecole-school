@@ -1,10 +1,8 @@
 # Base image
-FROM node:18-alpine
+FROM node:18-bullseye
 
 # Set the working directory
 WORKDIR /app
-
-RUN apk add --no-cache openssl
 
 # Copy package files and install dependencies
 COPY package.json package-lock.json ./
