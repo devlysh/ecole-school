@@ -39,6 +39,7 @@ export class BookedClassesService {
           teacherId: assignedTeacherId,
           studentId: user.id,
           recurring: isRecurrentSchedule,
+          isActive: true,
         }))
       );
       return Response.json({ result }, { status: 200 });
@@ -67,6 +68,7 @@ export class BookedClassesService {
         teacherId: teacherToAssign,
         studentId: user.id,
         recurring: isRecurrentSchedule,
+        isActive: true,
       }))
     );
 

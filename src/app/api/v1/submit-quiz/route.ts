@@ -28,6 +28,10 @@ export const GET = async () => {
       studyTimePerWeek: studyTimePerWeek || "",
     };
 
+    if (!name || !email) {
+      return Response.json("Failed to submit quiz", { status: 400 });
+    }
+
     const tokenData: PreAuthTokenPayload = { name, email, quizAnswers };
 
     const preAuthToken = await signToken(tokenData, "1h");

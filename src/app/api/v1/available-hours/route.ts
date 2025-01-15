@@ -8,7 +8,7 @@ export const GET = async (request: Request) => {
   return await handleGetAvailableHoursRequest(request);
 };
 
-export const handleGetAvailableHoursRequest = async (
+const handleGetAvailableHoursRequest = async (
   request: Request
 ): Promise<NextResponse> => {
   try {
@@ -60,7 +60,7 @@ export const handleGetAvailableHoursRequest = async (
   }
 };
 
-export const parseSelectedSlots = (param?: string): Date[] => {
+const parseSelectedSlots = (param?: string): Date[] => {
   if (!param) return [];
   return param.split(",").map((slot) => {
     return new Date(expandTime(Number(slot)));

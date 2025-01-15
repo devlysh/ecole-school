@@ -111,7 +111,6 @@ function enforceHourlyIncrement(start: Date, end: Date): [string, string] {
 }
 
 export default function ScheduleCalendar({
-  email,
   timeSlots,
   vacations,
   setTimeSlots,
