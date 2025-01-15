@@ -19,6 +19,7 @@ import {
 } from "@nextui-org/react";
 import logger from "@/lib/logger";
 import { VerticalDotsIcon } from "@/icons";
+import { getNextWeeklyOccurrence } from "@/lib/utils";
 
 interface ClassItem extends Record<string, unknown> {
   id: string;
@@ -37,8 +38,14 @@ const AccountMyClasses = () => {
   useEffect(() => {
     const loadClasses = async () => {
       try {
-        const data = await fetchBookedClasses();
-        setClasses(data);
+        const classes = await fetchBookedClasses();
+        const expandedClasses = expandClasses(classes);
+        const sortedClasses = expandedClasses.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateA.getTime() - dateB.getTime();
+        });
+        setClasses(sortedClasses);
       } catch (err) {
         logger.error({ err }, "Failed to fetch classes");
       } finally {
@@ -166,3 +173,25 @@ const AccountMyClasses = () => {
 };
 
 export default AccountMyClasses;
+
+const expandClasses = (classes: ClassItem[]) => {
+  return classes.flatMap((classItem: ClassItem) => {
+    const classDate = new Date(classItem.date);
+    const isRecurring = classItem.recurring === true;
+    const occurrences = [];
+
+    if (isRecurring) {
+      const startDate = getNextWeeklyOccurrence(classDate);
+      for (let i = 0; i < 4; i++) {
+        classItem.id = `recurring-${classItem.id}-${i}`;
+        const newDate = new Date(startDate);
+        newDate.setDate(startDate.getDate() + i * 7);
+        occurrences.push({ ...classItem, date: newDate.toISOString() });
+      }
+    } else {
+      occurrences.push(classItem);
+    }
+
+    return occurrences;
+  });
+};

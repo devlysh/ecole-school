@@ -38,3 +38,16 @@ export const compressTime = (timeInMilliseconds: number): number => {
 export const expandTime = (timeInCompressedForm: number): number => {
   return timeInCompressedForm * Math.pow(10, 5);
 };
+
+export const getNextWeeklyOccurrence = (originalDate: Date): Date => {
+  const now = new Date();
+  // Make a copy so we don't mutate the originalDate
+  let nextDate = new Date(originalDate);
+
+  // Keep adding one week while nextDate is in the past
+  while (nextDate < now) {
+    nextDate.setDate(nextDate.getDate() + 7);
+  }
+
+  return nextDate;
+};
