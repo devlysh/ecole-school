@@ -1,8 +1,8 @@
-import { BookedClassesRepository } from "../../repositories/BookedClasses.repository";
+import { BookedClassesRepository } from "../repositories/BookedClasses.repository";
 import { UserRepository } from "@domain/repositories/User.repository";
 import { StudentRepository } from "@domain/repositories/Student.repository";
 import logger from "@/lib/logger";
-import { AvailableHoursService } from "../available-hours/AvailableHoursService";
+import { AvailableHoursService } from "./AvailableHours.service";
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
 import { AvailableSlot } from "@prisma/client";
 

@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
 import { parseISO } from "date-fns";
-import { BookedClass } from "@prisma/client";
+import { BookedClass, Vacation } from "@prisma/client";
 
 export class VacationsRepository {
-  fetchAllVacations() {
+  fetchAllVacations(): Promise<Vacation[]> {
     return prisma.vacation.findMany({});
   }
 }

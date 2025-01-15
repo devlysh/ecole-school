@@ -67,23 +67,13 @@ export const POST = async (request: NextRequest) => {
         await handleCustomerUpdated(customerUpdated);
         break;
       }
-      case "price.updated": {
-        const price = event.data.object;
-        logger.trace({ price }, "Price updated event received");
-        await handlePriceUpdated(price);
-        break;
-      }
       case "invoice.payment_succeeded": {
-        const invoicePaymentSucceeded = event.data.object;
-        logger.trace(
-          { invoicePaymentSucceeded },
-          "Invoice payment succeeded event received"
-        );
-        await handleInvoicePaymentSucceeded(invoicePaymentSucceeded);
+        const invoice = event.data.object;
+        await handleInvoicePaymentSucceeded(invoice);
         break;
       }
       default: {
-        logger.info({ eventType: event.type }, "Unhandled event type");
+        logger.trace({ eventType: event.type }, "Unhandled event type");
       }
     }
 

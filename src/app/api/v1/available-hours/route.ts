@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import logger from "@/lib/logger";
-import { AvailableHoursService } from "@domain/services/available-hours/AvailableHoursService";
+import { AvailableHoursService } from "@domain/services/AvailableHours.service";
 import { verifyAccessToken } from "@/lib/jwt";
-import { UserRepository } from "@domain/repositories/UserRepository";
 import { expandTime } from "@/lib/utils";
 
 export const GET = async (request: Request) => {

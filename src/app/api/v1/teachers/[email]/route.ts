@@ -1,7 +1,7 @@
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { AccessTokenPayload } from "@/lib/types";
-import { TeacherRepository } from "@domain/repositories/Teacher.repository";
+import { UserRepository } from "@domain/repositories/User.repository";
 import { NextResponse } from "next/server";
 
 export const GET = async (
@@ -10,8 +10,8 @@ export const GET = async (
 ) => {
   try {
     await verifyAndDecodeToken();
-    const teachersRepository = new TeacherRepository();
-    const teacher = await teachersRepository.findTeacherByEmail(params.email);
+    const userRepository = new UserRepository();
+    const teacher = await userRepository.findByEmail(params.email);
     return NextResponse.json(teacher);
   } catch (err) {
     logger.error({ err }, "Error fetching teacher by email");

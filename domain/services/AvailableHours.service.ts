@@ -1,7 +1,7 @@
-import { AvailableSlotsRepository } from "../../repositories/AvailableSlots.repository";
-import { BookedClassesRepository } from "../../repositories/BookedClasses.repository";
+import { AvailableSlotsRepository } from "../repositories/AvailableSlots.repository";
+import { BookedClassesRepository } from "../repositories/BookedClasses.repository";
 import { AvailableSlot, BookedClass, Vacation } from "@prisma/client";
-import { UserRepository } from "../../repositories/User.repository";
+import { UserRepository } from "../repositories/User.repository";
 import { compressTime } from "@/lib/utils";
 import {
   SlotAvailibilityContext,

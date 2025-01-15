@@ -1,4 +1,4 @@
-import { QuizService } from "./QuizService";
+import { QuizService } from "./Quiz.service";
 import { QuizStep, QuizState, StepType } from "@/lib/types";
 
 const steps: QuizStep[] = [

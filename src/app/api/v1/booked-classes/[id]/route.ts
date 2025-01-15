@@ -1,4 +1,4 @@
-import { BookedClassesService } from "@domain/services/booked-classes/BookedClassesService";
+import { BookedClassesService } from "@domain/services/BookedClasses.service";
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 

@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { Student } from "@prisma/client";
 
 export class StudentRepository {
   /**
@@ -10,7 +11,7 @@ export class StudentRepository {
   public async updateAssignedTeacher(
     studentId: number,
     teacherId: number | null
-  ) {
+  ): Promise<Student> {
     // Use Prisma to update the student record
     return prisma.student.update({
       where: { userId: studentId },

@@ -1,4 +1,4 @@
-import { QuizState, QuizStep, StepType } from "@/lib/types";
+import { QuizState, QuizStep } from "@/lib/types";
 
 export const QuizService = {
   initializeQuiz: (steps: QuizStep[]): QuizState => ({

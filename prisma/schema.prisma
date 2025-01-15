@@ -108,6 +108,7 @@ model BookedClass {
   teacher   Teacher  @relation(fields: [teacherId], references: [userId])
   teacherId Int      @map("teacher_id")
   recurring Boolean
+  credit    Credit[]
 
   @@index([date, teacherId, studentId], name: "idx_booked_class_date_teacher_id_student_id")
   @@map("booked_classes")
@@ -131,9 +132,22 @@ model Student {
   user          User          @relation(fields: [userId], references: [id])
   teacher       Teacher?      @relation(fields: [assignedTeacherId], references: [userId])
   bookedClasses BookedClass[]
+  credits       Credit[]
 
   @@index([assignedTeacherId], name: "idx_student_assigned_teacher_id")
   @@map("students")
+}
+
+model Credit {
+  id                    Int          @id @default(autoincrement())
+  studentId             Int          @map("student_id")
+  student               Student      @relation(fields: [studentId], references: [userId])
+  createdAt             DateTime     @default(now()) @map("created_at")
+  usedAt                DateTime?    @map("used_at")
+  usedWithBookedClass   BookedClass? @relation(fields: [usedWithBookedClassId], references: [id])
+  usedWithBookedClassId Int?         @map("used_with_booked_class_id")
+
+  @@map("credits")
 }
 
 model SystemSetting {
