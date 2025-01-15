@@ -31,9 +31,7 @@ interface ClassItem extends Record<string, unknown> {
 const AccountMyClasses = () => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
-  const pageSize = 10;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [creditCount, setCreditCount] = useState(0);
 
@@ -73,15 +71,6 @@ const AccountMyClasses = () => {
     };
     loadCreditCount();
   }, []);
-
-  const paginatedClasses = classes.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
 
   const handleDelete = async () => {
     if (selectedClass) {
@@ -177,7 +166,7 @@ const AccountMyClasses = () => {
         <>
           <GenericTable
             columns={columns}
-            list={paginatedClasses}
+            list={classes}
             initialVisibleColumns={initialVisibleColumns}
           />
         </>

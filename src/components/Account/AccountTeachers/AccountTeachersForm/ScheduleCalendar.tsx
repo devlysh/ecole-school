@@ -14,7 +14,6 @@ import RecurrenceOptions from "./RecurrenceOptions";
 import { Checkbox } from "@nextui-org/react";
 import { convertToRruleDate } from "@/lib/utils";
 import useRecurrenceRule from "@/hooks/useRecurrenceRule";
-import logger from "@/lib/logger";
 
 export enum EndCondition {
   NEVER = "never",

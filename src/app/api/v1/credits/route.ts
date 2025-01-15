@@ -4,7 +4,7 @@ import { CreditRepository } from "@domain/repositories/Credit.repository";
 import { CreditService } from "@domain/services/Credit.service";
 import prisma from "@/lib/prisma";
 
-export const GET = async (request: Request) => {
+export const GET = async () => {
   try {
     // Verify the access token
     const decodedToken = await verifyAccessToken();

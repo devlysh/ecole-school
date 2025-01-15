@@ -1,6 +1,5 @@
 import { RRule } from "rrule";
 import logger from "@/lib/logger";
-import { AvailableSlot } from "@prisma/client";
 import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,

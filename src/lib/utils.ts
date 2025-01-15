@@ -42,7 +42,7 @@ export const expandTime = (timeInCompressedForm: number): number => {
 export const getNextWeeklyOccurrence = (originalDate: Date): Date => {
   const now = new Date();
   // Make a copy so we don't mutate the originalDate
-  let nextDate = new Date(originalDate);
+  const nextDate = new Date(originalDate);
 
   // Keep adding one week while nextDate is in the past
   while (nextDate < now) {

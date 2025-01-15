@@ -3,7 +3,6 @@ import {
   RestrictedTimeDirection,
   RestrictedTimeUnit,
 } from "./IsOutsideRestrictedTimeRange.strategy";
-import { AvailableSlot } from "@prisma/client";
 
 describe("BookingWindowStrategy", () => {
   it("should return true for a slot that is at least two days in the future", () => {

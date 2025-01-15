@@ -3,10 +3,6 @@
 import React from "react";
 import AccountLayout from "@/components/Account/layout";
 import AccountTeachersForm from "@/components/Account/AccountTeachers/AccountTeachersForm";
-import logger from "@/lib/logger";
-import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import { convertToRruleDate } from "@/lib/utils";
 
 interface AccountTeachersEditPageProps {
   params: {

@@ -1,9 +1,7 @@
-import { AvailableSlot } from "@prisma/client";
 import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,
 } from "./SlotAvailibilityStrategy.interface";
-import { IsSlotAvailableStrategy } from "./IsSlotAvailable.strategy";
 import logger from "@/lib/logger";
 
 export class HandleSelectedSlotsStrategy implements SlotAvailibilityStrategy {

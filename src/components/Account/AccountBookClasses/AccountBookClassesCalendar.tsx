@@ -124,7 +124,7 @@ export const AccountBookClassesCalendar: React.FC<
   useEffect(() => {
     const endOfWeek = addDays(currentWeekStart, 6);
     fetchAvailableSlots(currentWeekStart, endOfWeek);
-  }, [fetchAvailableSlots, isRecurrentSchedule]);
+  }, [currentWeekStart, fetchAvailableSlots, isRecurrentSchedule]);
 
   return (
     <div className="flex flex-col gap-4 w-full">

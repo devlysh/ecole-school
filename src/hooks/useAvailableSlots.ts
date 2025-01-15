@@ -6,7 +6,9 @@ import logger from "@/lib/logger";
 import { expandTime } from "@/lib/utils";
 
 export const useAvailableSlots = () => {
-  const [availableSlots, setAvailableSlots] = useState<AvailableCalendarSlot[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<AvailableCalendarSlot[]>(
+    []
+  );
   const [selectedSlots, setSelectedSlots] = useState<Date[]>([]);
   const [isRecurrentSchedule, setIsRecurrentSchedule] = useState<boolean>(true);
 
@@ -39,4 +41,4 @@ export const useAvailableSlots = () => {
     setIsRecurrentSchedule,
     fetchAvailableSlots,
   };
-}; 
+};

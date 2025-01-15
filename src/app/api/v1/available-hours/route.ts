@@ -5,7 +5,7 @@ import { verifyAccessToken } from "@/lib/jwt";
 import { expandTime } from "@/lib/utils";
 
 export const GET = async (request: Request) => {
-  return handleGetAvailableHoursRequest(request);
+  return await handleGetAvailableHoursRequest(request);
 };
 
 export const handleGetAvailableHoursRequest = async (

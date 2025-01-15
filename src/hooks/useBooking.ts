@@ -19,7 +19,7 @@ export const useBooking = (
     } catch (error) {
       logger.error({ error }, "Failed to book classes");
     }
-  }, [selectedSlots, isRecurrentSchedule]);
+  }, [selectedSlots, isRecurrentSchedule, router]);
 
   return { handleBook };
 };

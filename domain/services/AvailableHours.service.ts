@@ -19,7 +19,6 @@ import {
   PermittedTimeUnit,
 } from "@domain/strategies/IsAtPermittedTime.strategy";
 import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.strategy";
-import logger from "@/lib/logger";
 
 interface GetAvailableHoursParams {
   startDate: Date;
@@ -142,7 +141,7 @@ export class AvailableHoursService {
     // 2. For each teacher, check if *every* selectedSlot is matched
     //    by at least one slot from that teacher (via the strategy).
     const validTeacherIds = Array.from(teacherSlotsMap.entries())
-      .filter(([_, slots]) =>
+      .filter(([, slots]) =>
         selectedSlots.every((selectedSlot) =>
           slots.some((slot) =>
             isSlotAvailableStrategy.isAvailable({
