@@ -53,17 +53,15 @@ export class BookedClassesService {
         availableSlots,
         selectedSlots
       );
-    const teacherToAssign =
-      Array.from(selectedTeachers)[
-        Math.floor(Math.random() * selectedTeachers.size)
-      ];
+
+    const teacherToAssign = this.determineTeacherToAssign(selectedTeachers);
 
     await this.studentRepository.updateAssignedTeacher(
       user.id,
       teacherToAssign
     );
 
-    const result = this.bookedClassesRepository.createBookedClasses(
+    await this.bookedClassesRepository.createBookedClasses(
       selectedSlots.map((date) => ({
         date,
         teacherId: teacherToAssign,
@@ -72,7 +70,7 @@ export class BookedClassesService {
       }))
     );
 
-    return Response.json({ result }, { status: 200 });
+    return { message: "Classes booked successfully" };
   }
 
   public async getBookedClasses() {
@@ -123,5 +121,11 @@ export class BookedClassesService {
         ? this.availableSlotsRepository.fetchAll()
         : this.availableSlotsRepository.fetchRecurringSlots();
     }
+  }
+
+  private determineTeacherToAssign(selectedTeachers: Set<number>) {
+    return Array.from(selectedTeachers)[
+      Math.floor(Math.random() * selectedTeachers.size)
+    ];
   }
 }

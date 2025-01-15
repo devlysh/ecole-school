@@ -141,21 +141,6 @@ const AccountMyClasses = () => {
             list={paginatedClasses}
             initialVisibleColumns={initialVisibleColumns}
           />
-          <div>
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-            <span>Page {currentPage}</span>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage * pageSize >= classes.length}
-            >
-              Next
-            </button>
-          </div>
         </>
       )}
       <Modal isOpen={isOpen} onClose={handleCloseModal}>
