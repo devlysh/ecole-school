@@ -17,4 +17,8 @@ export class CreditService {
   ): Promise<Credit> {
     return this.creditRepository.useCredit(studentId, bookedClass);
   }
+
+  public async getActiveCreditsCount(studentId: number): Promise<number> {
+    return this.creditRepository.getActiveCreditsCount(studentId);
+  }
 }

@@ -48,7 +48,7 @@ export const GET = async (request: Request) => {
 
     return NextResponse.json(vacations, { status: 200 });
   } catch (err) {
-    logger.error("Error fetching vacations:", err);
+    logger.error({ err }, "Error fetching vacations:");
     return NextResponse.json(
       { error: "Failed to fetch vacations" },
       { status: 500 }

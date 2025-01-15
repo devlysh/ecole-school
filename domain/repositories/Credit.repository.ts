@@ -47,4 +47,14 @@ export class CreditRepository {
       },
     });
   }
+
+  public async getActiveCreditsCount(studentId: number): Promise<number> {
+    return prisma.credit.count({
+      where: {
+        studentId,
+        usedAt: null,
+        usedWithBookedClassId: null,
+      },
+    });
+  }
 }

@@ -20,6 +20,7 @@ import {
 import logger from "@/lib/logger";
 import { VerticalDotsIcon } from "@/icons";
 import { getNextWeeklyOccurrence } from "@/lib/utils";
+import { fetchCreditCount } from "@/app/api/v1/credits/request";
 
 interface ClassItem extends Record<string, unknown> {
   id: string;
@@ -34,18 +35,27 @@ const AccountMyClasses = () => {
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
   const pageSize = 10;
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [creditCount, setCreditCount] = useState(0);
 
   useEffect(() => {
     const loadClasses = async () => {
       try {
-        const classes = await fetchBookedClasses();
-        const expandedClasses = expandClasses(classes);
+        const fetchedClasses = await fetchBookedClasses();
+        const expandedClasses = expandClasses(fetchedClasses);
         const sortedClasses = expandedClasses.sort((a, b) => {
           const dateA = new Date(a.date);
           const dateB = new Date(b.date);
           return dateA.getTime() - dateB.getTime();
         });
-        setClasses(sortedClasses);
+
+        const coloredClasses = sortedClasses.map((classItem, index) => {
+          if (creditCount > index) {
+            return { ...classItem, hasCredit: true };
+          }
+          return { ...classItem, hasCredit: false };
+        });
+
+        setClasses(coloredClasses);
       } catch (err) {
         logger.error({ err }, "Failed to fetch classes");
       } finally {
@@ -53,6 +63,15 @@ const AccountMyClasses = () => {
       }
     };
     loadClasses();
+  }, [creditCount]);
+
+  useEffect(() => {
+    const loadCreditCount = async () => {
+      const creditCount = await fetchCreditCount();
+      logger.debug({ creditCount }, "Credit count");
+      setCreditCount(creditCount);
+    };
+    loadCreditCount();
   }, []);
 
   const paginatedClasses = classes.slice(
@@ -78,7 +97,6 @@ const AccountMyClasses = () => {
   };
 
   const handleOpenModal = (classItem: ClassItem) => {
-    logger.info({ classItem }, "Selected class");
     setSelectedClass(classItem);
     onOpen();
   };
@@ -103,6 +121,14 @@ const AccountMyClasses = () => {
       key: "time",
       render: (item: Record<string, unknown>) => (
         <span>{new Date(item.date as string).toLocaleTimeString()}</span>
+      ),
+    },
+    {
+      name: "Has Credit",
+      uid: "hasCredit",
+      key: "hasCredit",
+      render: (item: Record<string, unknown>) => (
+        <span>{JSON.stringify(item.hasCredit)}</span>
       ),
     },
     {
@@ -134,7 +160,13 @@ const AccountMyClasses = () => {
     },
   ];
 
-  const initialVisibleColumns = ["date", "time", "join", "actions"];
+  const initialVisibleColumns = [
+    "date",
+    "time",
+    "join",
+    "actions",
+    "hasCredit",
+  ];
 
   return (
     <div>
