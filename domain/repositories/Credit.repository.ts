@@ -11,7 +11,7 @@ export class CreditRepository {
       const credit = await prisma.credit.create({
         data: {
           studentId,
-          createdAt: new Date(),
+          addedAt: new Date(),
         },
       });
       credits.push(credit);
@@ -29,7 +29,7 @@ export class CreditRepository {
         usedAt: null,
       },
       orderBy: {
-        createdAt: "asc",
+        addedAt: "asc",
       },
     });
 

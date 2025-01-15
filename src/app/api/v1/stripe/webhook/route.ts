@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
-import { handlePriceUpdated } from "./price.updated";
 import { handleCustomerUpdated } from "./customer.updated";
 import { handleInvoicePaymentSucceeded } from "./invoice.payment_succeeded";
 
@@ -21,8 +20,6 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, {
 });
 
 export const POST = async (request: NextRequest) => {
-  logger.info("Webhook received");
-
   if (!STRIPE_WEBHOOK_SIGNING_SECRET) {
     logger.error("STRIPE_WEBHOOK_SIGNING_SECRET is missing");
     return new Response(
@@ -50,7 +47,6 @@ export const POST = async (request: NextRequest) => {
       signature,
       STRIPE_WEBHOOK_SIGNING_SECRET
     );
-    logger.info({ eventType: event.type }, "Received Stripe webhook event");
   } catch (err: unknown) {
     logger.error({ err }, "Webhook signature verification failed");
     return new Response(
@@ -63,7 +59,6 @@ export const POST = async (request: NextRequest) => {
     switch (event.type) {
       case "customer.updated": {
         const customerUpdated = event.data.object;
-        logger.trace({ customerUpdated }, "Customer updated event received");
         await handleCustomerUpdated(customerUpdated);
         break;
       }
@@ -76,8 +71,6 @@ export const POST = async (request: NextRequest) => {
         logger.trace({ eventType: event.type }, "Unhandled event type");
       }
     }
-
-    logger.info({ eventType: event.type }, "Webhook processed successfully");
     return new Response(JSON.stringify({ received: true }), { status: 200 });
   } catch (err: unknown) {
     logger.error(

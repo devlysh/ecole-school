@@ -142,7 +142,7 @@ model Credit {
   id                    Int          @id @default(autoincrement())
   studentId             Int          @map("student_id")
   student               Student      @relation(fields: [studentId], references: [userId])
-  createdAt             DateTime     @default(now()) @map("created_at")
+  addedAt               DateTime     @default(now()) @map("added_at")
   usedAt                DateTime?    @map("used_at")
   usedWithBookedClass   BookedClass? @relation(fields: [usedWithBookedClassId], references: [id])
   usedWithBookedClassId Int?         @map("used_with_booked_class_id")
