@@ -336,4 +336,59 @@ describe("AvailableHoursService", () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe("AvailableHoursService - Bug Reproduction", () => {
+    it("should handle available slots and selected slots correctly", async () => {
+      const mockUser = createMockUser("student@example.com", 105);
+      const availableSlots: AvailableSlot[] = [
+        createMockSlot(
+          442,
+          105,
+          "2025-01-12T03:00:00Z",
+          "2025-01-12T06:00:00Z",
+          "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
+        ),
+        createMockSlot(
+          443,
+          105,
+          "2025-01-12T08:00:00Z",
+          "2025-01-12T11:00:00Z",
+          "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
+        ),
+        createMockSlot(
+          444,
+          105,
+          "2025-01-12T15:00:00Z",
+          "2025-01-12T19:00:00Z",
+          "RRULE:FREQ=WEEKLY;BYDAY=TU,WE,TH,FR,SA,SU"
+        ),
+      ];
+
+      mockFindByEmail.mockResolvedValue(mockUser);
+      mockFetchByTeacherId.mockResolvedValue(availableSlots);
+      mockFetchAllBookedClasses.mockResolvedValue([]);
+      mockFetchAllVacations.mockResolvedValue([]);
+
+      const result = await service.getAvailableHours({
+        email: "student@example.com",
+        startDate: new Date("2025-01-19T00:00:00Z"),
+        endDate: new Date("2025-01-25T23:59:59Z"),
+        isRecurrentSchedule: false,
+        selectedSlots: [new Date(17375364)],
+      });
+
+      expect(result).toEqual([
+        17372556, 17372592, 17372628, 17373420, 17373456, 17373492, 17374284,
+        17374320, 17374356, 17375148, 17375184, 17375220, 17376012, 17376048,
+        17376084, 17376876, 17376912, 17376948, 17377740, 17377776, 17377812,
+        17372736, 17372772, 17372808, 17373600, 17373636, 17373672, 17374464,
+        17374500, 17374536, 17375328, 17375364, 17375400, 17376192, 17376228,
+        17376264, 17377056, 17377092, 17377128, 17377920, 17377956, 17377992,
+        17372988, 17373024, 17373060, 17373096, 17374716, 17374752, 17374788,
+        17374824, 17375580, 17375616, 17375652, 17375688, 17376444, 17376480,
+        17376516, 17376552, 17377308, 17377344, 17377380, 17377416, 17378172,
+        17378208, 17378244, 17378280,
+      ]);
+    });
+  });
 });
