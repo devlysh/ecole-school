@@ -20,6 +20,15 @@ import {
 } from "@domain/strategies/IsAtPermittedTime.strategy";
 import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.strategy";
 
+interface AvailableSlotsServiceParams {
+  userRepo?: UserRepository;
+  availableSlotsRepo?: AvailableSlotsRepository;
+  bookClassesRepo?: BookedClassesRepository;
+  vacationsRepo?: VacationsRepository;
+  strategies?: SlotAvailibilityStrategy[];
+  config?: Config;
+}
+
 interface GetAvailableSlotsParams {
   startDate: Date;
   endDate: Date;
@@ -62,45 +71,16 @@ export class AvailableSlotsService {
   private strategies: SlotAvailibilityStrategy[];
   private config: Config;
 
-  constructor(
-    userRepo?: UserRepository,
-    availableSlotsRepo?: AvailableSlotsRepository,
-    bookClassesRepo?: BookedClassesRepository,
-    vacationsRepo?: VacationsRepository,
-    strategies?: SlotAvailibilityStrategy[],
-    config?: Config
-  ) {
-    this.userRepo = userRepo || new UserRepository();
+  constructor(params?: AvailableSlotsServiceParams) {
+    this.userRepo = params?.userRepo ?? new UserRepository();
     this.availableSlotsRepo =
-      availableSlotsRepo || new AvailableSlotsRepository();
-    this.bookClassesRepo = bookClassesRepo || new BookedClassesRepository();
-    this.vacationsRepo = vacationsRepo || new VacationsRepository();
-    this.strategies = strategies || this.defaultStrategies();
-    this.config = config || {
-      permittedTime: {
-        duration: 1,
-        unit: PermittedTimeUnit.DAYS,
-        direction: PermittedTimeDirection.AFTER,
-        date: new Date(),
-      },
-    };
-  }
-
-  private defaultStrategies(): SlotAvailibilityStrategy[] {
-    return [
-      new IsSlotAvailableStrategy(),
-      new IsSlotBookedStrategy(),
-      new HandleSelectedSlotsStrategy(),
-      new IsAssignedTeacherStrategy(),
-      new IsOnVacationStrategy(),
-      new IsAtPermittedTimeStrategy(
-        this.config.permittedTime.duration,
-        this.config.permittedTime.unit,
-        this.config.permittedTime.direction,
-        this.config.permittedTime.date
-      ),
-      new IsSlotRecurringStrategy(),
-    ];
+      params?.availableSlotsRepo ?? new AvailableSlotsRepository();
+    this.bookClassesRepo =
+      params?.bookClassesRepo ?? new BookedClassesRepository();
+    this.vacationsRepo = params?.vacationsRepo ?? new VacationsRepository();
+    this.config = params?.config ?? this.getDefaultConfig();
+    this.strategies =
+      params?.strategies ?? this.getDefaultStrategies(this.config);
   }
 
   public async getAvailableSlots(
@@ -285,5 +265,33 @@ export class AvailableSlotsService {
     }
 
     return days;
+  }
+
+  private getDefaultConfig(): Config {
+    return {
+      permittedTime: {
+        duration: 1,
+        unit: PermittedTimeUnit.DAYS,
+        direction: PermittedTimeDirection.AFTER,
+        date: new Date(),
+      },
+    };
+  }
+
+  private getDefaultStrategies(config: Config): SlotAvailibilityStrategy[] {
+    return [
+      new IsSlotAvailableStrategy(),
+      new IsSlotBookedStrategy(),
+      new HandleSelectedSlotsStrategy(),
+      new IsAssignedTeacherStrategy(),
+      new IsOnVacationStrategy(),
+      new IsAtPermittedTimeStrategy(
+        config.permittedTime.duration,
+        config.permittedTime.unit,
+        config.permittedTime.direction,
+        config.permittedTime.date
+      ),
+      new IsSlotRecurringStrategy(),
+    ];
   }
 }

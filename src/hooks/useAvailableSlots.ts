@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { getAvailableSlotsRequest } from "@/app/api/v1/available-hours/request";
+import { getAvailableSlotsRequest } from "@/app/api/v1/available-slots/request";
 import { AvailableCalendarSlot } from "@/lib/types";
 import { format } from "date-fns";
 import logger from "@/lib/logger";

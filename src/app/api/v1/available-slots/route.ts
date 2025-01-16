@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import logger from "@/lib/logger";
 import { AvailableSlotsService } from "@domain/services/AvailableSlots.service";
 import { verifyAccessToken } from "@/lib/jwt";
@@ -10,7 +9,7 @@ export const GET = async (request: Request) => {
 
 const handleGetAvailableSlotsRequest = async (
   request: Request
-): Promise<NextResponse> => {
+): Promise<Response> => {
   try {
     const parsedUrl = new URL(request.url);
     const startDateParam = parsedUrl.searchParams.get("startDate") ?? undefined;
@@ -21,7 +20,7 @@ const handleGetAvailableSlotsRequest = async (
       parsedUrl.searchParams.get("recurrentSchedule") ?? undefined;
 
     if (!startDateParam || !endDateParam) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Start date and end date are required" },
         { status: 400 }
       );
@@ -31,7 +30,7 @@ const handleGetAvailableSlotsRequest = async (
     const email = decodedToken?.email;
 
     if (!email) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Unauthorized - no email in token" },
         { status: 401 }
       );
@@ -50,10 +49,10 @@ const handleGetAvailableSlotsRequest = async (
       email,
     });
 
-    return NextResponse.json(hourSlots, { status: 200 });
+    return Response.json(hourSlots, { status: 200 });
   } catch (err) {
     logger.error(err, "Error fetching available hours");
-    return NextResponse.json(
+    return Response.json(
       { error: "Failed to fetch available hours" },
       { status: 500 }
     );

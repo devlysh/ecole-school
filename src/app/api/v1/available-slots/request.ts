@@ -13,7 +13,7 @@ export const getAvailableSlotsRequest = async (
   selectedSlots?: Date[],
   recurrentSchedule?: boolean
 ) => {
-  const url = new URL(`${NEXT_PUBLIC_BASE_URL}/api/v1/available-hours`);
+  const url = new URL(`${NEXT_PUBLIC_BASE_URL}/api/v1/available-slots`);
   url.searchParams.append("startDate", startDate);
   url.searchParams.append("endDate", endDate);
 
