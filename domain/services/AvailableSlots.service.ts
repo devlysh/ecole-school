@@ -20,7 +20,7 @@ import {
 } from "@domain/strategies/IsAtPermittedTime.strategy";
 import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.strategy";
 
-interface GetAvailableHoursParams {
+interface GetAvailableSlotsParams {
   startDate: Date;
   endDate: Date;
   isRecurrentSchedule: boolean;
@@ -45,26 +45,45 @@ enum RangeUnit {
   Hour = "Hours",
 }
 
-export class AvailableHoursService {
+interface Config {
+  permittedTime: {
+    duration: number;
+    unit: PermittedTimeUnit;
+    direction: PermittedTimeDirection;
+    date: Date;
+  };
+}
+
+export class AvailableSlotsService {
   private userRepo: UserRepository;
-  private availableHoursRepo: AvailableSlotsRepository;
+  private availableSlotsRepo: AvailableSlotsRepository;
   private bookClassesRepo: BookedClassesRepository;
   private vacationsRepo: VacationsRepository;
   private strategies: SlotAvailibilityStrategy[];
+  private config: Config;
 
   constructor(
     userRepo?: UserRepository,
-    availableHoursRepo?: AvailableSlotsRepository,
+    availableSlotsRepo?: AvailableSlotsRepository,
     bookClassesRepo?: BookedClassesRepository,
     vacationsRepo?: VacationsRepository,
-    strategies?: SlotAvailibilityStrategy[]
+    strategies?: SlotAvailibilityStrategy[],
+    config?: Config
   ) {
     this.userRepo = userRepo || new UserRepository();
-    this.availableHoursRepo =
-      availableHoursRepo || new AvailableSlotsRepository();
+    this.availableSlotsRepo =
+      availableSlotsRepo || new AvailableSlotsRepository();
     this.bookClassesRepo = bookClassesRepo || new BookedClassesRepository();
     this.vacationsRepo = vacationsRepo || new VacationsRepository();
     this.strategies = strategies || this.defaultStrategies();
+    this.config = config || {
+      permittedTime: {
+        duration: 1,
+        unit: PermittedTimeUnit.DAYS,
+        direction: PermittedTimeDirection.AFTER,
+        date: new Date(),
+      },
+    };
   }
 
   private defaultStrategies(): SlotAvailibilityStrategy[] {
@@ -75,17 +94,17 @@ export class AvailableHoursService {
       new IsAssignedTeacherStrategy(),
       new IsOnVacationStrategy(),
       new IsAtPermittedTimeStrategy(
-        1,
-        PermittedTimeUnit.DAYS,
-        PermittedTimeDirection.AFTER,
-        new Date()
+        this.config.permittedTime.duration,
+        this.config.permittedTime.unit,
+        this.config.permittedTime.direction,
+        this.config.permittedTime.date
       ),
       new IsSlotRecurringStrategy(),
     ];
   }
 
-  public async getAvailableHours(
-    params: GetAvailableHoursParams
+  public async getAvailableSlots(
+    params: GetAvailableSlotsParams
   ): Promise<number[]> {
     this.validateParams(params);
 
@@ -157,7 +176,7 @@ export class AvailableHoursService {
     return new Set<number>(validTeacherIds);
   }
 
-  private validateParams(params: GetAvailableHoursParams): void {
+  private validateParams(params: GetAvailableSlotsParams): void {
     if (!params.email) {
       throw new Error("Email is required");
     }
@@ -169,12 +188,12 @@ export class AvailableHoursService {
   ): Promise<AvailableSlot[] | null> {
     if (teacherId) {
       return isRecurrentSchedule
-        ? this.availableHoursRepo.fetchRecurringByTeacherId(teacherId)
-        : this.availableHoursRepo.fetchByTeacherId(teacherId);
+        ? this.availableSlotsRepo.fetchRecurringByTeacherId(teacherId)
+        : this.availableSlotsRepo.fetchByTeacherId(teacherId);
     } else {
       return isRecurrentSchedule
-        ? this.availableHoursRepo.fetchRecurringSlots()
-        : this.availableHoursRepo.fetchAll();
+        ? this.availableSlotsRepo.fetchRecurringSlots()
+        : this.availableSlotsRepo.fetchAll();
     }
   }
 
@@ -192,7 +211,7 @@ export class AvailableHoursService {
     } = params;
 
     const selectedTeacherIds =
-      AvailableHoursService.collectTeachersForSelectedSlots(
+      AvailableSlotsService.collectTeachersForSelectedSlots(
         availableSlots,
         selectedSlots ?? []
       );
@@ -209,7 +228,7 @@ export class AvailableHoursService {
 
       for (const currentDay of dailyRange) {
         for (const hourSlot of hourlyIncrements) {
-          const dateTime = AvailableHoursService.createDateTime(
+          const dateTime = AvailableSlotsService.createDateTime(
             currentDay,
             hourSlot
           );

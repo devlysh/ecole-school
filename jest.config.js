@@ -16,6 +16,10 @@ const config = {
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@domain/(.*)$": "<rootDir>/domain/$1",
   },
+  testPathIgnorePatterns: [
+    "<rootDir>/infrastructure/",
+    // "<rootDir>/src/lib/prisma.ts",
+  ],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

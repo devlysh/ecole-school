@@ -66,7 +66,6 @@ const AccountMyClasses = () => {
   useEffect(() => {
     const loadCreditCount = async () => {
       const creditCount = await fetchCreditCount();
-      logger.debug({ creditCount }, "Credit count");
       setCreditCount(creditCount);
     };
     loadCreditCount();

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { getAvailableHoursRequest } from "@/app/api/v1/available-hours/request";
+import { getAvailableSlotsRequest } from "@/app/api/v1/available-hours/request";
 import { AvailableCalendarSlot } from "@/lib/types";
 import { format } from "date-fns";
 import logger from "@/lib/logger";
@@ -15,7 +15,7 @@ export const useAvailableSlots = () => {
   const fetchAvailableSlots = useCallback(
     async (start: Date, end: Date) => {
       try {
-        const fetchedData = await getAvailableHoursRequest(
+        const fetchedData = await getAvailableSlotsRequest(
           format(start, "yyyy-MM-dd"),
           format(end, "yyyy-MM-dd"),
           selectedSlots,

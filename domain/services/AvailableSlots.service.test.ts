@@ -1,4 +1,4 @@
-import { AvailableHoursService } from "./AvailableHours.service";
+import { AvailableSlotsService } from "./AvailableSlots.service";
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
 import { BookedClassesRepository } from "@domain/repositories/BookedClasses.repository";
 import { UserRepository } from "@domain/repositories/User.repository";
@@ -74,7 +74,7 @@ const mockFetchAllVacations = VacationsRepository.prototype
   .fetchAllVacations as jest.Mock;
 
 describe("AvailableHoursService", () => {
-  let service: AvailableHoursService;
+  let service: AvailableSlotsService;
   let mockStrategies: SlotAvailibilityStrategy[];
 
   beforeEach(() => {
@@ -84,7 +84,7 @@ describe("AvailableHoursService", () => {
       new IsSlotBookedStrategy(),
       new HandleSelectedSlotsStrategy(),
     ];
-    service = new AvailableHoursService(
+    service = new AvailableSlotsService(
       undefined,
       undefined,
       undefined,
@@ -96,7 +96,7 @@ describe("AvailableHoursService", () => {
   describe("Validation", () => {
     it("should throw an error if email is not provided", async () => {
       await expect(
-        service.getAvailableHours({
+        service.getAvailableSlots({
           email: "",
           startDate: new Date(),
           endDate: new Date(),
@@ -111,7 +111,7 @@ describe("AvailableHoursService", () => {
       mockFetchByTeacherId.mockResolvedValue([]);
       mockFetchAllBookedClasses.mockResolvedValue([]);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2025-01-10T12:00:00Z"),
         endDate: new Date("2025-01-10T08:00:00Z"),
@@ -127,7 +127,7 @@ describe("AvailableHoursService", () => {
       mockFetchByTeacherId.mockResolvedValue([]);
       mockFetchAllBookedClasses.mockResolvedValue([]);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2025-01-10T00:00:00Z"),
         endDate: new Date("2025-01-10T00:00:00Z"),
@@ -153,7 +153,7 @@ describe("AvailableHoursService", () => {
       jest.spyOn(mockStrategies[1], "isAvailable").mockReturnValue(true);
       jest.spyOn(mockStrategies[2], "isAvailable").mockReturnValue(true);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2023-01-01T00:00:00Z"),
         endDate: new Date("2023-01-01T23:59:59Z"),
@@ -180,7 +180,7 @@ describe("AvailableHoursService", () => {
       jest.spyOn(mockStrategies[1], "isAvailable").mockReturnValue(false);
       jest.spyOn(mockStrategies[2], "isAvailable").mockReturnValue(true);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2023-01-01T00:00:00Z"),
         endDate: new Date("2023-01-01T23:59:59Z"),
@@ -204,7 +204,7 @@ describe("AvailableHoursService", () => {
       jest.spyOn(mockStrategies[1], "isAvailable").mockReturnValue(false);
       jest.spyOn(mockStrategies[2], "isAvailable").mockReturnValue(false);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2023-01-01T00:00:00Z"),
         endDate: new Date("2023-01-01T23:59:59Z"),
@@ -235,7 +235,7 @@ describe("AvailableHoursService", () => {
       jest.spyOn(mockStrategies[1], "isAvailable").mockReturnValue(true);
       jest.spyOn(mockStrategies[2], "isAvailable").mockReturnValue(true);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2023-01-01T14:00:00Z"), // Equivalent to 09:00 in -05:00
         endDate: new Date("2023-01-01T15:00:00Z"),
@@ -265,7 +265,7 @@ describe("AvailableHoursService", () => {
       jest.spyOn(mockStrategies[1], "isAvailable").mockReturnValue(false);
       jest.spyOn(mockStrategies[2], "isAvailable").mockReturnValue(true);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2023-01-01T00:00:00Z"),
         endDate: new Date("2023-01-01T23:59:59Z"),
@@ -297,7 +297,7 @@ describe("AvailableHoursService", () => {
       jest.spyOn(mockStrategies[1], "isAvailable").mockReturnValue(true);
       jest.spyOn(mockStrategies[2], "isAvailable").mockReturnValue(true);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2023-01-02T09:00:00Z"),
         endDate: new Date("2023-01-02T10:00:00Z"),
@@ -323,7 +323,7 @@ describe("AvailableHoursService", () => {
       jest.spyOn(mockStrategies[1], "isAvailable").mockReturnValue(false);
       jest.spyOn(mockStrategies[2], "isAvailable").mockReturnValue(false);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2023-01-01T00:00:00Z"),
         endDate: new Date("2023-01-01T23:59:59Z"),
@@ -366,7 +366,7 @@ describe("AvailableHoursService", () => {
       mockFetchAllBookedClasses.mockResolvedValue([]);
       mockFetchAllVacations.mockResolvedValue([]);
 
-      const result = await service.getAvailableHours({
+      const result = await service.getAvailableSlots({
         email: "student@example.com",
         startDate: new Date("2025-01-19T00:00:00Z"),
         endDate: new Date("2025-01-25T23:59:59Z"),

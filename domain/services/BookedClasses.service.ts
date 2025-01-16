@@ -2,7 +2,7 @@ import { BookedClassesRepository } from "../repositories/BookedClasses.repositor
 import { UserRepository } from "@domain/repositories/User.repository";
 import { StudentRepository } from "@domain/repositories/Student.repository";
 import logger from "@/lib/logger";
-import { AvailableHoursService } from "./AvailableHours.service";
+import { AvailableSlotsService } from "./AvailableSlots.service";
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
 import { AvailableSlot } from "@prisma/client";
 
@@ -50,7 +50,7 @@ export class BookedClassesService {
       isRecurrentSchedule
     );
     const selectedTeachers =
-      AvailableHoursService.collectTeachersForSelectedSlots(
+      AvailableSlotsService.collectTeachersForSelectedSlots(
         availableSlots,
         selectedSlots
       );

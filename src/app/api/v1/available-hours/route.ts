@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import logger from "@/lib/logger";
-import { AvailableHoursService } from "@domain/services/AvailableHours.service";
+import { AvailableSlotsService } from "@domain/services/AvailableSlots.service";
 import { verifyAccessToken } from "@/lib/jwt";
 import { expandTime } from "@/lib/utils";
 
 export const GET = async (request: Request) => {
-  return await handleGetAvailableHoursRequest(request);
+  return await handleGetAvailableSlotsRequest(request);
 };
 
-const handleGetAvailableHoursRequest = async (
+const handleGetAvailableSlotsRequest = async (
   request: Request
 ): Promise<NextResponse> => {
   try {
@@ -41,8 +41,8 @@ const handleGetAvailableHoursRequest = async (
     const selectedSlots = parseSelectedSlots(selectedSlotsParam);
 
     // Use the service to retrieve data
-    const availableHoursService = new AvailableHoursService();
-    const hourSlots = await availableHoursService.getAvailableHours({
+    const availableHoursService = new AvailableSlotsService();
+    const hourSlots = await availableHoursService.getAvailableSlots({
       startDate: new Date(startDateParam),
       endDate: new Date(endDateParam),
       selectedSlots,

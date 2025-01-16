@@ -7,7 +7,7 @@ if (!NEXT_PUBLIC_BASE_URL) {
   throw new Error("NEXT_PUBLIC_BASE_URL is not set");
 }
 
-export const getAvailableHoursRequest = async (
+export const getAvailableSlotsRequest = async (
   startDate: string,
   endDate: string,
   selectedSlots?: Date[],
