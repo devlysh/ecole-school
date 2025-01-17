@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import logger from "@/lib/logger";
 import { verifyAccessToken } from "@/lib/jwt";
@@ -12,7 +11,7 @@ export const PUT = async (
   try {
     const decodedToken: AccessTokenPayload = await verifyAccessToken();
     if (!decodedToken || !decodedToken.roles.includes(Role.ADMIN)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { name, timezone, timeSlots, vacations } =
@@ -22,7 +21,7 @@ export const PUT = async (
       };
 
     if (!name || !timezone) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
@@ -54,10 +53,10 @@ export const PUT = async (
       },
     });
 
-    return NextResponse.json(updatedTeacher, { status: 200 });
+    return Response.json(updatedTeacher, { status: 200 });
   } catch (err: unknown) {
     logger.error(err, "Error updating teacher");
-    return NextResponse.json(
+    return Response.json(
       { error: "Failed to update teacher" },
       { status: 500 }
     );

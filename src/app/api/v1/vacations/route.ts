@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import logger from "@/lib/logger";
 import { verifyAccessToken } from "@/lib/jwt";
@@ -11,7 +10,7 @@ export const GET = async (request: Request) => {
     const requesterEmail = decodedToken?.email;
 
     if (!requesterEmail) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Unauthorized - no email in token" },
         { status: 401 }
       );
@@ -21,7 +20,7 @@ export const GET = async (request: Request) => {
     const email = url.searchParams.get("email");
 
     if (!email) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Email query parameter is required" },
         { status: 400 }
       );
@@ -36,7 +35,7 @@ export const GET = async (request: Request) => {
     });
 
     if (!teacher || !teacher.teacher) {
-      return NextResponse.json({ error: "Teacher not found" }, { status: 404 });
+      return Response.json({ error: "Teacher not found" }, { status: 404 });
     }
 
     // Fetch vacations for the teacher
@@ -46,10 +45,10 @@ export const GET = async (request: Request) => {
       },
     });
 
-    return NextResponse.json(vacations, { status: 200 });
+    return Response.json(vacations, { status: 200 });
   } catch (err) {
     logger.error({ err }, "Error fetching vacations:");
-    return NextResponse.json(
+    return Response.json(
       { error: "Failed to fetch vacations" },
       { status: 500 }
     );
@@ -63,7 +62,7 @@ export const DELETE = async (request: Request) => {
     const requesterEmail = decodedToken?.email;
 
     if (!requesterEmail) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Unauthorized - no email in token" },
         { status: 401 }
       );
@@ -74,7 +73,7 @@ export const DELETE = async (request: Request) => {
     const email = url.searchParams.get("email");
 
     if (!vacationId || !email) {
-      return NextResponse.json(
+      return Response.json(
         { error: "vacationId and email query parameters are required" },
         { status: 400 }
       );
@@ -89,7 +88,7 @@ export const DELETE = async (request: Request) => {
     });
 
     if (!teacher || !teacher.teacher) {
-      return NextResponse.json({ error: "Teacher not found" }, { status: 404 });
+      return Response.json({ error: "Teacher not found" }, { status: 404 });
     }
 
     const teacherId = teacher.teacher.userId;
@@ -100,7 +99,7 @@ export const DELETE = async (request: Request) => {
     });
 
     if (!vacation || vacation.teacherId !== teacherId) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Vacation not found or not yours" },
         { status: 404 }
       );
@@ -111,10 +110,10 @@ export const DELETE = async (request: Request) => {
       where: { id: vacation.id },
     });
 
-    return NextResponse.json({ message: "Vacation deleted" }, { status: 200 });
+    return Response.json({ message: "Vacation deleted" }, { status: 200 });
   } catch (err) {
     logger.error("Error deleting vacation:", err);
-    return NextResponse.json(
+    return Response.json(
       { error: "Failed to delete vacation" },
       { status: 500 }
     );

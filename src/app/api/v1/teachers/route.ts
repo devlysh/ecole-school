@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import logger from "@/lib/logger";
 import { verifyAccessToken } from "@/lib/jwt";
@@ -8,14 +7,14 @@ export const GET = async () => {
   try {
     const decodedToken = await verifyAndDecodeToken();
     if (!isAdmin(decodedToken)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const teachers = await fetchTeachers();
-    return NextResponse.json(teachers);
+    return Response.json(teachers);
   } catch (err) {
     logger.error({ err }, "Error fetching teachers");
-    return NextResponse.json(
+    return Response.json(
       { error: "Failed to fetch teachers" },
       { status: 500 }
     );
