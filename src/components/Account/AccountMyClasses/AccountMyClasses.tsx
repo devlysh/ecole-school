@@ -15,20 +15,31 @@ import {
   ModalHeader,
   ModalFooter,
   useDisclosure,
+  DatePicker,
 } from "@nextui-org/react";
 import logger from "@/lib/logger";
 import { VerticalDotsIcon } from "@/icons";
 import { decodeClassId, useClasses } from "@/hooks/useClasses";
 import { ClassItem } from "@/lib/types";
 import { useCreditCount } from "@/hooks/useCreditCount";
+import { fromDate } from "@internationalized/date";
 
 const AccountMyClasses = () => {
   const creditCount = useCreditCount();
   const { classes, loading, setClasses } = useClasses(creditCount);
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isDeleteBookingModalOpen,
+    onOpen: onDeleteBookingModalOpen,
+    onClose: onDeleteBookingModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isRescheduleBookingModalOpen,
+    onOpen: onRescheduleBookingModalOpen,
+    onClose: onRescheduleBookingModalClose,
+  } = useDisclosure();
 
-  const handleDelete = useCallback(async () => {
+  const handleDeleteBooking = useCallback(async () => {
     if (!selectedClass) return;
 
     try {
@@ -43,22 +54,48 @@ const AccountMyClasses = () => {
     } catch (err) {
       logger.error({ err }, "Failed to delete class");
     } finally {
-      onClose();
+      onDeleteBookingModalClose();
     }
-  }, [onClose, selectedClass, setClasses]);
+  }, [onDeleteBookingModalClose, selectedClass, setClasses]);
 
   const handleOpenDeleteBookingModal = useCallback(
     (classItem: ClassItem) => {
       setSelectedClass(classItem);
-      onOpen();
+      onDeleteBookingModalOpen();
     },
-    [onOpen]
+    [onDeleteBookingModalOpen]
   );
 
-  const handleCloseModal = () => {
-    onClose();
+  const handleCloseDeleteBookingModal = useCallback(() => {
+    onDeleteBookingModalClose();
     setSelectedClass(null);
-  };
+  }, [onDeleteBookingModalClose, setSelectedClass]);
+
+  const handleRescheduleBooking = useCallback(async () => {
+    if (!selectedClass) return;
+
+    try {
+      // Implement rescheduling logic here
+      logger.debug({ selectedClass }, "Rescheduling class");
+    } catch (err) {
+      logger.error({ err }, "Failed to reschedule class");
+    } finally {
+      onRescheduleBookingModalClose();
+    }
+  }, [onRescheduleBookingModalClose, selectedClass]);
+
+  const handleOpenRescheduleBookingModal = useCallback(
+    (classItem: ClassItem) => {
+      setSelectedClass(classItem);
+      onRescheduleBookingModalOpen();
+    },
+    [onRescheduleBookingModalOpen]
+  );
+
+  const handleCloseRescheduleBookingModal = useCallback(() => {
+    onRescheduleBookingModalClose();
+    setSelectedClass(null);
+  }, [onRescheduleBookingModalClose, setSelectedClass]);
 
   const columns = useMemo(
     () => [
@@ -106,9 +143,14 @@ const AccountMyClasses = () => {
               </DropdownTrigger>
               <DropdownMenu>
                 <DropdownItem
+                  onClick={() => handleOpenRescheduleBookingModal(item)}
+                >
+                  Reschedule
+                </DropdownItem>
+                <DropdownItem
                   onClick={() => handleOpenDeleteBookingModal(item)}
                 >
-                  Delete booking
+                  Delete
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
@@ -116,7 +158,7 @@ const AccountMyClasses = () => {
         ),
       },
     ],
-    [handleOpenDeleteBookingModal]
+    [handleOpenDeleteBookingModal, handleOpenRescheduleBookingModal]
   );
 
   const initialVisibleColumns = [
@@ -133,15 +175,16 @@ const AccountMyClasses = () => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <>
-          <GenericTable
-            columns={columns}
-            list={classes}
-            initialVisibleColumns={initialVisibleColumns}
-          />
-        </>
+        <GenericTable
+          columns={columns}
+          list={classes}
+          initialVisibleColumns={initialVisibleColumns}
+        />
       )}
-      <Modal isOpen={isOpen} onClose={handleCloseModal}>
+      <Modal
+        isOpen={isDeleteBookingModalOpen}
+        onClose={handleCloseDeleteBookingModal}
+      >
         <ModalContent>
           <ModalHeader className="flex flex-col gap-1">
             Confirm Deletion
@@ -150,11 +193,57 @@ const AccountMyClasses = () => {
             <p>Are you sure you want to delete this class?</p>
           </ModalBody>
           <ModalFooter>
-            <Button color="danger" variant="light" onPress={handleCloseModal}>
+            <Button
+              color="danger"
+              variant="light"
+              onPress={handleCloseDeleteBookingModal}
+            >
               No
             </Button>
-            <Button color="primary" onPress={handleDelete}>
+            <Button color="primary" onPress={handleDeleteBooking}>
               Yes
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal
+        isOpen={isRescheduleBookingModalOpen}
+        onClose={handleCloseRescheduleBookingModal}
+      >
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            Reschedule Class
+          </ModalHeader>
+          <ModalBody>
+            <DatePicker
+              hideTimeZone
+              showMonthAndYearPickers
+              label="Event Date"
+              variant="bordered"
+              defaultValue={
+                selectedClass?.date
+                  ? fromDate(
+                      new Date(selectedClass.date),
+                      Intl.DateTimeFormat().resolvedOptions().timeZone
+                    )
+                  : fromDate(
+                      new Date(),
+                      Intl.DateTimeFormat().resolvedOptions().timeZone
+                    )
+              }
+            />
+            {/* Add form elements for rescheduling here */}
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              color="danger"
+              variant="light"
+              onPress={handleCloseRescheduleBookingModal}
+            >
+              Cancel
+            </Button>
+            <Button color="primary" onPress={handleRescheduleBooking}>
+              Confirm
             </Button>
           </ModalFooter>
         </ModalContent>
