@@ -225,10 +225,14 @@ export class AvailableSlotsService {
       );
 
     const availableDateTimes: Date[] = [];
-    const dailyRange = this.generateRange(startDate, endDate, RangeUnit.Day);
+    const dailyRange = this.generateDateRange(
+      startDate,
+      endDate,
+      RangeUnit.Day
+    );
 
     for (const slot of availableSlots) {
-      const hourlyIncrements = this.generateRange(
+      const hourlyIncrements = this.generateDateRange(
         slot.startTime,
         slot.endTime,
         RangeUnit.Hour
@@ -279,20 +283,24 @@ export class AvailableSlotsService {
     return strategies.every((strategy) => strategy.isAvailable(context));
   }
 
-  private generateRange(
+  private generateDateRange(
     startDate: Date,
     endDate: Date,
     unit: RangeUnit
   ): Date[] {
-    const days: Date[] = [];
-    const currentDay = new Date(startDate);
+    const range: Date[] = [];
+    const current = new Date(startDate);
 
-    while (currentDay <= endDate) {
-      days.push(new Date(currentDay));
-      currentDay[`set${unit}`](currentDay[`get${unit}`]() + 1);
+    while (current <= endDate) {
+      range.push(new Date(current));
+      if (unit === RangeUnit.Day) {
+        current.setDate(current.getDate() + 1);
+      } else if (unit === RangeUnit.Hour) {
+        current.setHours(current.getHours() + 1);
+      }
     }
 
-    return days;
+    return range;
   }
 
   private getDefaultConfig(): Config {
