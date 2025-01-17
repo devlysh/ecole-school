@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "deploy": "cd ./infrastructure/aws && cdk synth --profile ecole && cdk deploy --profile ecole && cd ../..",
+    "deploy": "cd ./infrastructure/aws && npm i && cdk synth --profile ecole && cdk deploy --profile ecole && cd ../..",
     "test": "jest",
     "test:watch": "jest --watch",
     "migrate": "npm run prisma:migrate",
