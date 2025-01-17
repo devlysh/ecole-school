@@ -4,7 +4,8 @@ import { StudentRepository } from "@domain/repositories/Student.repository";
 import logger from "@/lib/logger";
 import { AvailableSlotsService } from "./AvailableSlots.service";
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
-import { AvailableSlot } from "@prisma/client";
+import { AvailableSlot, BookedClass, User } from "@prisma/client";
+import { addWeeks } from "date-fns";
 
 export class BookedClassesService {
   private userRepository: UserRepository;
@@ -98,14 +99,64 @@ export class BookedClassesService {
     return classes;
   }
 
-  public async deleteBookedClassById(email: string, classId: number) {
+  public async deleteBookedClassById(
+    email: string,
+    classBeingDeletedId: number,
+    classBeingDeletedDate: Date
+  ) {
     const user = await this.userRepository.findStudentByEmail(email);
 
     if (!user || !user.id || !user.student) {
       throw new Error("User not found");
     }
 
-    await this.bookedClassesRepository.deleteByIdAndStudentId(classId, user.id);
+    const bookedClass =
+      await this.bookedClassesRepository.fetchBookedClassById(
+        classBeingDeletedId
+      );
+
+    if (!bookedClass) {
+      throw new Error("Booked class not found");
+    }
+
+    if (bookedClass.recurring) {
+      const nextWeekDate = addWeeks(classBeingDeletedDate, 1);
+
+      const recurringClass = {
+        date: nextWeekDate,
+        teacherId: bookedClass.teacherId,
+        studentId: user.id,
+        recurring: true,
+        isActive: true,
+      };
+
+      const singleClasses = this.generateSingleClasses(
+        bookedClass,
+        classBeingDeletedDate,
+        user
+      );
+
+      try {
+        await this.bookedClassesRepository.createBookedClasses(singleClasses);
+        await this.bookedClassesRepository.createBookedClasses([
+          recurringClass,
+        ]);
+        await this.bookedClassesRepository.deleteByIdAndStudentId(
+          classBeingDeletedId,
+          user.id
+        );
+      } catch (error) {
+        logger.error(error, "Error creating booked classes");
+        throw new Error("Failed to create booked classes");
+      }
+
+      return { message: "Classes deleted successfully" };
+    } else {
+      return await this.bookedClassesRepository.deleteByIdAndStudentId(
+        classBeingDeletedId,
+        user.id
+      );
+    }
   }
 
   private async getAvailableSlots(
@@ -129,5 +180,41 @@ export class BookedClassesService {
     return Array.from(selectedTeachers)[
       Math.floor(Math.random() * selectedTeachers.size)
     ];
+  }
+
+  private generateSingleClasses(
+    bookedClass: BookedClass,
+    classBeingDeletedDate: Date,
+    user: User
+  ) {
+    return this.getWeeklyOccurrencesInPast(
+      bookedClass.date,
+      classBeingDeletedDate,
+      new Date()
+    ).map((classDate) => ({
+      date: classDate,
+      teacherId: bookedClass.teacherId,
+      studentId: user.id,
+      recurring: false,
+      isActive: true,
+    }));
+  }
+
+  private getWeeklyOccurrencesInPast(
+    startDate: Date,
+    endDate: Date,
+    now: Date
+  ) {
+    const occurrences = [];
+    const date = new Date(startDate);
+
+    while (date < endDate) {
+      if (date > now) {
+        occurrences.push(new Date(date));
+      }
+      date.setDate(date.getDate() + 7);
+    }
+
+    return occurrences;
   }
 }

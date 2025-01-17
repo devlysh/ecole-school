@@ -19,14 +19,12 @@ import {
 } from "@nextui-org/react";
 import logger from "@/lib/logger";
 import { VerticalDotsIcon } from "@/icons";
-import { getNextWeeklyOccurrence } from "@/lib/utils";
 import { fetchCreditCount } from "@/app/api/v1/credits/request";
+import { addMonths, addWeeks } from "date-fns";
+import { getWeeklyOccurencesForPeriod } from "@/lib/utils";
+import { BookedClass } from "@prisma/client";
 
-interface ClassItem extends Record<string, unknown> {
-  id: string;
-  date: string;
-  time: string;
-}
+type ClassItem = { id: string } & Pick<BookedClass, "date" | "recurring">;
 
 const AccountMyClasses = () => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -34,65 +32,6 @@ const AccountMyClasses = () => {
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [creditCount, setCreditCount] = useState(0);
-
-  useEffect(() => {
-    const loadClasses = async () => {
-      try {
-        const fetchedClasses = await fetchBookedClasses();
-        const expandedClasses = expandClasses(fetchedClasses);
-        const sortedClasses = expandedClasses.sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          return dateA.getTime() - dateB.getTime();
-        });
-
-        const coloredClasses = sortedClasses.map((classItem, index) => {
-          if (creditCount > index) {
-            return { ...classItem, hasCredit: true };
-          }
-          return { ...classItem, hasCredit: false };
-        });
-
-        setClasses(coloredClasses);
-      } catch (err) {
-        logger.error({ err }, "Failed to fetch classes");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadClasses();
-  }, [creditCount]);
-
-  useEffect(() => {
-    const loadCreditCount = async () => {
-      const creditCount = await fetchCreditCount();
-      setCreditCount(creditCount);
-    };
-    loadCreditCount();
-  }, []);
-
-  const handleDelete = async () => {
-    if (selectedClass) {
-      try {
-        await deleteBookedClass(selectedClass.id);
-        setClasses(classes.filter((c) => c.id !== selectedClass.id));
-      } catch (err) {
-        logger.error({ err }, "Failed to delete class");
-      } finally {
-        onClose();
-      }
-    }
-  };
-
-  const handleOpenModal = (classItem: ClassItem) => {
-    setSelectedClass(classItem);
-    onOpen();
-  };
-
-  const handleCloseModal = () => {
-    onClose();
-    setSelectedClass(null);
-  };
 
   const columns = [
     {
@@ -156,6 +95,62 @@ const AccountMyClasses = () => {
     "hasCredit",
   ];
 
+  const handleDelete = async () => {
+    if (!selectedClass) return;
+
+    try {
+      const bookedClassId = selectedClass.recurring
+        ? decodeClassId(selectedClass.id).bookedClassId
+        : Number(selectedClass.id);
+
+      await deleteBookedClass(bookedClassId, new Date(selectedClass.date));
+      setClasses((prevClasses) =>
+        prevClasses.filter((c) => c.id !== selectedClass.id)
+      );
+    } catch (err) {
+      logger.error({ err }, "Failed to delete class");
+    } finally {
+      onClose();
+    }
+  };
+
+  const handleOpenModal = (classItem: ClassItem) => {
+    setSelectedClass(classItem);
+    onOpen();
+  };
+
+  const handleCloseModal = () => {
+    onClose();
+    setSelectedClass(null);
+  };
+
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        let classes = await fetchBookedClasses();
+        classes = expandClasses(classes);
+        classes = filterClasses(classes);
+        classes = sortClasses(classes);
+        classes = markClassesWithCredit(classes, creditCount);
+
+        setClasses(classes);
+      } catch (err) {
+        logger.error({ err }, "Failed to fetch classes");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadClasses();
+  }, [creditCount]);
+
+  useEffect(() => {
+    const loadCreditCount = async () => {
+      const creditCount = await fetchCreditCount();
+      setCreditCount(creditCount);
+    };
+    loadCreditCount();
+  }, []);
+
   return (
     <div>
       <h1>My Classes</h1>
@@ -198,20 +193,63 @@ const expandClasses = (classes: ClassItem[]) => {
   return classes.flatMap((classItem: ClassItem) => {
     const classDate = new Date(classItem.date);
     const isRecurring = classItem.recurring === true;
-    const occurrences = [];
+    const classes = [];
 
     if (isRecurring) {
-      const startDate = getNextWeeklyOccurrence(classDate);
-      for (let i = 0; i < 4; i++) {
-        classItem.id = `recurring-${classItem.id}-${i}`;
-        const newDate = new Date(startDate);
-        newDate.setDate(startDate.getDate() + i * 7);
-        occurrences.push({ ...classItem, date: newDate.toISOString() });
+      const occurencesForMonth = getWeeklyOccurencesForPeriod(
+        classDate,
+        addMonths(classDate, 1)
+      );
+
+      for (let i = 0; i < occurencesForMonth.length; i++) {
+        const recurringClassDate = addWeeks(classDate, i);
+
+        const recurringClassItem = {
+          ...classItem,
+          id: encodeClassId(classItem.id, i),
+        };
+
+        classes.push({
+          ...recurringClassItem,
+          date: recurringClassDate,
+        });
       }
     } else {
-      occurrences.push(classItem);
+      classes.push({ ...classItem, id: classItem.id.toString() });
     }
 
-    return occurrences;
+    return classes;
   });
+};
+
+const filterClasses = (classes: ClassItem[]) => {
+  return classes.filter((classItem) => {
+    return new Date() < new Date(classItem.date);
+  });
+};
+
+const sortClasses = (classes: ClassItem[]) => {
+  return classes.sort((a, b) => {
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  });
+};
+
+const markClassesWithCredit = (classes: ClassItem[], creditCount: number) => {
+  return classes.map((classItem, index) => {
+    if (creditCount > index) {
+      return { ...classItem, hasCredit: true };
+    }
+    return { ...classItem, hasCredit: false };
+  });
+};
+
+const encodeClassId = (classId: string, index: number) => {
+  return encodeURIComponent(`recurring-${classId}-${index}`);
+};
+
+const decodeClassId = (
+  classId: string
+): { bookedClassId: number; index: number } => {
+  const [, bookedClassId, index] = classId.split("-");
+  return { bookedClassId: Number(bookedClassId), index: Number(index) };
 };

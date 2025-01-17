@@ -1,10 +1,31 @@
 import logger from "@/lib/logger";
+import { compressTime } from "@/lib/utils";
 
-export const deleteBookedClass = async (classId: string) => {
+const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+if (!NEXT_PUBLIC_BASE_URL) {
+  throw new Error("NEXT_PUBLIC_BASE_URL is not set");
+}
+
+export const deleteBookedClass = async (classId: number, date: Date) => {
+  if (typeof classId !== "number") {
+    throw new Error("Class id must be a number");
+  }
+
+  if (!(date instanceof Date)) {
+    throw new Error("Date must be an instance of Date");
+  }
+
   try {
-    const response = await fetch(`/api/v1/booked-classes/${classId}`, {
+    const url = new URL(
+      `${NEXT_PUBLIC_BASE_URL}/api/v1/booked-classes/${classId}`
+    );
+    url.searchParams.set("date", compressTime(date.getTime()).toString());
+
+    const response = await fetch(url.toString(), {
       method: "DELETE",
     });
+
     if (!response.ok) {
       throw new Error("Failed to delete booked class");
     }

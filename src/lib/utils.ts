@@ -39,15 +39,17 @@ export const expandTime = (timeInCompressedForm: number): number => {
   return timeInCompressedForm * Math.pow(10, 5);
 };
 
-export const getNextWeeklyOccurrence = (originalDate: Date): Date => {
-  const now = new Date();
-  // Make a copy so we don't mutate the originalDate
-  const nextDate = new Date(originalDate);
-
-  // Keep adding one week while nextDate is in the past
-  while (nextDate < now) {
-    nextDate.setDate(nextDate.getDate() + 7);
+export const getWeeklyOccurencesForPeriod = (
+  startDate: Date,
+  endDate: Date
+): Date[] => {
+  const occurences = [];
+  for (
+    let date = new Date(startDate);
+    date <= endDate;
+    date.setDate(date.getDate() + 7)
+  ) {
+    occurences.push(new Date(date));
   }
-
-  return nextDate;
+  return occurences;
 };

@@ -10,11 +10,20 @@ export class BookedClassesRepository {
     return prisma.bookedClass.findMany({});
   }
 
+  async fetchBookedClassById(id: number): Promise<BookedClass | null> {
+    return prisma.bookedClass.findUnique({ where: { id } });
+  }
+
   async fetchBookedClassesByStudentId(
     studentId: number
-  ): Promise<BookedClass[]> {
+  ): Promise<Pick<BookedClass, "id" | "date" | "recurring">[]> {
     return prisma.bookedClass.findMany({
-      where: { studentId: studentId },
+      where: { studentId: studentId, isActive: true },
+      select: {
+        id: true,
+        date: true,
+        recurring: true,
+      },
     });
   }
 
