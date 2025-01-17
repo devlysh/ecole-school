@@ -84,13 +84,9 @@ describe("AvailableHoursService", () => {
       new IsSlotBookedStrategy(),
       new HandleSelectedSlotsStrategy(),
     ];
-    service = new AvailableSlotsService(
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      mockStrategies
-    );
+    service = new AvailableSlotsService({
+      strategies: mockStrategies,
+    });
   });
 
   describe("Validation", () => {
