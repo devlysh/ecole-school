@@ -1,3 +1,4 @@
+import { BookedClass } from "@prisma/client";
 import { SVGProps } from "react";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -148,3 +149,8 @@ export interface AvailableCalendarSlot {
   day: number;
   hour: number;
 }
+
+export type ClassItem = { id: string } & Pick<
+  BookedClass,
+  "date" | "recurring"
+>;
