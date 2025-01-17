@@ -95,8 +95,8 @@ export class AvailableSlotsService {
     const assignedTeacherId = user?.student?.assignedTeacherId ?? undefined;
 
     const availableSlots = await this.fetchSlots(
-      assignedTeacherId,
-      isRecurrentSchedule
+      isRecurrentSchedule,
+      assignedTeacherId
     );
 
     if (!availableSlots) {
@@ -116,6 +116,34 @@ export class AvailableSlotsService {
       vacations,
       strategies: this.strategies,
       isRecurrentSchedule,
+    });
+  }
+
+  public async isSlotAvailable(
+    date: Date,
+    assignedTeacherId?: number
+  ): Promise<boolean> {
+    const availableSlots = await this.fetchSlots(false);
+
+    if (!availableSlots || !availableSlots.length) {
+      return false;
+    }
+
+    const bookedClasses = await this.bookClassesRepo.fetchAllBookedClasses();
+    const vacations = await this.vacationsRepo.fetchAllVacations();
+
+    return availableSlots.some((slot) => {
+      const context: SlotAvailibilityContext = {
+        dateTime: date,
+        slot,
+        assignedTeacherId,
+        bookedClasses,
+        vacations,
+        selectedSlots: [],
+        selectedTeacherIds: new Set(),
+        isRecurrentSchedule: false,
+      };
+      return this.isAvailable(this.strategies, context);
     });
   }
 
@@ -163,8 +191,8 @@ export class AvailableSlotsService {
   }
 
   private async fetchSlots(
-    teacherId: number | undefined,
-    isRecurrentSchedule: boolean
+    isRecurrentSchedule: boolean,
+    teacherId?: number
   ): Promise<AvailableSlot[] | null> {
     if (teacherId) {
       return isRecurrentSchedule

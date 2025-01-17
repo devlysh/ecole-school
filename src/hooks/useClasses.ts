@@ -1,34 +1,35 @@
 import logger from "@/lib/logger";
 import { ClassItem } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { addMonths, addWeeks } from "date-fns";
 import { getWeeklyOccurencesForPeriod } from "@/lib/utils";
 import { fetchBookedClasses } from "src/app/api/v1/booked-classes/request";
 
 export const useClasses = (creditCount: number) => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const loadClasses = async () => {
-      try {
-        let classes = await fetchBookedClasses();
-        classes = expandClasses(classes);
-        classes = filterClasses(classes);
-        classes = sortClasses(classes);
-        classes = markClassesWithCredit(classes, creditCount);
+  const fetchClasses = useCallback(async () => {
+    try {
+      let classes = await fetchBookedClasses();
+      classes = expandClasses(classes);
+      classes = filterClasses(classes);
+      classes = sortClasses(classes);
+      classes = markClassesWithCredit(classes, creditCount);
 
-        setClasses(classes);
-      } catch (err) {
-        logger.error({ err }, "Failed to fetch classes");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadClasses();
+      setClasses(classes);
+    } catch (err) {
+      logger.error({ err }, "Failed to fetch classes");
+    } finally {
+      setLoading(false);
+    }
   }, [creditCount]);
 
-  return { classes, loading, setClasses };
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
+
+  return { classes, loading, setClasses, fetchClasses };
 };
 
 const expandClasses = (classes: ClassItem[]) => {

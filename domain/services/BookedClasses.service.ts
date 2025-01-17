@@ -11,19 +11,21 @@ export class BookedClassesService {
   private userRepository: UserRepository;
   private studentRepository: StudentRepository;
   private bookedClassesRepository: BookedClassesRepository;
+  private availableSlotsService: AvailableSlotsService;
   private availableSlotsRepository: AvailableSlotsRepository;
 
   constructor() {
     this.userRepository = new UserRepository();
     this.studentRepository = new StudentRepository();
     this.bookedClassesRepository = new BookedClassesRepository();
+    this.availableSlotsService = new AvailableSlotsService();
     this.availableSlotsRepository = new AvailableSlotsRepository();
   }
 
   public async bookClasses(
     email: string,
     selectedSlots: Date[],
-    isRecurrentSchedule: boolean
+    isRecurrent: boolean
   ) {
     const user = await this.userRepository.findStudentByEmail(email);
 
@@ -39,7 +41,7 @@ export class BookedClassesService {
           date,
           teacherId: assignedTeacherId,
           studentId: user.id,
-          recurring: isRecurrentSchedule,
+          recurring: isRecurrent,
           isActive: true,
         }))
       );
@@ -48,7 +50,7 @@ export class BookedClassesService {
 
     const availableSlots = await this.getAvailableSlots(
       assignedTeacherId,
-      isRecurrentSchedule
+      isRecurrent
     );
     const selectedTeachers =
       AvailableSlotsService.collectTeachersForSelectedSlots(
@@ -68,7 +70,7 @@ export class BookedClassesService {
         date,
         teacherId: teacherToAssign,
         studentId: user.id,
-        recurring: isRecurrentSchedule,
+        recurring: isRecurrent,
         isActive: true,
       }))
     );
@@ -157,6 +159,44 @@ export class BookedClassesService {
         user.id
       );
     }
+  }
+
+  public async rescheduleBookedClass(
+    email: string,
+    classId: number,
+    oldDate: Date,
+    newDate: Date
+  ) {
+    try {
+      const bookedClass =
+        await this.bookedClassesRepository.fetchBookedClassById(classId);
+
+      if (!bookedClass) {
+        throw new Error("Booked class not found");
+      }
+
+      const isAvailable = await this.availableSlotsService.isSlotAvailable(
+        newDate,
+        bookedClass.teacherId
+      );
+
+      if (!isAvailable) {
+        throw new Error("Slot is not available");
+      }
+    } catch (err) {
+      logger.warn({ date: newDate }, "Slot is not available");
+      throw err;
+    }
+
+    try {
+      await this.deleteBookedClassById(email, classId, oldDate);
+      await this.bookClasses(email, [newDate], false);
+    } catch (err) {
+      logger.error(err, "Error rescheduling booked classes");
+      throw err;
+    }
+
+    return { message: "Class rescheduled successfully" };
   }
 
   private async getAvailableSlots(

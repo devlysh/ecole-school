@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { deleteBookedClass } from "src/app/api/v1/booked-classes/[id]/request";
+import {
+  deleteBookedClass,
+  rescheduleBookedClass,
+} from "src/app/api/v1/booked-classes/[id]/request";
 import GenericTable from "src/components/GenericTable";
 import {
   Modal,
@@ -23,21 +26,42 @@ import { decodeClassId, useClasses } from "@/hooks/useClasses";
 import { ClassItem } from "@/lib/types";
 import { useCreditCount } from "@/hooks/useCreditCount";
 import { fromDate } from "@internationalized/date";
+import { ZonedDateTime } from "@internationalized/date";
+import { ToastContainer, toast } from "react-toastify";
 
 const AccountMyClasses = () => {
   const creditCount = useCreditCount();
-  const { classes, loading, setClasses } = useClasses(creditCount);
+  const { classes, loading, setClasses, fetchClasses } =
+    useClasses(creditCount);
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
-  const {
-    isOpen: isDeleteBookingModalOpen,
-    onOpen: onDeleteBookingModalOpen,
-    onClose: onDeleteBookingModalClose,
-  } = useDisclosure();
-  const {
-    isOpen: isRescheduleBookingModalOpen,
-    onOpen: onRescheduleBookingModalOpen,
-    onClose: onRescheduleBookingModalClose,
-  } = useDisclosure();
+  const [rescheduleDate, setRescheduleDate] = useState<Date | null>(null);
+
+  const deleteClassModal = useDisclosure();
+  const rescheduleClassModal = useDisclosure();
+
+  const handleRescheduleBooking = useCallback(async () => {
+    if (!selectedClass || !rescheduleDate) return;
+
+    try {
+      const bookedClassId = selectedClass.recurring
+        ? decodeClassId(selectedClass.id).bookedClassId
+        : Number(selectedClass.id);
+
+      await rescheduleBookedClass(
+        bookedClassId,
+        new Date(selectedClass.date),
+        new Date(rescheduleDate)
+      );
+      await fetchClasses();
+    } catch (err) {
+      logger.error({ err }, "Failed to reschedule class");
+      toast.error(
+        "The selected slot is not available. Please choose another date."
+      );
+    } finally {
+      rescheduleClassModal.onClose();
+    }
+  }, [rescheduleClassModal, rescheduleDate, selectedClass, fetchClasses]);
 
   const handleDeleteBooking = useCallback(async () => {
     if (!selectedClass) return;
@@ -48,54 +72,46 @@ const AccountMyClasses = () => {
         : Number(selectedClass.id);
 
       await deleteBookedClass(bookedClassId, new Date(selectedClass.date));
-      setClasses((prevClasses: ClassItem[]) =>
-        prevClasses.filter((c: ClassItem) => c.id !== selectedClass.id)
+      setClasses((prevClasses) =>
+        prevClasses.filter((c) => c.id !== selectedClass.id)
       );
+      await fetchClasses();
     } catch (err) {
       logger.error({ err }, "Failed to delete class");
     } finally {
-      onDeleteBookingModalClose();
+      deleteClassModal.onClose();
     }
-  }, [onDeleteBookingModalClose, selectedClass, setClasses]);
+  }, [deleteClassModal, selectedClass, setClasses, fetchClasses]);
 
   const handleOpenDeleteBookingModal = useCallback(
     (classItem: ClassItem) => {
       setSelectedClass(classItem);
-      onDeleteBookingModalOpen();
+      deleteClassModal.onOpen();
     },
-    [onDeleteBookingModalOpen]
+    [deleteClassModal]
   );
 
   const handleCloseDeleteBookingModal = useCallback(() => {
-    onDeleteBookingModalClose();
+    deleteClassModal.onClose();
     setSelectedClass(null);
-  }, [onDeleteBookingModalClose, setSelectedClass]);
-
-  const handleRescheduleBooking = useCallback(async () => {
-    if (!selectedClass) return;
-
-    try {
-      // Implement rescheduling logic here
-      logger.debug({ selectedClass }, "Rescheduling class");
-    } catch (err) {
-      logger.error({ err }, "Failed to reschedule class");
-    } finally {
-      onRescheduleBookingModalClose();
-    }
-  }, [onRescheduleBookingModalClose, selectedClass]);
+  }, [deleteClassModal]);
 
   const handleOpenRescheduleBookingModal = useCallback(
     (classItem: ClassItem) => {
       setSelectedClass(classItem);
-      onRescheduleBookingModalOpen();
+      rescheduleClassModal.onOpen();
     },
-    [onRescheduleBookingModalOpen]
+    [rescheduleClassModal]
   );
 
   const handleCloseRescheduleBookingModal = useCallback(() => {
-    onRescheduleBookingModalClose();
+    rescheduleClassModal.onClose();
     setSelectedClass(null);
-  }, [onRescheduleBookingModalClose, setSelectedClass]);
+  }, [rescheduleClassModal]);
+
+  const handleChangeRescheduleDate = useCallback((date: ZonedDateTime) => {
+    setRescheduleDate(date.toDate());
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -171,6 +187,7 @@ const AccountMyClasses = () => {
 
   return (
     <div>
+      <ToastContainer />
       <h1>My Classes</h1>
       {loading ? (
         <p>Loading...</p>
@@ -182,7 +199,7 @@ const AccountMyClasses = () => {
         />
       )}
       <Modal
-        isOpen={isDeleteBookingModalOpen}
+        isOpen={deleteClassModal.isOpen}
         onClose={handleCloseDeleteBookingModal}
       >
         <ModalContent>
@@ -207,7 +224,7 @@ const AccountMyClasses = () => {
         </ModalContent>
       </Modal>
       <Modal
-        isOpen={isRescheduleBookingModalOpen}
+        isOpen={rescheduleClassModal.isOpen}
         onClose={handleCloseRescheduleBookingModal}
       >
         <ModalContent>
@@ -220,6 +237,7 @@ const AccountMyClasses = () => {
               showMonthAndYearPickers
               label="Event Date"
               variant="bordered"
+              onChange={handleChangeRescheduleDate}
               defaultValue={
                 selectedClass?.date
                   ? fromDate(
@@ -232,7 +250,6 @@ const AccountMyClasses = () => {
                     )
               }
             />
-            {/* Add form elements for rescheduling here */}
           </ModalBody>
           <ModalFooter>
             <Button
