@@ -30,19 +30,9 @@ export const AccountBookClassesCalendar: React.FC<
 
   const [hourRange, setHourRange] = useState<number[]>(() => hours);
 
-  const handleWeekChange = useCallback(
-    (direction: number) => {
-      if (!isRecurrentSchedule) {
-        setCurrentWeekStart((prev) => {
-          const newDate = addDays(prev, direction * 7);
-          const endOfWeek = addDays(newDate, 6);
-          fetchAvailableSlots(newDate, endOfWeek);
-          return newDate;
-        });
-      }
-    },
-    [isRecurrentSchedule, fetchAvailableSlots]
-  );
+  const handleWeekChange = useCallback((direction: number) => {
+    setCurrentWeekStart((prev) => addDays(prev, direction * 7));
+  }, []);
 
   const handleHourScroll = useCallback((direction: number) => {
     setHourRange((prev) => {
