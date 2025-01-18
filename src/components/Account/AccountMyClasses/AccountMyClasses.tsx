@@ -3,7 +3,7 @@
 import React from "react";
 import { ToastContainer, toast } from "react-toastify";
 import logger from "@/lib/logger";
-import { decodeClassId, useClasses } from "@/hooks/useClasses";
+import { useClasses } from "@/hooks/useClasses";
 import { useCreditCount } from "@/hooks/useCreditCount";
 import useClassModals from "@/hooks/useClassModals";
 import useRescheduleDate from "@/hooks/useRescheduleDate";
@@ -14,6 +14,7 @@ import {
   deleteBookedClass,
   rescheduleBookedClass,
 } from "src/app/api/v1/booked-classes/[id]/request";
+import { determineBookedClassId } from "@/lib/utils";
 
 const AccountMyClasses = () => {
   const creditCount = useCreditCount();
@@ -34,9 +35,7 @@ const AccountMyClasses = () => {
     if (!selectedClass || !rescheduleDate) return;
 
     try {
-      const bookedClassId = selectedClass.recurring
-        ? decodeClassId(selectedClass.id).bookedClassId
-        : Number(selectedClass.id);
+      const bookedClassId = determineBookedClassId(selectedClass);
 
       await rescheduleBookedClass(
         bookedClassId,
@@ -58,9 +57,7 @@ const AccountMyClasses = () => {
     if (!selectedClass) return;
 
     try {
-      const bookedClassId = selectedClass.recurring
-        ? decodeClassId(selectedClass.id).bookedClassId
-        : Number(selectedClass.id);
+      const bookedClassId = determineBookedClassId(selectedClass);
 
       await deleteBookedClass(bookedClassId, new Date(selectedClass.date));
       setClasses((prevClasses) =>

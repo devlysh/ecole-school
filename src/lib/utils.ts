@@ -1,4 +1,5 @@
-import { Plan, PlansMap } from "./types";
+import { decodeClassId } from "@/hooks/useClasses";
+import { ClassItem, Plan, PlansMap } from "./types";
 
 // Groups an array of plans by their currency and returns a map
 export const groupByCurrency = (plans: Plan[]): PlansMap => {
@@ -52,4 +53,10 @@ export const getWeeklyOccurencesForPeriod = (
     occurences.push(new Date(date));
   }
   return occurences;
+};
+
+export const determineBookedClassId = (selectedClass: ClassItem) => {
+  return selectedClass.recurring
+    ? decodeClassId(selectedClass.id).bookedClassId
+    : Number(selectedClass.id);
 };
