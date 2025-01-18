@@ -6,18 +6,25 @@ import {
   ModalContent,
   ModalHeader,
   ModalFooter,
+  Checkbox,
 } from "@nextui-org/react";
 
 interface DeleteClassModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDelete: () => void;
+  isRecurring: boolean;
+  deleteFutureOccurences: boolean;
+  setDeleteFutureOccurences: (value: boolean) => void;
 }
 
 const DeleteClassModal: React.FC<DeleteClassModalProps> = ({
   isOpen,
   onClose,
   onDelete,
+  isRecurring,
+  deleteFutureOccurences,
+  setDeleteFutureOccurences,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -27,6 +34,17 @@ const DeleteClassModal: React.FC<DeleteClassModalProps> = ({
         </ModalHeader>
         <ModalBody>
           <p>Are you sure you want to delete this class?</p>
+          {isRecurring && (
+            <>
+              <p>This is a recurring class.</p>
+              <Checkbox
+                isSelected={deleteFutureOccurences}
+                onValueChange={setDeleteFutureOccurences}
+              >
+                Delete all future occurrences
+              </Checkbox>
+            </>
+          )}
         </ModalBody>
         <ModalFooter>
           <Button color="danger" variant="light" onPress={onClose}>

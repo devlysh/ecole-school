@@ -6,7 +6,7 @@ import logger from "@/lib/logger";
 import { useClasses } from "@/hooks/useClasses";
 import { useCreditCount } from "@/hooks/useCreditCount";
 import useClassModals from "@/hooks/useClassModals";
-import useRescheduleDate from "@/hooks/useRescheduleDate";
+import useRescheduleClass from "@/hooks/useRescheduleClass";
 import MyClassesTable from "./MyClassesTable";
 import DeleteClassModal from "./DeleteClassModal";
 import RescheduleClassModal from "./RescheduleClassModal";
@@ -15,6 +15,7 @@ import {
   rescheduleBookedClass,
 } from "src/app/api/v1/booked-classes/[id]/request";
 import { determineBookedClassId } from "@/lib/utils";
+import useDeleteClass from "@/hooks/useDeleteClass";
 
 const AccountMyClasses = () => {
   const creditCount = useCreditCount();
@@ -29,7 +30,9 @@ const AccountMyClasses = () => {
     handleOpenRescheduleBookingModal,
     handleCloseRescheduleBookingModal,
   } = useClassModals();
-  const { rescheduleDate, handleChangeRescheduleDate } = useRescheduleDate();
+  const { rescheduleDate, handleChangeRescheduleDate } = useRescheduleClass();
+  const { deleteFutureOccurences, setDeleteFutureOccurences } =
+    useDeleteClass();
 
   const handleRescheduleBooking = async () => {
     if (!selectedClass || !rescheduleDate) return;
@@ -59,7 +62,12 @@ const AccountMyClasses = () => {
     try {
       const bookedClassId = determineBookedClassId(selectedClass);
 
-      await deleteBookedClass(bookedClassId, new Date(selectedClass.date));
+      await deleteBookedClass(
+        bookedClassId,
+        new Date(selectedClass.date),
+        deleteFutureOccurences
+      );
+
       setClasses((prevClasses) =>
         prevClasses.filter((c) => c.id !== selectedClass.id)
       );
@@ -88,6 +96,9 @@ const AccountMyClasses = () => {
         isOpen={deleteClassModal.isOpen}
         onClose={handleCloseDeleteBookingModal}
         onDelete={handleDeleteBooking}
+        isRecurring={selectedClass?.recurring ?? false}
+        deleteFutureOccurences={deleteFutureOccurences}
+        setDeleteFutureOccurences={setDeleteFutureOccurences}
       />
       <RescheduleClassModal
         isOpen={rescheduleClassModal.isOpen}

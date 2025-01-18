@@ -7,7 +7,11 @@ if (!NEXT_PUBLIC_BASE_URL) {
   throw new Error("NEXT_PUBLIC_BASE_URL is not set");
 }
 
-export const deleteBookedClass = async (classId: number, date: Date) => {
+export const deleteBookedClass = async (
+  classId: number,
+  date: Date,
+  deleteFutureOccurences: boolean = false
+) => {
   if (typeof classId !== "number") {
     throw new Error("Class id must be a number");
   }
@@ -21,6 +25,10 @@ export const deleteBookedClass = async (classId: number, date: Date) => {
       `${NEXT_PUBLIC_BASE_URL}/api/v1/booked-classes/${classId}`
     );
     url.searchParams.set("date", compressTime(date.getTime()).toString());
+    url.searchParams.set(
+      "deleteFutureOccurences",
+      deleteFutureOccurences.toString()
+    );
 
     const response = await fetch(url.toString(), {
       method: "DELETE",

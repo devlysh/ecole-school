@@ -104,61 +104,30 @@ export class BookedClassesService {
   public async deleteBookedClassById(
     email: string,
     classBeingDeletedId: number,
-    classBeingDeletedDate: Date
+    classBeingDeletedDate: Date,
+    deleteFutureOccurences: boolean = false
   ) {
-    const user = await this.userRepository.findStudentByEmail(email);
-
-    if (!user || !user.id || !user.student) {
-      throw new Error("User not found");
-    }
-
-    const bookedClass =
-      await this.bookedClassesRepository.fetchBookedClassById(
-        classBeingDeletedId
-      );
-
-    if (!bookedClass) {
-      throw new Error("Booked class not found");
-    }
+    const user = await this.getUserByEmail(email);
+    const bookedClass = await this.getBookedClassById(classBeingDeletedId);
 
     if (bookedClass.recurring) {
-      const nextWeekDate = addWeeks(classBeingDeletedDate, 1);
-
-      const recurringClass = {
-        date: nextWeekDate,
-        teacherId: bookedClass.teacherId,
-        studentId: user.id,
-        recurring: true,
-        isActive: true,
-      };
-
-      const singleClasses = this.generateSingleClasses(
+      logger.debug({
+        user,
         bookedClass,
         classBeingDeletedDate,
-        user
+        deleteFutureOccurences,
+      });
+      await this.handleRecurringClassDeletion(
+        user,
+        bookedClass,
+        classBeingDeletedDate,
+        deleteFutureOccurences
       );
-
-      try {
-        await this.bookedClassesRepository.createBookedClasses(singleClasses);
-        await this.bookedClassesRepository.createBookedClasses([
-          recurringClass,
-        ]);
-        await this.bookedClassesRepository.deleteByIdAndStudentId(
-          classBeingDeletedId,
-          user.id
-        );
-      } catch (error) {
-        logger.error(error, "Error creating booked classes");
-        throw new Error("Failed to create booked classes");
-      }
-
-      return { message: "Classes deleted successfully" };
     } else {
-      return await this.bookedClassesRepository.deleteByIdAndStudentId(
-        classBeingDeletedId,
-        user.id
-      );
+      await this.deleteClass(user.id, classBeingDeletedId);
     }
+
+    return { message: "Classes deleted successfully" };
   }
 
   public async rescheduleBookedClass(
@@ -197,6 +166,80 @@ export class BookedClassesService {
     }
 
     return { message: "Class rescheduled successfully" };
+  }
+
+  private async getUserByEmail(email: string) {
+    const user = await this.userRepository.findStudentByEmail(email);
+    if (!user || !user.id || !user.student) {
+      throw new Error("User not found");
+    }
+    return user;
+  }
+
+  private async getBookedClassById(classId: number) {
+    const bookedClass =
+      await this.bookedClassesRepository.fetchBookedClassById(classId);
+    if (!bookedClass) {
+      throw new Error("Booked class not found");
+    }
+    return bookedClass;
+  }
+
+  private async handleRecurringClassDeletion(
+    user: User,
+    bookedClass: BookedClass,
+    classBeingDeletedDate: Date,
+    deleteFutureOccurences: boolean = false
+  ) {
+    try {
+      // Add singles classes for past occurrences
+      const singleClasses = this.generateSingleClasses(
+        bookedClass,
+        classBeingDeletedDate,
+        user
+      );
+      await this.bookedClassesRepository.createBookedClasses(singleClasses);
+
+      // Add recurring class for future occurrences if deleteFutureOccurences is true
+      if (!deleteFutureOccurences) {
+        const nextWeekDate = addWeeks(classBeingDeletedDate, 1);
+        const recurringClass = this.createRecurringClass(
+          nextWeekDate,
+          bookedClass.teacherId,
+          user.id
+        );
+        await this.bookedClassesRepository.createBookedClasses([
+          recurringClass,
+        ]);
+      }
+
+      // Delete the class being deleted
+      await this.deleteClass(user.id, bookedClass.id);
+    } catch (error) {
+      logger.error(error, "Error creating booked classes");
+      throw new Error("Failed to create booked classes");
+    }
+  }
+
+  private createRecurringClass(
+    date: Date,
+    teacherId: number,
+    studentId: number
+  ) {
+    return {
+      date,
+      teacherId,
+      studentId,
+      recurring: true,
+      isActive: true,
+    };
+  }
+
+  private async deleteClass(studentId: number, classId: number) {
+    await this.bookedClassesRepository.deleteByIdAndStudentId(
+      classId,
+      studentId
+    );
   }
 
   private async getAvailableSlots(

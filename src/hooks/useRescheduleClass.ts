@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 
-const useRescheduleDate = () => {
+const useRescheduleClass = () => {
   const [rescheduleDate, setRescheduleDate] = useState<Date | null>(null);
 
   const handleChangeRescheduleDate = useCallback((date: Date) => {
@@ -15,4 +15,4 @@ const useRescheduleDate = () => {
   };
 };
 
-export default useRescheduleDate;
+export default useRescheduleClass;

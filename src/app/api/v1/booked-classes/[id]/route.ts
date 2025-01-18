@@ -22,6 +22,10 @@ export const DELETE = async (
       return handleErrorResponse("Date is required", 400);
     }
 
+    const deleteFutureOccurencesParam = request.nextUrl.searchParams.get(
+      "deleteFutureOccurences"
+    );
+
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
     if (!email) {
@@ -31,9 +35,16 @@ export const DELETE = async (
     const id = Number(params.id);
     const compressedTime = Number(dateParam);
     const date = new Date(expandTime(compressedTime));
+    const deleteFutureOccurences =
+      deleteFutureOccurencesParam === "true" ? true : false;
 
     const bookedClassesService = new BookedClassesService();
-    await bookedClassesService.deleteBookedClassById(email, id, date);
+    await bookedClassesService.deleteBookedClassById(
+      email,
+      id,
+      date,
+      deleteFutureOccurences
+    );
 
     return Response.json(
       { message: "Class deleted successfully" },
