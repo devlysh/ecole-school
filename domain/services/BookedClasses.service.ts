@@ -111,12 +111,6 @@ export class BookedClassesService {
     const bookedClass = await this.getBookedClassById(classBeingDeletedId);
 
     if (bookedClass.recurring) {
-      logger.debug({
-        user,
-        bookedClass,
-        classBeingDeletedDate,
-        deleteFutureOccurences,
-      });
       await this.handleRecurringClassDeletion(
         user,
         bookedClass,
