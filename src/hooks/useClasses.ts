@@ -43,7 +43,7 @@ const expandClasses = (classes: ClassItem[]) => {
     if (isRecurring) {
       const occurencesForMonth = getWeeklyOccurencesForPeriod(
         classDate,
-        addMonths(classDate, 1)
+        addMonths(new Date(), 1)
       );
 
       for (let i = 0; i < occurencesForMonth.length; i++) {
