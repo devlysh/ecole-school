@@ -1,45 +1,36 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React from "react";
+import { ToastContainer, toast } from "react-toastify";
+import logger from "@/lib/logger";
+import { decodeClassId, useClasses } from "@/hooks/useClasses";
+import { useCreditCount } from "@/hooks/useCreditCount";
+import useClassModals from "@/hooks/useClassModals";
+import useRescheduleDate from "@/hooks/useRescheduleDate";
+import MyClassesTable from "./MyClassesTable";
+import DeleteClassModal from "./DeleteClassModal";
+import RescheduleClassModal from "./RescheduleClassModal";
 import {
   deleteBookedClass,
   rescheduleBookedClass,
 } from "src/app/api/v1/booked-classes/[id]/request";
-import GenericTable from "src/components/GenericTable";
-import {
-  Modal,
-  Button,
-  ModalBody,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  useDisclosure,
-  DatePicker,
-} from "@nextui-org/react";
-import logger from "@/lib/logger";
-import { VerticalDotsIcon } from "@/icons";
-import { decodeClassId, useClasses } from "@/hooks/useClasses";
-import { ClassItem } from "@/lib/types";
-import { useCreditCount } from "@/hooks/useCreditCount";
-import { fromDate } from "@internationalized/date";
-import { ZonedDateTime } from "@internationalized/date";
-import { ToastContainer, toast } from "react-toastify";
 
 const AccountMyClasses = () => {
   const creditCount = useCreditCount();
   const { classes, loading, setClasses, fetchClasses } =
     useClasses(creditCount);
-  const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
-  const [rescheduleDate, setRescheduleDate] = useState<Date | null>(null);
+  const {
+    deleteClassModal,
+    rescheduleClassModal,
+    selectedClass,
+    handleOpenDeleteBookingModal,
+    handleCloseDeleteBookingModal,
+    handleOpenRescheduleBookingModal,
+    handleCloseRescheduleBookingModal,
+  } = useClassModals();
+  const { rescheduleDate, handleChangeRescheduleDate } = useRescheduleDate();
 
-  const deleteClassModal = useDisclosure();
-  const rescheduleClassModal = useDisclosure();
-
-  const handleRescheduleBooking = useCallback(async () => {
+  const handleRescheduleBooking = async () => {
     if (!selectedClass || !rescheduleDate) return;
 
     try {
@@ -61,9 +52,9 @@ const AccountMyClasses = () => {
     } finally {
       rescheduleClassModal.onClose();
     }
-  }, [rescheduleClassModal, rescheduleDate, selectedClass, fetchClasses]);
+  };
 
-  const handleDeleteBooking = useCallback(async () => {
+  const handleDeleteBooking = async () => {
     if (!selectedClass) return;
 
     try {
@@ -81,109 +72,7 @@ const AccountMyClasses = () => {
     } finally {
       deleteClassModal.onClose();
     }
-  }, [deleteClassModal, selectedClass, setClasses, fetchClasses]);
-
-  const handleOpenDeleteBookingModal = useCallback(
-    (classItem: ClassItem) => {
-      setSelectedClass(classItem);
-      deleteClassModal.onOpen();
-    },
-    [deleteClassModal]
-  );
-
-  const handleCloseDeleteBookingModal = useCallback(() => {
-    deleteClassModal.onClose();
-    setSelectedClass(null);
-  }, [deleteClassModal]);
-
-  const handleOpenRescheduleBookingModal = useCallback(
-    (classItem: ClassItem) => {
-      setSelectedClass(classItem);
-      rescheduleClassModal.onOpen();
-    },
-    [rescheduleClassModal]
-  );
-
-  const handleCloseRescheduleBookingModal = useCallback(() => {
-    rescheduleClassModal.onClose();
-    setSelectedClass(null);
-  }, [rescheduleClassModal]);
-
-  const handleChangeRescheduleDate = useCallback((date: ZonedDateTime) => {
-    setRescheduleDate(date.toDate());
-  }, []);
-
-  const columns = useMemo(
-    () => [
-      {
-        name: "Class Date",
-        uid: "date",
-        key: "date",
-        render: (item: Record<string, unknown>) => (
-          <span>{new Date(item.date as string).toLocaleDateString()}</span>
-        ),
-      },
-      {
-        name: "Class Time",
-        uid: "time",
-        key: "time",
-        render: (item: Record<string, unknown>) => (
-          <span>{new Date(item.date as string).toLocaleTimeString()}</span>
-        ),
-      },
-      {
-        name: "Has Credit",
-        uid: "hasCredit",
-        key: "hasCredit",
-        render: (item: Record<string, unknown>) => (
-          <span>{JSON.stringify(item.hasCredit)}</span>
-        ),
-      },
-      {
-        name: "Join",
-        uid: "join",
-        key: "join",
-        render: () => <button>Join</button>,
-      },
-      {
-        name: "Actions",
-        uid: "actions",
-        key: "actions",
-        render: (item: ClassItem) => (
-          <div className="relative flex justify-end items-center gap-2">
-            <Dropdown className="bg-background border-1 border-default-200">
-              <DropdownTrigger>
-                <Button isIconOnly radius="full" size="sm" variant="light">
-                  <VerticalDotsIcon className="text-default-400" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem
-                  onClick={() => handleOpenRescheduleBookingModal(item)}
-                >
-                  Reschedule
-                </DropdownItem>
-                <DropdownItem
-                  onClick={() => handleOpenDeleteBookingModal(item)}
-                >
-                  Delete
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        ),
-      },
-    ],
-    [handleOpenDeleteBookingModal, handleOpenRescheduleBookingModal]
-  );
-
-  const initialVisibleColumns = [
-    "date",
-    "time",
-    "join",
-    "actions",
-    "hasCredit",
-  ];
+  };
 
   return (
     <div>
@@ -192,79 +81,24 @@ const AccountMyClasses = () => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <GenericTable
-          columns={columns}
-          list={classes}
-          initialVisibleColumns={initialVisibleColumns}
+        <MyClassesTable
+          classes={classes}
+          handleOpenRescheduleBookingModal={handleOpenRescheduleBookingModal}
+          handleOpenDeleteBookingModal={handleOpenDeleteBookingModal}
         />
       )}
-      <Modal
+      <DeleteClassModal
         isOpen={deleteClassModal.isOpen}
         onClose={handleCloseDeleteBookingModal}
-      >
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            Confirm Deletion
-          </ModalHeader>
-          <ModalBody>
-            <p>Are you sure you want to delete this class?</p>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="light"
-              onPress={handleCloseDeleteBookingModal}
-            >
-              No
-            </Button>
-            <Button color="primary" onPress={handleDeleteBooking}>
-              Yes
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Modal
+        onDelete={handleDeleteBooking}
+      />
+      <RescheduleClassModal
         isOpen={rescheduleClassModal.isOpen}
         onClose={handleCloseRescheduleBookingModal}
-      >
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            Reschedule Class
-          </ModalHeader>
-          <ModalBody>
-            <DatePicker
-              hideTimeZone
-              showMonthAndYearPickers
-              label="Event Date"
-              variant="bordered"
-              onChange={handleChangeRescheduleDate}
-              defaultValue={
-                selectedClass?.date
-                  ? fromDate(
-                      new Date(selectedClass.date),
-                      Intl.DateTimeFormat().resolvedOptions().timeZone
-                    )
-                  : fromDate(
-                      new Date(),
-                      Intl.DateTimeFormat().resolvedOptions().timeZone
-                    )
-              }
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="light"
-              onPress={handleCloseRescheduleBookingModal}
-            >
-              Cancel
-            </Button>
-            <Button color="primary" onPress={handleRescheduleBooking}>
-              Confirm
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        onConfirm={handleRescheduleBooking}
+        selectedClass={selectedClass}
+        onChangeDate={handleChangeRescheduleDate}
+      />
     </div>
   );
 };
