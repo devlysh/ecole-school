@@ -1,3 +1,5 @@
+"use client";
+
 import { getPlansRequest } from "@/app/api/v1/stripe/plans/request";
 import { Plan } from "@/lib/types";
 import { useState, useEffect } from "react";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback } from "react";
 import { getAvailableSlotsRequest } from "@/app/api/v1/available-slots/request";
 import { AvailableCalendarSlot } from "@/lib/types";

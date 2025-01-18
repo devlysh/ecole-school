@@ -1,3 +1,5 @@
+"use client";
+
 import { getLanguagesRequest } from "@/app/api/v1/languages/request";
 import { Language } from "@/lib/types";
 import { useState, useEffect } from "react";

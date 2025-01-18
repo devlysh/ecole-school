@@ -1,3 +1,5 @@
+"use client";
+
 import logger from "@/lib/logger";
 import { ClassItem } from "@/lib/types";
 import { useEffect, useState, useCallback } from "react";

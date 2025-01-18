@@ -1,3 +1,5 @@
+"use client";
+
 import { getCurrenciesRequest } from "@/app/api/v1/currencies/request";
 import { Currency } from "@/lib/types";
 import { useState, useEffect } from "react";

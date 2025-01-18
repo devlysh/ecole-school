@@ -1,3 +1,5 @@
+"use client";
+
 import { fetchCreditCount } from "@/app/api/v1/credits/request";
 import { useEffect, useState } from "react";
 

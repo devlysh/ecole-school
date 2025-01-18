@@ -1,3 +1,5 @@
+"use client";
+
 import { useDisclosure } from "@nextui-org/react";
 import { useState, useCallback } from "react";
 import { ClassItem } from "@/lib/types";

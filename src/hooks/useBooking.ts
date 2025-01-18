@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback } from "react";
 import { bookClassesRequest } from "@/app/api/v1/booked-classes/request";
 import logger from "@/lib/logger";
