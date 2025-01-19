@@ -2,11 +2,8 @@ import { BookedClassesService } from "@domain/services/BookedClasses.service";
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { NextRequest } from "next/server";
-import { expandTime } from "@/lib/utils";
-
-const handleErrorResponse = (message: string, status: number) => {
-  return Response.json({ error: message }, { status });
-};
+import { expandTime, handleErrorResponse } from "@/lib/utils";
+import { SlotIsNotAvailableError } from "@/lib/errors";
 
 export const DELETE = async (
   request: NextRequest,
@@ -80,6 +77,11 @@ export const PUT = async (
 
     return Response.json(response, { status: 200 });
   } catch (err) {
+    if (err instanceof SlotIsNotAvailableError) {
+      logger.warn("User tried to reschedule to a slot that is not available");
+      return handleErrorResponse("Slot is not available", 400);
+    }
+
     logger.error(err, "Error rescheduling booked classes");
     return handleErrorResponse("Failed to reschedule booked class", 500);
   }

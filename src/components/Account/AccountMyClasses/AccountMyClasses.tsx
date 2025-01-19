@@ -47,7 +47,10 @@ const AccountMyClasses = () => {
       );
       await fetchClasses();
     } catch (err) {
-      logger.error({ err }, "Failed to reschedule class");
+      logger.error(
+        { err, classDate: selectedClass.date, rescheduleDate },
+        "Failed to reschedule class"
+      );
       toast.error(
         "The selected slot is not available. Please choose another date."
       );

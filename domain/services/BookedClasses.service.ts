@@ -6,6 +6,7 @@ import { AvailableSlotsService } from "./AvailableSlots.service";
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
 import { AvailableSlot, BookedClass, User } from "@prisma/client";
 import { addWeeks } from "date-fns";
+import { SlotIsNotAvailableError } from "@/lib/errors";
 
 export class BookedClassesService {
   private userRepository: UserRepository;
@@ -130,34 +131,24 @@ export class BookedClassesService {
     oldDate: Date,
     newDate: Date
   ) {
-    try {
-      const bookedClass =
-        await this.bookedClassesRepository.fetchBookedClassById(classId);
+    const bookedClass =
+      await this.bookedClassesRepository.fetchBookedClassById(classId);
 
-      if (!bookedClass) {
-        throw new Error("Booked class not found");
-      }
-
-      const isAvailable = await this.availableSlotsService.isSlotAvailable(
-        newDate,
-        bookedClass.teacherId
-      );
-
-      if (!isAvailable) {
-        throw new Error("Slot is not available");
-      }
-    } catch (err) {
-      logger.warn({ date: newDate }, "Slot is not available");
-      throw err;
+    if (!bookedClass) {
+      throw new Error("Booked class not found");
     }
 
-    try {
-      await this.deleteBookedClassById(email, classId, oldDate);
-      await this.bookClasses(email, [newDate], false);
-    } catch (err) {
-      logger.error(err, "Error rescheduling booked classes");
-      throw err;
+    const isAvailable = await this.availableSlotsService.isSlotAvailable(
+      newDate,
+      bookedClass.teacherId
+    );
+
+    if (!isAvailable) {
+      throw new SlotIsNotAvailableError();
     }
+
+    await this.deleteBookedClassById(email, classId, oldDate);
+    await this.bookClasses(email, [newDate], false);
 
     return { message: "Class rescheduled successfully" };
   }
