@@ -37,6 +37,21 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       }
     );
 
+    // Security Group for RDS instance
+    const dbSecurityGroup = new ec2.SecurityGroup(this, "DBSecurityGroup", {
+      vpc,
+      description: "Security group for PostgreSQL RDS instance",
+    });
+
+    // Whitelist your local IP for testing with PgAdmin on port 5432
+    // Replace x.x.x.x/32 with your actual IP address or a small CIDR
+    dbSecurityGroup.addIngressRule(
+      ec2.Peer.ipv4("0.0.0.0/0"),
+      ec2.Port.tcp(5432),
+      "Allow PostgreSQL from local IP"
+    );
+
+    // 3. Create the RDS Instance
     const dbInstance = new rds.DatabaseInstance(this, "EcoleSchoolPostgres", {
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_13,
@@ -49,24 +64,21 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       ),
       allocatedStorage: 20,
       maxAllocatedStorage: 100,
-      publiclyAccessible: false,
+
+      // Make it publicly accessible
+      publiclyAccessible: true,
+
+      // IMPORTANT: use PUBLIC subnets to actually get a public IP
       vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        subnetType: ec2.SubnetType.PUBLIC,
       },
+
+      // Removes the DB upon stack deletion (not recommended for production)
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      securityGroups: [dbSecurityGroup],
     });
 
-    // Security Group for RDS instance with limited access
-    const dbSecurityGroup = new ec2.SecurityGroup(this, "DBSecurityGroup", {
-      vpc,
-    });
-    dbInstance.connections.allowFrom(
-      dbSecurityGroup,
-      ec2.Port.tcp(5432),
-      "Allow App Runner access to PostgreSQL"
-    );
-
-    // 4. Docker Image Asset
+    // 4. Docker Image Asset (your application container)
     const dockerImageAsset = new ecr_assets.DockerImageAsset(
       this,
       "EcoleSchoolApp",
@@ -95,6 +107,8 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
     dbCredentialsSecret.grantRead(instanceRole);
 
     // 7. VPC Connector for App Runner
+    // Even though the RDS is in public subnets, we can still optionally
+    // let the App Runner traffic route through private subnets if desired.
     const vpcConnector = new apprunner.VpcConnector(
       this,
       "AppRunnerVpcConnector",
@@ -112,7 +126,7 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       .secretValueFromJson("password")
       .unsafeUnwrap()}@${dbInstance.instanceEndpoint.hostname}:5432/${dbInstance.instanceIdentifier}`;
 
-    // Create a custom observability configuration
+    // 8. Create a custom observability configuration (optional)
     const observabilityConfig = new CfnObservabilityConfiguration(
       this,
       "AppRunnerObservabilityConfig",
@@ -124,7 +138,7 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       }
     );
 
-    // 8. App Runner service configuration with VPC connector
+    // 9. App Runner service configuration with VPC connector
     const service = new apprunner.Service(this, "EcoleSchoolAppRunnerService", {
       source: apprunner.Source.fromAsset({
         imageConfiguration: {
@@ -155,19 +169,25 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       observabilityEnabled: true,
     };
 
-    // After creating the App Runner service
-    const logGroupName = `/aws/apprunner/${service.serviceName}/${service.serviceId}`;
+    // 10. Outputs
 
-    // Output the log group name
+    // (A) App Runner Log Group
+    const logGroupName = `/aws/apprunner/${service.serviceName}/${service.serviceId}`;
     new cdk.CfnOutput(this, "EcoleSchoolAppRunnerLogGroup", {
       value: logGroupName,
       description: "The CloudWatch Log Group for the App Runner service",
     });
 
-    // 9. Output the App Runner service URL
+    // (B) App Runner Service URL
     new cdk.CfnOutput(this, "EcoleSchoolAppRunnerServiceUrl", {
       value: service.serviceUrl,
       description: "The URL of the App Runner service",
+    });
+
+    // (C) RDS Endpoint (so you can connect from PgAdmin more easily)
+    new cdk.CfnOutput(this, "RdsEndpoint", {
+      value: dbInstance.instanceEndpoint.hostname,
+      description: "RDS Endpoint to connect with PgAdmin",
     });
   }
 }
