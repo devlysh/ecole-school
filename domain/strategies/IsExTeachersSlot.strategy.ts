@@ -11,7 +11,7 @@ export class IsExTeachersSlotStrategy implements SlotAvailibilityStrategy {
     const { slot, exTeacherIds } = context;
 
     if (!slot) {
-      logger.warn("Slot is missing from context");
+      logger.warn("Slot is missing from context in IsExTeachersSlotStrategy");
       return false;
     }
 
