@@ -57,3 +57,20 @@ export const POST = async (request: Request) => {
     );
   }
 };
+
+export const DELETE = async () => {
+  try {
+    const decodedToken = await verifyAccessToken();
+    const email = decodedToken?.email;
+
+    const bookedClassesService = new BookedClassesService();
+    await bookedClassesService.deleteAllBookedClassesByEmail(email);
+    return Response.json({ message: "Booked class deleted" }, { status: 200 });
+  } catch (err) {
+    logger.error(err, "Error deleting booked classes");
+    return Response.json(
+      { error: "Failed to delete booked classes" },
+      { status: 500 }
+    );
+  }
+};

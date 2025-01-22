@@ -1,4 +1,4 @@
-import { HandleSelectedSlotsStrategy } from "./HandleSelectedSlotsStrategy.strategy";
+import { HandleSelectedSlotsStrategy } from "./HandleSelectedSlots.strategy";
 import { AvailableSlot } from "@prisma/client";
 import { SlotAvailibilityContext } from "./SlotAvailibilityStrategy.interface";
 

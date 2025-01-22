@@ -5,7 +5,7 @@ import { ClassItem } from "@/lib/types";
 import { useEffect, useState, useCallback } from "react";
 import { addMonths, addWeeks } from "date-fns";
 import { getWeeklyOccurencesForPeriod } from "@/lib/utils";
-import { fetchBookedClasses } from "src/app/api/v1/booked-classes/request";
+import { fetchBookedClassesRequest } from "src/app/api/v1/booked-classes/request";
 
 export const useClasses = (creditCount: number) => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -13,7 +13,7 @@ export const useClasses = (creditCount: number) => {
 
   const fetchClasses = useCallback(async () => {
     try {
-      let classes = await fetchBookedClasses();
+      let classes = await fetchBookedClassesRequest();
       classes = expandClasses(classes);
       classes = filterClasses(classes);
       classes = sortClasses(classes);

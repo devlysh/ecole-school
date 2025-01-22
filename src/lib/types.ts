@@ -145,6 +145,12 @@ export interface TeacherFormValues {
   timezone: string;
 }
 
+export interface SettingsFormValues {
+  name: string;
+  email: string;
+  timezone: string;
+}
+
 export interface AvailableCalendarSlot {
   day: number;
   hour: number;
@@ -154,3 +160,10 @@ export type ClassItem = { id: string } & Pick<
   BookedClass,
   "date" | "recurring"
 >;
+
+export interface Settings {
+  name: string;
+  email: string;
+  // timezone: string;
+  // timeFormat: string;
+}

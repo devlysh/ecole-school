@@ -1,9 +1,9 @@
 import logger from "@/lib/logger";
 
-export async function bookClassesRequest(
+export const bookClassesRequest = async (
   dates: number[],
   isRecurrent: boolean
-) {
+) => {
   const response = await fetch("/api/v1/booked-classes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -19,9 +19,9 @@ export async function bookClassesRequest(
   }
 
   return response.json();
-}
+};
 
-export const fetchBookedClasses = async () => {
+export const fetchBookedClassesRequest = async () => {
   try {
     const response = await fetch("/api/v1/booked-classes");
     if (!response.ok) {
@@ -32,4 +32,11 @@ export const fetchBookedClasses = async () => {
     logger.error({ err }, "Failed to fetch booked classes");
     throw new Error("Failed to fetch booked classes");
   }
+};
+
+export const deleteBookedClassesRequest = async () => {
+  const response = await fetch("/api/v1/booked-classes", {
+    method: "DELETE",
+  });
+  return response.json();
 };

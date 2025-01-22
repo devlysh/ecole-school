@@ -14,8 +14,13 @@ const rolePaths: Record<Role, RegExp[]> = {
     /^\/account$/,
     /^\/account\/book-classes$/,
     /^\/account\/my-classes$/,
+    /^\/account\/settings$/,
   ],
-  [Role.TEACHER]: [/^\/account$/, /^\/account\/teacher$/],
+  [Role.TEACHER]: [
+    /^\/account$/,
+    /^\/account\/teacher$/,
+    /^\/account\/settings$/,
+  ],
 };
 
 const guestPaths = [

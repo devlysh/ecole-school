@@ -5,7 +5,7 @@ import { UserRepository } from "@domain/repositories/User.repository";
 import { AvailableSlot, BookedClass, Student, User } from "@prisma/client";
 import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.strategy";
 import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
-import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlotsStrategy.strategy";
+import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlots.strategy";
 import { SlotAvailibilityStrategy } from "@domain/strategies/SlotAvailibilityStrategy.interface";
 import { VacationsRepository } from "@domain/repositories/Vacations.repostiroy";
 

@@ -28,4 +28,25 @@ export class UserRepository {
       },
     });
   }
+
+  public async updateName(id: number, name: string) {
+    return await prisma.user.update({
+      where: { id },
+      data: { name },
+    });
+  }
+
+  public async resetAssignedTeacher(userId: number, student: Student) {
+    if (!student.assignedTeacherId) {
+      throw new Error("User has no assigned teacher");
+    }
+
+    return await prisma.student.update({
+      where: { userId },
+      data: {
+        assignedTeacherId: null,
+        exTeacherIds: [...student.exTeacherIds, student.assignedTeacherId],
+      },
+    });
+  }
 }

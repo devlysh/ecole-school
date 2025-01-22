@@ -52,7 +52,7 @@ export class IsSlotAvailableStrategy implements SlotAvailibilityStrategy {
 
       // Check if dateTime still falls within the slot's duration
       const occurrenceEnd = new Date(occurrenceStart.getTime() + duration);
-      return occurrenceStart <= dateTime && dateTime < occurrenceEnd;
+      return occurrenceStart <= dateTime && occurrenceEnd > dateTime;
     } catch (err) {
       // Handle invalid RRULE strings
       logger.warn({ err, slot }, "Invalid rrule");

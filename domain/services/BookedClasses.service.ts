@@ -23,6 +23,22 @@ export class BookedClassesService {
     this.availableSlotsRepository = new AvailableSlotsRepository();
   }
 
+  public async deleteAllBookedClassesById(studentId: number) {
+    await this.bookedClassesRepository.deleteAllBookedClassesByStudentId(
+      studentId
+    );
+  }
+
+  public async deleteAllBookedClassesByEmail(email: string) {
+    const user = await this.userRepository.findStudentByEmail(email);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    await this.bookedClassesRepository.deleteAllBookedClassesByStudentId(
+      user.id
+    );
+  }
+
   public async bookClasses(
     email: string,
     selectedSlots: Date[],

@@ -127,6 +127,7 @@ model Vacation {
 model Student {
   userId               Int     @id @map("user_id")
   assignedTeacherId    Int?    @map("assigned_teacher_id")
+  exTeacherIds         Int[]   @default([]) @map("ex_teacher_ids")
   stripeCustomerId     String  @unique @map("stripe_customer_id")
   stripeSubscriptionId String? @unique @map("stripe_subscription_id")
 

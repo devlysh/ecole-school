@@ -35,4 +35,10 @@ export class BookedClassesRepository {
       },
     });
   }
+
+  async deleteAllBookedClassesByStudentId(studentId: number) {
+    return prisma.bookedClass.deleteMany({
+      where: { studentId: studentId },
+    });
+  }
 }

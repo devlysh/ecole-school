@@ -9,7 +9,7 @@ import {
 } from "@domain/strategies/SlotAvailibilityStrategy.interface";
 import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.strategy";
 import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
-import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlotsStrategy.strategy";
+import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlots.strategy";
 import { IsAssignedTeacherStrategy } from "@domain/strategies/IsAssignedTeacher.strategy";
 import { IsOnVacationStrategy } from "@domain/strategies/IsOnVacation.strategy";
 import { VacationsRepository } from "@domain/repositories/Vacations.repostiroy";
@@ -19,6 +19,7 @@ import {
   PermittedTimeUnit,
 } from "@domain/strategies/IsAtPermittedTime.strategy";
 import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.strategy";
+import { IsExTeachersSlotStrategy } from "@domain/strategies/IsExTeachersSlot.strategy";
 
 interface AvailableSlotsServiceParams {
   userRepo?: UserRepository;
@@ -47,6 +48,7 @@ interface ComputeAvailableTimesParams {
   assignedTeacherId?: number;
   strategies: SlotAvailibilityStrategy[];
   isRecurrentSchedule?: boolean;
+  exTeacherIds?: number[];
 }
 
 enum RangeUnit {
@@ -93,6 +95,7 @@ export class AvailableSlotsService {
 
     const user = await this.userRepo.findStudentByEmail(email);
     const assignedTeacherId = user?.student?.assignedTeacherId ?? undefined;
+    const exTeacherIds = user?.student?.exTeacherIds ?? [];
 
     const availableSlots = await this.fetchSlots(
       isRecurrentSchedule,
@@ -116,6 +119,7 @@ export class AvailableSlotsService {
       vacations,
       strategies: this.strategies,
       isRecurrentSchedule,
+      exTeacherIds,
     });
   }
 
@@ -216,6 +220,7 @@ export class AvailableSlotsService {
       vacations,
       strategies,
       isRecurrentSchedule,
+      exTeacherIds,
     } = params;
 
     const selectedTeacherIds =
@@ -254,6 +259,7 @@ export class AvailableSlotsService {
             selectedTeacherIds,
             vacations,
             isRecurrentSchedule,
+            exTeacherIds,
           };
 
           if (this.isAvailable(strategies, context)) {
@@ -328,6 +334,7 @@ export class AvailableSlotsService {
         config.permittedTime.date
       ),
       new IsSlotRecurringStrategy(),
+      new IsExTeachersSlotStrategy(),
     ];
   }
 }

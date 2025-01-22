@@ -185,8 +185,7 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({ email }) => {
 
 export default AccountTeachersForm;
 
-// Helper to shape the timeslot appearance consistently
-function shapeTimeSlots(timeSlots: EventInput[]): EventInput[] {
+const shapeTimeSlots = (timeSlots: EventInput[]): EventInput[] => {
   return timeSlots.map((slot, index) => {
     const start = new Date(slot.start as Date);
     const end = new Date(slot.end as Date);
@@ -204,4 +203,4 @@ function shapeTimeSlots(timeSlots: EventInput[]): EventInput[] {
       duration,
     };
   });
-}
+};
