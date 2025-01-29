@@ -16,28 +16,30 @@ const PasswordChangeForm: React.FC = () => {
   });
 
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <Input
-        name="currentPassword"
-        label="Current Password"
-        type="password"
-        onChange={formik.handleChange}
-        value={formik.values.currentPassword}
-      />
-      <Input
-        name="newPassword"
-        label="New Password"
-        type="password"
-        onChange={formik.handleChange}
-        value={formik.values.newPassword}
-      />
-      <Input
-        name="confirmPassword"
-        label="Confirm Password"
-        type="password"
-        onChange={formik.handleChange}
-        value={formik.values.confirmPassword}
-      />
+    <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4 mb-8">
+      <div className="flex flex-col gap-4">
+        <Input
+          name="currentPassword"
+          label="Current Password"
+          type="password"
+          onChange={formik.handleChange}
+          value={formik.values.currentPassword}
+        />
+        <Input
+          name="newPassword"
+          label="New Password"
+          type="password"
+          onChange={formik.handleChange}
+          value={formik.values.newPassword}
+        />
+        <Input
+          name="confirmPassword"
+          label="Confirm Password"
+          type="password"
+          onChange={formik.handleChange}
+          value={formik.values.confirmPassword}
+        />
+      </div>
       <Button type="submit">Save</Button>
     </form>
   );

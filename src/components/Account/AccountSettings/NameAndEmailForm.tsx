@@ -20,20 +20,22 @@ const NameAndEmailForm: React.FC<NameAndEmailProps> = ({
   });
 
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <Input
-        name="name"
-        label="Name"
-        onChange={formik.handleChange}
-        value={formik.values.name}
-      />
-      <Input
-        name="email"
-        label="Email"
-        onChange={formik.handleChange}
-        value={formik.values.email}
-        isDisabled
-      />
+    <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4 mb-8">
+      <div className="flex flex-row gap-4">
+        <Input
+          name="name"
+          label="Name"
+          onChange={formik.handleChange}
+          value={formik.values.name}
+        />
+        <Input
+          name="email"
+          label="Email"
+          onChange={formik.handleChange}
+          value={formik.values.email}
+          isDisabled
+        />
+      </div>
       <Button type="submit">Save</Button>
     </form>
   );

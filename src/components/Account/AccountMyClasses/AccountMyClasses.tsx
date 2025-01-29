@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import logger from "@/lib/logger";
 import { useClasses } from "@/hooks/useClasses";
 import { useCreditCount } from "@/hooks/useCreditCount";
@@ -84,7 +84,6 @@ const AccountMyClasses = () => {
 
   return (
     <div>
-      <ToastContainer />
       <h1>My Classes</h1>
       {loading ? (
         <p>Loading...</p>

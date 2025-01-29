@@ -109,7 +109,6 @@ model BookedClass {
   teacherId Int      @map("teacher_id")
   recurring Boolean
   credit    Credit[]
-  isActive  Boolean  @default(true) @map("is_active")
 
   @@index([date, teacherId, studentId], name: "idx_booked_class_date_teacher_id_student_id")
   @@map("booked_classes")
@@ -150,12 +149,4 @@ model Credit {
   usedWithBookedClassId Int?         @map("used_with_booked_class_id")
 
   @@map("credits")
-}
-
-model SystemSetting {
-  id    Int    @id @default(autoincrement())
-  key   String @unique
-  value String
-
-  @@map("system_settings")
 }
