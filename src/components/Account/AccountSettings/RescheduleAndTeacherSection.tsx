@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "@nextui-org/react";
-import logger from "@/lib/logger";
 import { toast } from "react-toastify";
 
 interface ScheduleTeacherSectionProps {
@@ -25,7 +24,6 @@ const ScheduleTeacherSection: React.FC<ScheduleTeacherSectionProps> = ({
           <div className="w-1/4">
             <Button
               onClick={() => {
-                logger.debug("DEBUG RESET SCHEDULE");
                 deleteBookedClasses();
                 toast.success("Teacher classes deleted");
               }}
@@ -43,7 +41,6 @@ const ScheduleTeacherSection: React.FC<ScheduleTeacherSectionProps> = ({
           <div className="w-1/4">
             <Button
               onClick={() => {
-                logger.debug("DEBUG CHANGE TEACHER");
                 resetAssignedTeacher();
                 toast.success("Teacher unassigned");
               }}

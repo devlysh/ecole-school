@@ -1,4 +1,4 @@
-import { signToken, verifyToken } from "@/lib/jwt";
+import { signToken, verifyAccessToken, verifyToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import {
   AccessTokenPayload,
@@ -7,7 +7,13 @@ import {
 } from "@/lib/types";
 import { cookies } from "next/headers";
 import bcrypt from "bcrypt";
-import { EmailIsMissingError, UserNotFoundError } from "@/lib/errors";
+import {
+  BadRequestError,
+  EmailIsMissingError,
+  IncorrectPasswordError,
+  InvalidUserError,
+  UserNotFoundError,
+} from "@/lib/errors";
 import { UserRepository } from "@domain/repositories/User.repository";
 import { handleErrorResponse } from "@/lib/errorUtils";
 
@@ -16,6 +22,66 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is missing!");
 }
+
+export const PUT = async (request: Request) => {
+  try {
+    const { currentPassword, newPassword } = await request.json();
+
+    const { email } = await verifyAccessToken();
+
+    if (!email) {
+      throw new EmailIsMissingError();
+    }
+
+    if (!currentPassword || !newPassword) {
+      throw new BadRequestError("Some of passwords are missing");
+    }
+
+    const userRepository = new UserRepository();
+    const user = await userRepository.findByEmail(email);
+
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+
+    if (!user.passwordHash) {
+      throw new InvalidUserError("User has no password", {
+        email: user.email,
+      });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash
+    );
+
+    if (!isPasswordCorrect) {
+      throw new IncorrectPasswordError("Current password is incorrect", {
+        email: user.email,
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await userRepository.updatePassword(user.id, passwordHash);
+
+    return Response.json({ message: "Password changed" }, { status: 200 });
+  } catch (err: unknown) {
+    if (err instanceof EmailIsMissingError) {
+      return handleErrorResponse(err, 401);
+    } else if (err instanceof UserNotFoundError) {
+      return handleErrorResponse(err, 401);
+    } else if (err instanceof BadRequestError) {
+      return handleErrorResponse(err, 400);
+    } else if (err instanceof InvalidUserError) {
+      return handleErrorResponse(err, 501);
+    } else if (err instanceof IncorrectPasswordError) {
+      return handleErrorResponse(err, 400);
+    }
+    logger.error(err, "Error changing password");
+    return handleErrorResponse(new Error("Failed to verify access token"), 401);
+  }
+};
 
 export const POST = async (request: Request) => {
   const { token, password } = await request.json();

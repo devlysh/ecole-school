@@ -164,6 +164,8 @@ export type ClassItem = { id: string } & Pick<
 export interface Settings {
   name: string;
   email: string;
+  language: string;
+  quizAnswers: Record<string, string>;
   // timezone: string;
   // timeFormat: string;
 }

@@ -50,6 +50,26 @@ export class UserNotFoundError extends ErrorWithMetadata {
   }
 }
 
+export class InvalidUserError extends ErrorWithMetadata {
+  constructor(
+    message: string = "Invalid user",
+    metadata?: Record<string, unknown>
+  ) {
+    super(message, metadata);
+    this.name = "InvalidUserError";
+  }
+}
+
+export class IncorrectPasswordError extends ErrorWithMetadata {
+  constructor(
+    message: string = "Incorrect password",
+    metadata?: Record<string, unknown>
+  ) {
+    super(message, metadata);
+    this.name = "IncorrectPasswordError";
+  }
+}
+
 export class BookedClassNotFoundError extends ErrorWithMetadata {
   constructor(metadata?: Record<string, unknown>) {
     super("Booked class not found", metadata);

@@ -4,6 +4,7 @@ import { UserRepository } from "@domain/repositories/User.repository";
 import { User } from "@prisma/client";
 import { UserNotFoundError } from "@/lib/errors";
 import { UnauthorizedError } from "@/lib/errors";
+import { JsonObject } from "@prisma/client/runtime/library";
 
 interface SettingsServiceParams {
   userRepo?: UserRepository;
@@ -27,9 +28,13 @@ export class SettingsService {
       throw new UserNotFoundError();
     }
 
+    const userSettings = user.settings as JsonObject;
+
     const settings = {
       email: user.email,
       name: user.name,
+      language: userSettings.language ?? null,
+      quizAnswers: userSettings.quizAnswers ?? null,
     };
 
     return settings;

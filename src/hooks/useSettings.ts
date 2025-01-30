@@ -8,6 +8,7 @@ import logger from "@/lib/logger";
 import { Settings } from "@/lib/types";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { changePasswordRequest } from "@/app/api/v1/password/request";
 
 export const useSettings = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -51,6 +52,22 @@ export const useSettings = () => {
     }
   }, []);
 
+  const setPassword = useCallback(
+    async (currentPassword: string, newPassword: string) => {
+      try {
+        await changePasswordRequest(currentPassword, newPassword);
+        toast.success("Password updated successfully");
+      } catch (err: unknown) {
+        const errorMessage =
+          (err as Error)?.message ?? "Failed to set password";
+        toast.error(errorMessage);
+        setError(errorMessage);
+        logger.error(err, "Failed to set password");
+      }
+    },
+    []
+  );
+
   const fetchSettings = async () => {
     try {
       const settings = await getSettingsRequest();
@@ -77,5 +94,6 @@ export const useSettings = () => {
     resetAssignedTeacher,
     deleteBookedClasses,
     setName,
+    setPassword,
   };
 };

@@ -151,7 +151,7 @@ export class UserRepository {
   }
 
   public async updatePassword(id: number, passwordHash: string) {
-    await prisma.user.update({
+    return await prisma.user.update({
       where: { id },
       data: {
         passwordHash,

@@ -4,7 +4,6 @@ import React from "react";
 import NameAndEmailForm from "./NameAndEmailForm";
 import RescheduleAndTeacherSection from "./RescheduleAndTeacherSection";
 import PasswordChangeForm from "./PasswordChangeForm";
-import TimeSetupForm from "./TimeSetupForm";
 import SubscriptionDetails from "./SubscriptionDetails";
 import { useSettings } from "@/hooks/useSettings";
 
@@ -15,6 +14,7 @@ const AccountSettingsPage: React.FC = () => {
     resetAssignedTeacher,
     deleteBookedClasses,
     setName,
+    setPassword,
   } = useSettings();
 
   if (loading) {
@@ -37,9 +37,9 @@ const AccountSettingsPage: React.FC = () => {
         resetAssignedTeacher={resetAssignedTeacher}
         deleteBookedClasses={deleteBookedClasses}
       />
-      <PasswordChangeForm />
-      <TimeSetupForm />
-      <SubscriptionDetails />
+      <PasswordChangeForm setPassword={setPassword} />
+      {/* <TimeSetupForm /> */}
+      <SubscriptionDetails language={settings.language} />
     </div>
   );
 };

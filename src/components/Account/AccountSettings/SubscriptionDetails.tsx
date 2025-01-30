@@ -1,11 +1,29 @@
+import useLanguages from "@/hooks/useLanguages";
+import { useSubscriptionDetails } from "@/hooks/useSubscriptionDetails";
 import React from "react";
 
-const SubscriptionDetails: React.FC = () => {
+interface SubscriptionDetailsProps {
+  language: string;
+}
+
+const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
+  language,
+}) => {
+  const { languages } = useLanguages();
+  const { subscriptionDetails } = useSubscriptionDetails();
+
   return (
     <div>
-      <p>Language: French</p>
-      <p>Current Plan: 12 classes</p>
-      <p>Payment Method: **** 4242</p>
+      <p>Language: {languages.find((l) => l.code === language)?.name}</p>
+      {subscriptionDetails?.planName && (
+        <p>Current Plan: {subscriptionDetails?.planName}</p>
+      )}
+      {subscriptionDetails?.paymentMethodCardLast4 && (
+        <p>
+          Payment Method: **** **** ****{" "}
+          {subscriptionDetails?.paymentMethodCardLast4}
+        </p>
+      )}
     </div>
   );
 };

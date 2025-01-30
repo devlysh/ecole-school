@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
     "deploy": "cd ./infrastructure/aws && npm i && cdk synth --profile ecole && cdk deploy --profile ecole && cd ../..",
     "destroy": "cd ./infrastructure/aws && npm i && cdk destroy --profile ecole && cd ../..",

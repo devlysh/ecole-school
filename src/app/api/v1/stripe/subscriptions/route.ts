@@ -8,9 +8,13 @@ import {
   RegistrationTokenPayload,
   TokenType,
 } from "@/lib/types";
-import { signToken, verifyToken } from "@/lib/jwt";
+import { signToken, verifyAccessToken, verifyToken } from "@/lib/jwt";
 import { handleErrorResponse } from "@/lib/errorUtils";
-import { UnauthorizedError } from "@/lib/errors";
+import {
+  EmailIsMissingError,
+  UnauthorizedError,
+  UserNotFoundError,
+} from "@/lib/errors";
 import { UserRepository } from "@domain/repositories/User.repository";
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -20,6 +24,49 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-09-30.acacia",
 });
+
+export const GET = async () => {
+  try {
+    const { email } = await verifyAccessToken();
+
+    if (!email) {
+      throw new EmailIsMissingError();
+    }
+
+    const customers = await stripe.customers.list({
+      email,
+    });
+
+    if (!customers.data.length) {
+      throw new UserNotFoundError("Stripe customer not found", { email });
+    }
+
+    const customerId = customers.data[0].id;
+
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+    });
+
+    const paymentMethods = await stripe.paymentMethods.list({
+      customer: customerId,
+    });
+
+    const subscription = subscriptions.data[0];
+    const paymentMethod = paymentMethods.data[0];
+
+    const subscriptionDetails = {
+      planName: subscription.items.data[0].plan.nickname,
+      paymentMethodCardLast4: paymentMethod.card?.last4,
+    };
+    return Response.json(subscriptionDetails, { status: 200 });
+  } catch (err: unknown) {
+    logger.error(err, "Error getting subscription details");
+    return handleErrorResponse(
+      new Error("Failed to get subscription details"),
+      500
+    );
+  }
+};
 
 export const POST = async (request: NextRequest) => {
   try {
@@ -52,8 +99,6 @@ export const POST = async (request: NextRequest) => {
     if (!decodedPreAuthToken.quizAnswers) {
       throw new UnauthorizedError("Quiz answers are missing");
     }
-
-    logger.debug({ decodedPreAuthToken }, "DEBUG!");
 
     const customer = await getOrCreateCustomer(
       email,
@@ -96,7 +141,7 @@ export const POST = async (request: NextRequest) => {
     if (err instanceof Stripe.errors.StripeError) {
       return handleErrorResponse(err, 400);
     } else if (err instanceof UnauthorizedError) {
-      return handleErrorResponse(err, 400);
+      return handleErrorResponse(err, 401);
     }
     return handleErrorResponse(new Error("An unexpected error occurred"), 500);
   }

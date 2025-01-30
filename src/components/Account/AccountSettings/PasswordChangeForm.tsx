@@ -1,17 +1,27 @@
 import React from "react";
 import { useFormik } from "formik";
 import { Input, Button } from "@nextui-org/react";
-import logger from "@/lib/logger";
+import { toast } from "react-toastify";
 
-const PasswordChangeForm: React.FC = () => {
+interface PasswordChangeFormProps {
+  setPassword: (currentPassword: string, newPassword: string) => Promise<void>;
+}
+
+const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
+  setPassword,
+}) => {
   const formik = useFormik({
     initialValues: {
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
-    onSubmit: (values) => {
-      logger.debug({ values }, "DEBUG PASSWORD CHANGE");
+    onSubmit: async (values) => {
+      if (values.newPassword === values.confirmPassword) {
+        await setPassword(values.currentPassword, values.newPassword);
+      } else {
+        toast.error("New password and confirm password are not the same");
+      }
     },
   });
 

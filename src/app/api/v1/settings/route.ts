@@ -6,10 +6,6 @@ import { EmailIsMissingError } from "@/lib/errors";
 import logger from "@/lib/logger";
 
 export const GET = async () => {
-  return await handleGetSettingsRequest();
-};
-
-const handleGetSettingsRequest = async () => {
   try {
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
@@ -32,10 +28,6 @@ const handleGetSettingsRequest = async () => {
 };
 
 export const PUT = async (request: Request) => {
-  return await handleUpdateSettingsRequest(request);
-};
-
-const handleUpdateSettingsRequest = async (request: Request) => {
   try {
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;

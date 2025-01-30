@@ -11,6 +11,21 @@ export interface CreateSubscriptionRequest {
   paymentMethodId: string;
 }
 
+export const getSubscriptionDetailsRequest = async () => {
+  const response = await fetch(
+    `${NEXT_PUBLIC_BASE_URL}/api/v1/stripe/subscriptions`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      response.statusText ??
+        "An error occurred while fetching your subscription details."
+    );
+  }
+
+  return await response.json();
+};
+
 export const createSubscriptionRequest = async (
   email: string,
   name: string,
