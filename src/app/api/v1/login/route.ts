@@ -50,13 +50,15 @@ export const POST = async (request: Request) => {
       roles: userRoles,
     };
 
-    const accessToken = await signToken(tokenData, "1h");
+    const hours = 10;
+
+    const accessToken = await signToken(tokenData, `${hours}h`);
 
     const cookieStore = cookies();
     cookieStore.set(TokenType.ACCESS, accessToken, {
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60 * 10, // 10 hours
+      maxAge: 60 * 60 * hours, // 10 hours
     });
 
     return Response.json({ message: "Login successful" }, { status: 200 });
