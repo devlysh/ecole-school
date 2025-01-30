@@ -1,7 +1,6 @@
 import { verifyAccessToken } from "@/lib/jwt";
-import { handleErrorResponse } from "@/lib/utils";
+import { handleErrorResponse, logError } from "@/lib/errorUtils";
 import { SettingsService } from "@domain/services/Settings.service";
-import logger from "@/lib/logger";
 import { Settings } from "@/lib/types";
 
 export const GET = async () => {
@@ -21,7 +20,9 @@ const handleGetSettingsRequest = async () => {
 
     return Response.json(settings, { status: 200 });
   } catch (err: unknown) {
-    logger.error({ err }, "Error during getting settings");
+    logError(err, "Error during getting settings", {
+      endpoint: "GET /settings",
+    });
     return handleErrorResponse("Failed to get settings", 500);
   }
 };
@@ -48,7 +49,9 @@ const handleUpdateSettingsRequest = async (request: Request) => {
 
     return Response.json(updatedSettings, { status: 200 });
   } catch (err: unknown) {
-    logger.error({ err }, "Error during updating settings");
+    logError(err, "Error during updating settings", {
+      endpoint: "PUT /settings",
+    });
     return handleErrorResponse("Failed to update settings", 500);
   }
 };
