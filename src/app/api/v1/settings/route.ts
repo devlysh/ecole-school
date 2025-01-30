@@ -1,20 +1,54 @@
 import { verifyAccessToken } from "@/lib/jwt";
 import { handleErrorResponse } from "@/lib/utils";
 import { SettingsService } from "@domain/services/Settings.service";
+import logger from "@/lib/logger";
+import { Settings } from "@/lib/types";
 
 export const GET = async () => {
   return await handleGetSettingsRequest();
 };
 
 const handleGetSettingsRequest = async () => {
-  const decodedToken = await verifyAccessToken();
-  const email = decodedToken?.email;
-  if (!email) {
-    return handleErrorResponse("Unauthorized", 401);
+  try {
+    const decodedToken = await verifyAccessToken();
+    const email = decodedToken?.email;
+    if (!email) {
+      return handleErrorResponse("Unauthorized", 401);
+    }
+
+    const settingsService = new SettingsService();
+    const settings = await settingsService.getSettings(email);
+
+    return Response.json(settings, { status: 200 });
+  } catch (err: unknown) {
+    logger.error({ err }, "Error during getting settings");
+    return handleErrorResponse("Failed to get settings", 500);
   }
+};
 
-  const settingsService = new SettingsService();
-  const settings = await settingsService.getSettings(email);
+export const PUT = async (request: Request) => {
+  return await handleUpdateSettingsRequest(request);
+};
 
-  return Response.json(settings, { status: 200 });
+const handleUpdateSettingsRequest = async (request: Request) => {
+  try {
+    const decodedToken = await verifyAccessToken();
+    const email = decodedToken?.email;
+    if (!email) {
+      return handleErrorResponse("Unauthorized", 401);
+    }
+
+    const settingsService = new SettingsService();
+    const settingsData: Partial<Settings> = await request.json();
+
+    const updatedSettings = await settingsService.updateSettings(
+      email,
+      settingsData
+    );
+
+    return Response.json(updatedSettings, { status: 200 });
+  } catch (err: unknown) {
+    logger.error({ err }, "Error during updating settings");
+    return handleErrorResponse("Failed to update settings", 500);
+  }
 };

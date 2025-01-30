@@ -1,9 +1,13 @@
 import { deleteBookedClassesRequest } from "@/app/api/v1/booked-classes/request";
 import { resetAssignedTeacherRequest } from "@/app/api/v1/reset-assigned-teacher/request";
-import { getSettingsRequest } from "@/app/api/v1/settings/request";
+import {
+  getSettingsRequest,
+  updateSettingsRequest,
+} from "@/app/api/v1/settings/request";
 import logger from "@/lib/logger";
 import { Settings } from "@/lib/types";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export const useSettings = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,11 +32,32 @@ export const useSettings = () => {
     }
   }, []);
 
+  const setName = useCallback(async (name: string) => {
+    try {
+      await updateSettingsRequest({ name });
+      setSettings((prevSettings) => ({
+        ...(prevSettings as Settings),
+        name,
+      }));
+      toast.success("Name updated successfully");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+        toast.error(err.message);
+      } else {
+        setError("Failed to set name");
+        toast.error("Failed to set name");
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const settings = await getSettingsRequest();
-        setSettings(settings);
+        if (settings) {
+          setSettings(settings);
+        }
       } catch (err) {
         logger.error({ err }, "Failed to fetch settings");
         setError("Failed to load settings. Please try again later.");
@@ -50,5 +75,6 @@ export const useSettings = () => {
     error,
     resetAssignedTeacher,
     deleteBookedClasses,
+    setName,
   };
 };

@@ -6,16 +6,19 @@ import logger from "@/lib/logger";
 interface NameAndEmailProps {
   name: string;
   email: string;
+  setName: (name: string) => void;
 }
 
 const NameAndEmailForm: React.FC<NameAndEmailProps> = ({
   name,
   email,
+  setName,
 }: NameAndEmailProps) => {
   const formik = useFormik({
     initialValues: { name: name, email: email },
     onSubmit: (values) => {
-      logger.debug({ values }, "DEBUG NAME AND EMAIL");
+      setName(values.name);
+      logger.info({ ...values }, "Name updated successfully");
     },
   });
 

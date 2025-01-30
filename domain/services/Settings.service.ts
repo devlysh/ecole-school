@@ -1,6 +1,8 @@
 import logger from "@/lib/logger";
+import { Settings } from "@/lib/types";
 import { BookedClassesRepository } from "@domain/repositories/BookedClasses.repository";
 import { UserRepository } from "@domain/repositories/User.repository";
+import { User } from "@prisma/client";
 
 interface SettingsServiceParams {
   userRepo?: UserRepository;
@@ -30,7 +32,24 @@ export class SettingsService {
     return settings;
   }
 
-  public async setName(email: string, name: string) {
+  public async updateSettings(email: string, settings: Partial<Settings>) {
+    const user = await this.userRepo.findStudentByEmail(email);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (settings.name) {
+      await this.setName(user, settings.name);
+    }
+
+    return {
+      email: user.email,
+      name: settings.name,
+    };
+  }
+
+  public async setNameByEmail(email: string, name: string) {
     const user = await this.userRepo.findStudentByEmail(email);
 
     if (!user) {
@@ -57,5 +76,9 @@ export class SettingsService {
 
     await this.userRepo.resetAssignedTeacher(user.id, user.student);
     await this.bookedClassesRepo.deleteAllBookedClassesByStudentId(user.id);
+  }
+
+  private async setName(user: User, name: string) {
+    await this.userRepo.updateName(user.id, name);
   }
 }

@@ -12,17 +12,13 @@ const AccountSettingsPage: React.FC = () => {
   const {
     settings,
     loading,
-    error,
     resetAssignedTeacher,
     deleteBookedClasses,
+    setName,
   } = useSettings();
 
   if (loading) {
     return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
   }
 
   if (!settings || !settings.name || !settings.email) {
@@ -32,7 +28,11 @@ const AccountSettingsPage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <h1>Account Settings</h1>
-      <NameAndEmailForm name={settings.name} email={settings.email} />
+      <NameAndEmailForm
+        name={settings.name}
+        email={settings.email}
+        setName={setName}
+      />
       <RescheduleAndTeacherSection
         resetAssignedTeacher={resetAssignedTeacher}
         deleteBookedClasses={deleteBookedClasses}
