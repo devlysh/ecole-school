@@ -4,7 +4,12 @@ import logger from "./logger";
 let prisma: PrismaClient;
 try {
   prisma = new PrismaClient({
-    log: ["info", "warn", "error"],
+    //**
+    // Uncomment, when to see the prisma queries in the console
+    //
+    // log: ["info", "warn", "error"], // this line
+    //
+    // */
   });
 } catch (err: unknown) {
   logger.error(err, "Error initializing Prisma Client");
