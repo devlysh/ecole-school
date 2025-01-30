@@ -30,7 +30,6 @@ export const POST = async (request: Request) => {
     }
 
     const userRepository = new UserRepository();
-
     const existingUser = await userRepository.findByEmailWithRoles(email);
 
     if (!existingUser) {
@@ -57,6 +56,7 @@ export const POST = async (request: Request) => {
       path: "/",
       maxAge: 60 * 60 * 1, // 1 hour
     });
+    cookieStore.delete(TokenType.REGISTRATION);
 
     return Response.json({ message: "Password set" }, { status: 200 });
   } catch (err: unknown) {

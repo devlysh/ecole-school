@@ -5,12 +5,9 @@ if (!NEXT_PUBLIC_BASE_URL) {
 }
 
 export const submitCheckoutRequest = async () => {
-  const response = await fetch(
-    `${NEXT_PUBLIC_BASE_URL}/api/v1/checkout/submit`,
-    {
-      method: "POST",
-    }
-  );
+  const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/checkout`, {
+    method: "POST",
+  });
 
   if (!response.ok) {
     throw new Error(response.statusText ?? "Failed to submit checkout");

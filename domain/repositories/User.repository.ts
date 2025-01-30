@@ -7,13 +7,19 @@ export class UserRepository {
   public async upsertStudent(
     email: string,
     name: string,
-    stripeCustomer: Stripe.Customer
+    stripeCustomer: Stripe.Customer,
+    language: string,
+    quizAnswers: Record<string, string>
   ): Promise<User> {
     return await prisma.user.upsert({
       where: { email },
       create: {
         email,
         name,
+        settings: {
+          language,
+          quizAnswers,
+        },
         roles: {
           create: {
             role: {

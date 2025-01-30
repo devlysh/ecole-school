@@ -29,9 +29,6 @@ const Checkout = ({ email, name, selectedPrice, languages }: CheckoutProps) => {
 
     const registrationToken = Cookies.get(TokenType.REGISTRATION);
 
-    Cookies.remove(TokenType.REGISTRATION);
-    Cookies.remove(TokenType.PRE_AUTH);
-
     if (!registrationToken) {
       return;
     }

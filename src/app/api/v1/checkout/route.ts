@@ -9,21 +9,21 @@ export const POST = async () => {
   const cookieStore = cookies();
 
   try {
-    const existingPreAuthToken = cookieStore.get(TokenType.PRE_AUTH);
+    const existingPreAuthTokenCookie = cookieStore.get(TokenType.PRE_AUTH);
+    const existingPreAuthToken = existingPreAuthTokenCookie?.value;
     const email = cookieStore.get("email")?.value;
 
-    cookieStore.delete(TokenType.PRE_AUTH);
-    cookieStore.delete("email");
-
     if (!existingPreAuthToken) {
+      logger.error("No pre-auth token found");
       redirect("/quiz");
     }
 
     const decodedPreAuthToken = (await verifyToken(
-      existingPreAuthToken.value
+      existingPreAuthToken
     )) as unknown as PreAuthTokenPayload;
 
     if (!decodedPreAuthToken || !decodedPreAuthToken.email) {
+      logger.error("Invalid pre-auth token");
       redirect("/quiz");
     }
 
@@ -34,11 +34,14 @@ export const POST = async () => {
       email: email ?? decodedPreAuthToken.email,
     };
 
-    const newPreAuthToken = await signToken(tokenData, "1h");
+    const hours = 1; // 1 hour
+
+    const newPreAuthToken = await signToken(tokenData, `${hours}h`);
 
     cookieStore.set(TokenType.PRE_AUTH, newPreAuthToken, {
-      maxAge: 60 * 60 * 1, // 1 hour
+      maxAge: 60 * 60 * hours,
     });
+    cookieStore.delete(TokenType.PRE_AUTH);
     return Response.json(null, { status: 200 });
   } catch (err: unknown) {
     logger.error(err, "Error during checkout submission");

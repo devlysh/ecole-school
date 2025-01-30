@@ -37,11 +37,30 @@ export const POST = async (request: NextRequest) => {
       preAuthToken.value
     )) as unknown as PreAuthTokenPayload;
 
-    if (!decodedPreAuthToken.email || !decodedPreAuthToken.name) {
-      throw new UnauthorizedError("Invalid token");
+    if (!name) {
+      throw new UnauthorizedError("Name is missing");
     }
 
-    const customer = await getOrCreateCustomer(email, name);
+    if (!email) {
+      throw new UnauthorizedError("Email is missing");
+    }
+
+    if (!decodedPreAuthToken.language) {
+      throw new UnauthorizedError("Language is missing");
+    }
+
+    if (!decodedPreAuthToken.quizAnswers) {
+      throw new UnauthorizedError("Quiz answers are missing");
+    }
+
+    logger.debug({ decodedPreAuthToken }, "DEBUG!");
+
+    const customer = await getOrCreateCustomer(
+      email,
+      name,
+      decodedPreAuthToken.language,
+      decodedPreAuthToken.quizAnswers
+    );
     await setupStripeCustomerPaymentMethod(customer.id, paymentMethodId);
     const subscription = await createStripeSubscription(customer.id, planId);
 
@@ -85,7 +104,9 @@ export const POST = async (request: NextRequest) => {
 
 const getOrCreateCustomer = async (
   email: string,
-  name: string
+  name: string,
+  language: string,
+  quizAnswers: Record<string, string>
 ): Promise<Stripe.Customer> => {
   const existingCustomers = await stripe.customers.list({ email });
   let stripeCustomer: Stripe.Customer;
@@ -98,7 +119,13 @@ const getOrCreateCustomer = async (
 
   const userRepository = new UserRepository();
 
-  await userRepository.upsertStudent(email, name, stripeCustomer);
+  await userRepository.upsertStudent(
+    email,
+    name,
+    stripeCustomer,
+    language,
+    quizAnswers
+  );
 
   return stripeCustomer;
 };
