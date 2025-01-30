@@ -47,7 +47,7 @@ export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
         "Updated student's Stripe customer ID"
       );
     }
-  } catch (err) {
+  } catch (err: unknown) {
     logger.error({ err, email }, "Error handling customer update");
   }
 };

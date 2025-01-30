@@ -1,20 +1,29 @@
 import { BookedClassesService } from "@domain/services/BookedClasses.service";
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
+import { handleErrorResponse } from "@/lib/errorUtils";
+import { EmailIsMissingError } from "@/lib/errors";
 
 export const GET = async () => {
   try {
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
 
+    if (!email) {
+      throw new EmailIsMissingError();
+    }
+
     const bookedClassesService = new BookedClassesService();
     const classes = await bookedClassesService.getBookedClassesByEmail(email);
     return Response.json(classes, { status: 200 });
-  } catch (err) {
+  } catch (err: unknown) {
+    if (err instanceof EmailIsMissingError) {
+      return handleErrorResponse(err, 401);
+    }
     logger.error(err, "Error fetching booked classes");
-    return Response.json(
-      { error: "Failed to fetch booked classes" },
-      { status: 500 }
+    return handleErrorResponse(
+      new Error("Failed to fetch booked classes"),
+      500
     );
   }
 };
@@ -23,20 +32,16 @@ export const POST = async (request: Request) => {
   try {
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
-
     if (!email) {
-      return Response.json(
-        { error: "Unauthorized - no email in token" },
-        { status: 401 }
-      );
+      throw new EmailIsMissingError();
     }
 
     const { dates, isRecurrent } = await request.json();
 
     if (!dates || !Array.isArray(dates) || dates.length === 0) {
-      return Response.json(
-        { error: "dates must be a non-empty array of ISO 8601 strings" },
-        { status: 400 }
+      return handleErrorResponse(
+        new Error("Dates must be a non-empty array of ISO 8601 strings"),
+        400
       );
     }
 
@@ -49,12 +54,12 @@ export const POST = async (request: Request) => {
     );
 
     return Response.json(result, { status: 201 });
-  } catch (err) {
+  } catch (err: unknown) {
+    if (err instanceof EmailIsMissingError) {
+      return handleErrorResponse(err, 401);
+    }
     logger.error(err, "Error creating booked classes");
-    return Response.json(
-      { error: "Failed to create booked class" },
-      { status: 500 }
-    );
+    return handleErrorResponse(new Error("Failed to create booked class"), 500);
   }
 };
 
@@ -62,15 +67,21 @@ export const DELETE = async () => {
   try {
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
+    if (!email) {
+      throw new EmailIsMissingError();
+    }
 
     const bookedClassesService = new BookedClassesService();
     await bookedClassesService.deleteAllBookedClassesByEmail(email);
     return Response.json({ message: "Booked class deleted" }, { status: 200 });
-  } catch (err) {
+  } catch (err: unknown) {
+    if (err instanceof EmailIsMissingError) {
+      return handleErrorResponse(err, 401);
+    }
     logger.error(err, "Error deleting booked classes");
-    return Response.json(
-      { error: "Failed to delete booked classes" },
-      { status: 500 }
+    return handleErrorResponse(
+      new Error("Failed to delete booked classes"),
+      500
     );
   }
 };

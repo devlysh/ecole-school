@@ -2,11 +2,12 @@
 
 import FormStep from "./FormStep";
 import { useCallback, useState, useEffect } from "react";
-import { setPasswordRequest } from "@/app/api/v1/password/set/request";
+import { setPasswordRequest } from "@/app/api/v1/password/request";
 import logger from "@/lib/logger";
 import { useRouter } from "next/navigation";
 import { setPasswordStep } from "@/lib/set-password-step.model";
 import { TokenType } from "@/lib/types";
+import { toast } from "react-toastify";
 
 const SetPasswordStep = () => {
   const router = useRouter();
@@ -38,15 +39,14 @@ const SetPasswordStep = () => {
         return;
       }
 
-      const response = await setPasswordRequest(values.password, token);
-
-      if (!response.ok) {
-        logger.error({ response }, "Failed to set password");
+      try {
+        await setPasswordRequest(values.password, token);
+        router.push("/account");
+      } catch (err: unknown) {
         setError("Failed to set password");
-        return;
+        toast.error("Failed to set password");
+        logger.error(err, "Error during setting password");
       }
-
-      router.push("/account");
     },
     [router, token]
   );

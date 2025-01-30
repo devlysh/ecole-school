@@ -33,11 +33,11 @@ export const verifyToken = async (token: string) => {
   } catch (err: unknown) {
     if (err instanceof Error) {
       if (err.message.includes("JWTExpired")) {
-        logger.error({ error: err }, "Token has expired");
+        logger.error(err, "Token has expired");
       } else if (err.message.includes("JWTInvalid")) {
-        logger.error({ error: err }, "Invalid token signature");
+        logger.error(err, "Invalid token signature");
       } else {
-        logger.error({ error: err }, "Token verification failed");
+        logger.error(err, "Token verification failed");
       }
     }
     throw err;
@@ -57,7 +57,7 @@ export const verifyAccessToken = async () => {
       accessToken.value
     )) as unknown as AccessTokenPayload;
   } catch (err: unknown) {
-    logger.error({ error: err }, "Error during access token verification");
+    logger.error(err, "Error during access token verification");
     throw err;
   }
 };

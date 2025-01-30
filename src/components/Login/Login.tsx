@@ -6,6 +6,7 @@ import { Input } from "@nextui-org/input";
 import { useRouter } from "next/navigation";
 import { loginRequest } from "@/app/api/v1/login/request";
 import logger from "@/lib/logger";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const router = useRouter();
@@ -18,15 +19,12 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await loginRequest(email, password);
-      if (response.ok) {
-        router.push("/account");
-      } else {
-        setError("Invalid email or password");
-      }
+      await loginRequest(email, password);
+      router.push("/account");
     } catch (err: unknown) {
-      logger.error({ err }, "Error during login");
+      toast.error("An error occurred during login");
       setError("An error occurred during login");
+      logger.error(err, "Error during login");
     }
   };
 

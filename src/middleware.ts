@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "./lib/jwt";
-import { Role, TokenType } from "./lib/types";
+import { RoleName, TokenType } from "./lib/types";
 import logger from "./lib/logger";
 
-const rolePaths: Record<Role, RegExp[]> = {
-  [Role.ADMIN]: [
+const rolePaths: Record<RoleName, RegExp[]> = {
+  [RoleName.ADMIN]: [
     /^\/account$/,
     /^\/account\/teachers$/,
     /^\/account\/teachers\/.+$/,
     /^\/admin$/,
   ],
-  [Role.STUDENT]: [
+  [RoleName.STUDENT]: [
     /^\/account$/,
     /^\/account\/book-classes$/,
     /^\/account\/my-classes$/,
     /^\/account\/settings$/,
   ],
-  [Role.TEACHER]: [
+  [RoleName.TEACHER]: [
     /^\/account$/,
     /^\/account\/teacher$/,
     /^\/account\/settings$/,
@@ -45,7 +45,7 @@ export const middleware = async (req: NextRequest) => {
 
   try {
     const decoded = await verifyToken(accessToken);
-    const { roles } = decoded as { email: string; roles: Role[] };
+    const { roles } = decoded as { email: string; roles: RoleName[] };
 
     const hasAccess = roles.some((role) => {
       const allowedPaths = rolePaths[role] || [];
@@ -57,8 +57,8 @@ export const middleware = async (req: NextRequest) => {
     }
 
     return NextResponse.redirect(new URL("/", req.url));
-  } catch (error) {
-    logger.error({ error }, "Error in middleware");
+  } catch (err: unknown) {
+    logger.error(err, "Error in middleware");
     return NextResponse.redirect(new URL("/", req.url));
   }
 };

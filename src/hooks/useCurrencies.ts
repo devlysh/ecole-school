@@ -14,7 +14,7 @@ const useCurrencies = () => {
       try {
         const currencies = await getCurrenciesRequest();
         setCurrencies(currencies);
-      } catch (err) {
+      } catch (err: unknown) {
         setError(err);
       } finally {
         setLoading(false);

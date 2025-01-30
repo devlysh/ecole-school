@@ -6,8 +6,8 @@ try {
   prisma = new PrismaClient({
     log: ["info", "warn", "error"],
   });
-} catch (error) {
-  logger.error({ error }, "Error initializing Prisma Client");
+} catch (err: unknown) {
+  logger.error(err, "Error initializing Prisma Client");
 }
 
 export default prisma!;

@@ -2,8 +2,10 @@ import logger from "@/lib/logger";
 import { signToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { PreAuthTokenPayload, TokenType } from "@/lib/types";
+import { BadRequestError } from "@/lib/errors";
+import { handleErrorResponse } from "@/lib/errorUtils";
 
-export const GET = async () => {
+export const POST = async () => {
   const cookieStore = cookies();
 
   try {
@@ -29,7 +31,7 @@ export const GET = async () => {
     };
 
     if (!name || !email) {
-      return Response.json("Failed to submit quiz", { status: 400 });
+      throw new BadRequestError("Invalid quiz submission");
     }
 
     const tokenData: PreAuthTokenPayload = { name, email, quizAnswers };
@@ -40,9 +42,12 @@ export const GET = async () => {
       maxAge: 60 * 60 * 1, // 1 hour
     });
 
-    return Response.json(null);
+    return Response.json(null, { status: 200 });
   } catch (err: unknown) {
+    if (err instanceof BadRequestError) {
+      return handleErrorResponse(err, 400);
+    }
     logger.error(err, "Error during quiz submission");
-    return Response.json("Failed to submit quiz", { status: 500 });
+    return handleErrorResponse(new Error("Failed to submit quiz"), 500);
   }
 };

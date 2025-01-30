@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import jwt from "jsonwebtoken";
 
-import { submitCheckoutRequest } from "@/app/api/v1/checkout/submit/request";
+import { submitCheckoutRequest } from "@/app/api/v1/checkout/request";
 import logger from "@/lib/logger";
 import { PreAuthTokenPayload, Language, Plan, TokenType } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
@@ -63,7 +63,7 @@ const Checkout = ({ email, name, selectedPrice, languages }: CheckoutProps) => {
       }
 
       setLanguage(decodedPreAuthToken.language);
-    } catch (err) {
+    } catch (err: unknown) {
       logger.error(err, "Failed to parse checkout data from cookies");
     }
   }, [router]);

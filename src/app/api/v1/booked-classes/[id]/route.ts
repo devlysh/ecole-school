@@ -2,31 +2,41 @@ import { BookedClassesService } from "@domain/services/BookedClasses.service";
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { NextRequest } from "next/server";
-import { expandTime, handleErrorResponse } from "@/lib/utils";
-import { SlotIsNotAvailableError } from "@/lib/errors";
+import { expandTime } from "@/lib/utils";
+import {
+  BadRequestError,
+  EmailIsMissingError,
+  SlotIsNotAvailableError,
+} from "@/lib/errors";
+import { handleErrorResponse } from "@/lib/errorUtils";
 
 export const DELETE = async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
   try {
-    if (!params.id) {
-      return handleErrorResponse("Class ID is required", 400);
-    }
-
     const dateParam = request.nextUrl.searchParams.get("date");
-    if (!dateParam) {
-      return handleErrorResponse("Date is required", 400);
-    }
-
     const deleteFutureOccurencesParam = request.nextUrl.searchParams.get(
       "deleteFutureOccurences"
     );
 
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
+
+    if (!params.id) {
+      throw new BadRequestError("Class ID is required");
+    }
+
+    if (!dateParam) {
+      throw new BadRequestError("Date is required");
+    }
+
+    if (!deleteFutureOccurencesParam) {
+      throw new BadRequestError("Delete future occurences is required");
+    }
+
     if (!email) {
-      return handleErrorResponse("Unauthorized", 401);
+      throw new EmailIsMissingError();
     }
 
     const id = Number(params.id);
@@ -47,9 +57,16 @@ export const DELETE = async (
       { message: "Class deleted successfully" },
       { status: 200 }
     );
-  } catch (err) {
+  } catch (err: unknown) {
+    if (err instanceof EmailIsMissingError) {
+      return handleErrorResponse(err, 401);
+    } else if (err instanceof BadRequestError) {
+      return handleErrorResponse(err, 400, {
+        ...err.metadata,
+      });
+    }
     logger.error(err, "Error deleting booked classes");
-    return handleErrorResponse("Failed to delete booked class", 500);
+    return handleErrorResponse(new Error("Failed to delete booked class"), 500);
   }
 };
 
@@ -64,7 +81,7 @@ export const PUT = async (
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
     if (!email) {
-      return handleErrorResponse("Unauthorized", 401);
+      throw new EmailIsMissingError();
     }
 
     const bookedClassesService = new BookedClassesService();
@@ -76,13 +93,15 @@ export const PUT = async (
     );
 
     return Response.json(response, { status: 200 });
-  } catch (err) {
-    if (err instanceof SlotIsNotAvailableError) {
-      logger.warn("User tried to reschedule to a slot that is not available");
-      return handleErrorResponse("Slot is not available", 400);
+  } catch (err: unknown) {
+    if (err instanceof EmailIsMissingError) {
+      return handleErrorResponse(err, 401);
+    } else if (err instanceof SlotIsNotAvailableError) {
+      return handleErrorResponse(err, 400);
     }
-
-    logger.error(err, "Error rescheduling booked classes");
-    return handleErrorResponse("Failed to reschedule booked class", 500);
+    return handleErrorResponse(
+      new Error("Failed to reschedule booked class"),
+      500
+    );
   }
 };

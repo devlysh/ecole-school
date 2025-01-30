@@ -14,7 +14,7 @@ const usePlans = () => {
       try {
         const plans = await getPlansRequest();
         setPlans(plans);
-      } catch (err) {
+      } catch (err: unknown) {
         setError(err);
       } finally {
         setLoading(false);

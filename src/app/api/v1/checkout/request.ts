@@ -1,5 +1,3 @@
-import logger from "@/lib/logger";
-
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 if (!NEXT_PUBLIC_BASE_URL) {
@@ -8,11 +6,15 @@ if (!NEXT_PUBLIC_BASE_URL) {
 
 export const submitCheckoutRequest = async () => {
   const response = await fetch(
-    `${NEXT_PUBLIC_BASE_URL}/api/v1/checkout/submit`
+    `${NEXT_PUBLIC_BASE_URL}/api/v1/checkout/submit`,
+    {
+      method: "POST",
+    }
   );
 
   if (!response.ok) {
-    logger.error({ response }, "Error during checkout submission");
     throw new Error(response.statusText ?? "Failed to submit checkout");
   }
+
+  return await response.json();
 };

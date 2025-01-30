@@ -14,7 +14,7 @@ const useLanguages = () => {
       try {
         const languages = await getLanguagesRequest();
         setLanguages(languages);
-      } catch (err) {
+      } catch (err: unknown) {
         setError(err);
       } finally {
         setLoading(false);

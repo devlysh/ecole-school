@@ -1,5 +1,3 @@
-import logger from "@/lib/logger";
-
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 if (!NEXT_PUBLIC_BASE_URL) {
@@ -20,7 +18,7 @@ export const createSubscriptionRequest = async (
   paymentMethodId: string
 ): Promise<{ clientSecret: string }> => {
   const response = await fetch(
-    `${NEXT_PUBLIC_BASE_URL}/api/v1/stripe/create-subscription`,
+    `${NEXT_PUBLIC_BASE_URL}/api/v1/stripe/subscriptions`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -34,13 +32,10 @@ export const createSubscriptionRequest = async (
   );
 
   if (!response.ok) {
-    logger.error({ response }, "Error during create subscription");
     throw new Error(
       response.statusText ?? "An error occurred while processing your payment."
     );
   }
 
-  const { clientSecret } = await response.json();
-
-  return { clientSecret };
+  return await response.json();
 };

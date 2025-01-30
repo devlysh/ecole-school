@@ -27,7 +27,7 @@ const SetPasswordPage = async ({
 
     return <SetPasswordStep />;
   } catch (err: unknown) {
-    logger.error({ err }, "Invalid token");
+    logger.error(err, "Invalid token");
     redirect("/quiz");
   }
 };

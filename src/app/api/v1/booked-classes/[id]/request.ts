@@ -1,4 +1,3 @@
-import logger from "@/lib/logger";
 import { compressTime } from "@/lib/utils";
 
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -7,7 +6,7 @@ if (!NEXT_PUBLIC_BASE_URL) {
   throw new Error("NEXT_PUBLIC_BASE_URL is not set");
 }
 
-export const deleteBookedClass = async (
+export const deleteBookedClassRequest = async (
   classId: number,
   date: Date,
   deleteFutureOccurences: boolean = false
@@ -20,31 +19,26 @@ export const deleteBookedClass = async (
     throw new Error("Date must be an instance of Date");
   }
 
-  try {
-    const url = new URL(
-      `${NEXT_PUBLIC_BASE_URL}/api/v1/booked-classes/${classId}`
-    );
-    url.searchParams.set("date", compressTime(date.getTime()).toString());
-    url.searchParams.set(
-      "deleteFutureOccurences",
-      deleteFutureOccurences.toString()
-    );
+  const url = new URL(
+    `${NEXT_PUBLIC_BASE_URL}/api/v1/booked-classes/${classId}`
+  );
+  url.searchParams.set("date", compressTime(date.getTime()).toString());
+  url.searchParams.set(
+    "deleteFutureOccurences",
+    deleteFutureOccurences.toString()
+  );
 
-    const response = await fetch(url.toString(), {
-      method: "DELETE",
-    });
+  const response = await fetch(url.toString(), {
+    method: "DELETE",
+  });
 
-    if (!response.ok) {
-      throw new Error("Failed to delete booked class");
-    }
-    return await response.json();
-  } catch (err) {
-    logger.error({ err, classId }, "Failed to delete booked class");
+  if (!response.ok) {
     throw new Error("Failed to delete booked class");
   }
+  return await response.json();
 };
 
-export const rescheduleBookedClass = async (
+export const rescheduleBookedClassRequest = async (
   classId: number,
   oldDate: Date,
   newDate: Date
@@ -57,26 +51,21 @@ export const rescheduleBookedClass = async (
     throw new Error("Date must be an instance of Date");
   }
 
-  try {
-    const url = new URL(
-      `${NEXT_PUBLIC_BASE_URL}/api/v1/booked-classes/${classId}`
-    );
+  const url = new URL(
+    `${NEXT_PUBLIC_BASE_URL}/api/v1/booked-classes/${classId}`
+  );
 
-    const response = await fetch(url.toString(), {
-      method: "PUT",
-      body: JSON.stringify({
-        oldDate: oldDate.toISOString(),
-        newDate: newDate.toISOString(),
-      }),
-    });
+  const response = await fetch(url.toString(), {
+    method: "PUT",
+    body: JSON.stringify({
+      oldDate: oldDate.toISOString(),
+      newDate: newDate.toISOString(),
+    }),
+  });
 
-    if (!response.ok) {
-      throw new Error("Failed to delete booked class");
-    }
-
-    return await response.json();
-  } catch (err) {
-    logger.error({ err, classId }, "Failed to delete booked class");
+  if (!response.ok) {
     throw new Error("Failed to delete booked class");
   }
+
+  return await response.json();
 };

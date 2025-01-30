@@ -13,7 +13,9 @@ import {
   User,
 } from "@nextui-org/react";
 import { VerticalDotsIcon } from "@/icons";
-import { fetchTeachers } from "@/app/api/v1/teachers/request";
+import { fetchTeachersRequest } from "@/app/api/v1/teachers/request";
+import logger from "@/lib/logger";
+import { toast } from "react-toastify";
 
 const AccountTeachers: React.FC = () => {
   const router = useRouter();
@@ -21,8 +23,13 @@ const AccountTeachers: React.FC = () => {
 
   useEffect(() => {
     const fetchTeachersData = async () => {
-      const teachersData = await fetchTeachers();
-      setTeachers(teachersData);
+      try {
+        const teachersData = await fetchTeachersRequest();
+        setTeachers(teachersData);
+      } catch (err: unknown) {
+        toast.error("Error fetching teachers");
+        logger.error(err, "Error fetching teachers");
+      }
     };
     fetchTeachersData();
   }, []);

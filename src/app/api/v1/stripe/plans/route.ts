@@ -1,3 +1,4 @@
+import { handleErrorResponse } from "@/lib/errorUtils";
 import logger from "@/lib/logger";
 import { Plan } from "@/lib/types";
 import Stripe from "stripe";
@@ -31,9 +32,9 @@ export const GET = async () => {
       },
     }));
 
-    return Response.json(plans);
+    return Response.json(plans, { status: 200 });
   } catch (err: unknown) {
     logger.error(err, "Error fetching plans");
-    return Response.json("Failed to load subscription plans", { status: 500 });
+    return handleErrorResponse(new Error("Error fetching plans"), 500);
   }
 };

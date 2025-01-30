@@ -1,81 +1,87 @@
-import prisma from "@/lib/prisma";
 import logger from "@/lib/logger";
 import { verifyAccessToken } from "@/lib/jwt";
-import { AccessTokenPayload, Role } from "@/lib/types";
+import { AccessTokenPayload, RoleName, TeacherFormValues } from "@/lib/types";
+import { handleErrorResponse } from "@/lib/errorUtils";
+import { UnauthorizedError } from "@/lib/errors";
+import { UserRepository } from "@domain/repositories/User.repository";
+import { EventInput } from "@fullcalendar/core/index.js";
+import bcrypt from "bcrypt";
 
 export const GET = async () => {
   try {
-    const decodedToken = await verifyAndDecodeToken();
-    if (!isAdmin(decodedToken)) {
-      return Response.json({ error: "Forbidden" }, { status: 403 });
+    const decodedToken = await verifyAccessToken();
+
+    if (!decodedToken.roles.includes(RoleName.ADMIN)) {
+      throw new UnauthorizedError("You are not authorized to fetch teachers");
     }
 
-    const teachers = await fetchTeachers();
-    return Response.json(teachers);
-  } catch (err) {
-    logger.error({ err }, "Error fetching teachers");
-    return Response.json(
-      { error: "Failed to fetch teachers" },
-      { status: 500 }
-    );
+    const userRepository = new UserRepository();
+    const teachers = await userRepository.findTeachers();
+    return Response.json(teachers, { status: 200 });
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return handleErrorResponse(err, 403);
+    }
+    logger.error(err, "Error fetching teachers");
+    return handleErrorResponse(new Error("Error fetching teachers"), 500);
   }
 };
 
-const verifyAndDecodeToken = async (): Promise<AccessTokenPayload> => {
+export const POST = async (request: Request) => {
   try {
-    return (await verifyAccessToken()) as AccessTokenPayload;
-  } catch (err) {
-    logger.error(err, "Error verifying access token");
-    throw new Error("Unauthorized");
-  }
-};
+    const decodedToken: AccessTokenPayload = await verifyAccessToken();
 
-const isAdmin = (decodedToken: AccessTokenPayload): boolean => {
-  return decodedToken.roles.includes(Role.ADMIN);
-};
+    if (!decodedToken.roles.includes(RoleName.ADMIN)) {
+      throw new UnauthorizedError("You are not authorized to add a teacher");
+    }
 
-const fetchTeachers = async () => {
-  return await prisma.user.findMany({
-    where: {
-      roles: {
-        some: {
-          role: {
-            name: Role.TEACHER,
+    const { name, email, password, timeSlots } =
+      (await request.json()) as TeacherFormValues & { timeSlots: EventInput[] };
+
+    if (!name || !email || !password) {
+      return Response.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const newTeacher = await prisma.user.create({
+      data: {
+        name: `${name}`,
+        email,
+        passwordHash,
+        settings: {},
+        teacher: {
+          create: {
+            availableSlots: {
+              create: timeSlots.map((slot) => ({
+                startTime: slot.start as string,
+                endTime: slot.end as string,
+                rrule: slot.rrule as string,
+              })),
+            },
           },
         },
-      },
-      teacher: {
-        isNot: null,
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      settings: true,
-      teacher: {
-        select: {
-          languages: {
-            select: {
-              language: {
-                select: {
-                  name: true,
-                  code: true,
-                },
+        roles: {
+          create: {
+            role: {
+              connect: {
+                name: "teacher",
               },
             },
           },
         },
       },
-      roles: {
-        select: {
-          role: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
-    },
-  });
+    });
+
+    return Response.json(newTeacher, { status: 201 });
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return handleErrorResponse(err, 403);
+    }
+    logger.error(err, "Error adding teacher");
+    return handleErrorResponse(new Error("Error adding teacher"), 500);
+  }
 };

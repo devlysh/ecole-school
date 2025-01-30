@@ -26,8 +26,8 @@ export class IsSlotRecurringStrategy implements SlotAvailibilityStrategy {
     try {
       RRule.fromString(slot.rrule);
       return true;
-    } catch (error) {
-      logger.error(error, "Invalid rrule format");
+    } catch (err: unknown) {
+      logger.warn(err, "Invalid rrule format");
       return false;
     }
   }

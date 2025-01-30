@@ -2,6 +2,7 @@ import React from "react";
 import { useFormik } from "formik";
 import { Input, Button } from "@nextui-org/react";
 import logger from "@/lib/logger";
+import { toast } from "react-toastify";
 
 interface NameAndEmailProps {
   name: string;
@@ -16,9 +17,14 @@ const NameAndEmailForm: React.FC<NameAndEmailProps> = ({
 }: NameAndEmailProps) => {
   const formik = useFormik({
     initialValues: { name: name, email: email },
-    onSubmit: (values) => {
-      setName(values.name);
-      logger.info({ ...values }, "Name updated successfully");
+    onSubmit: async (values) => {
+      try {
+        setName(values.name);
+        logger.info({ ...values }, "Name updated successfully");
+      } catch (err: unknown) {
+        logger.error(err, "Failed to update name");
+        toast.error("Failed to update name. Please try again.");
+      }
     },
   });
 

@@ -1,5 +1,4 @@
 import { Settings } from "@/lib/types";
-import { logError } from "@/lib/errorUtils";
 
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -8,39 +7,29 @@ if (!NEXT_PUBLIC_BASE_URL) {
 }
 
 export const getSettingsRequest = async (): Promise<Settings | undefined> => {
-  try {
-    const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/settings`);
+  const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/settings`);
 
-    if (!response.ok) {
-      throw new Error("Failed to get settings");
-    }
-
-    return await response.json();
-  } catch (err: unknown) {
-    logError(err, "Error during getting settings");
-    return undefined;
+  if (!response.ok) {
+    throw new Error("Failed to get settings");
   }
+
+  return await response.json();
 };
 
 export const updateSettingsRequest = async (
   settings: Partial<Settings>
 ): Promise<Settings> => {
-  try {
-    const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/settings`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(settings),
-    });
+  const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/settings`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(settings),
+  });
 
-    if (!response.ok) {
-      throw new Error("Failed to update settings");
-    }
-
-    return await response.json();
-  } catch (err: unknown) {
-    logError(err, "Error during updating settings");
+  if (!response.ok) {
     throw new Error("Failed to update settings");
   }
+
+  return await response.json();
 };

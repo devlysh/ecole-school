@@ -12,7 +12,7 @@ export enum TokenType {
   PRE_AUTH = "preAuthToken",
 }
 
-export enum Role {
+export enum RoleName {
   ADMIN = "admin",
   TEACHER = "teacher",
   STUDENT = "student",

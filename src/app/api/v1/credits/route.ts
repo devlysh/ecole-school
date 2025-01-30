@@ -3,18 +3,16 @@ import logger from "@/lib/logger";
 import { CreditRepository } from "@domain/repositories/Credit.repository";
 import { CreditService } from "@domain/services/Credit.service";
 import prisma from "@/lib/prisma";
+import { EmailIsMissingError, UnauthorizedError } from "@/lib/errors";
+import { handleErrorResponse } from "@/lib/errorUtils";
 
 export const GET = async () => {
   try {
-    // Verify the access token
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
 
     if (!email) {
-      return Response.json(
-        { error: "Unauthorized - no email in token" },
-        { status: 401 }
-      );
+      throw new EmailIsMissingError();
     }
 
     const user = await prisma.user.findUnique({
@@ -25,7 +23,7 @@ export const GET = async () => {
     });
 
     if (!user || !user.student) {
-      return Response.json({ error: "Student not found" }, { status: 404 });
+      throw new UnauthorizedError("User is not a student");
     }
 
     const creditService = new CreditService(new CreditRepository());
@@ -33,11 +31,14 @@ export const GET = async () => {
     const creditCount = await creditService.getActiveCreditsCount(user.id);
 
     return Response.json(creditCount, { status: 200 });
-  } catch (err) {
-    logger.error({ err }, "Error fetching vacations");
-    return Response.json(
-      { error: "Failed to fetch vacations" },
-      { status: 500 }
-    );
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return handleErrorResponse(err, 401);
+    } else if (err instanceof EmailIsMissingError) {
+      return handleErrorResponse(err, 401);
+    }
+
+    logger.error(err, "Error fetching vacations");
+    return handleErrorResponse(new Error("Failed to fetch vacations"), 500);
   }
 };

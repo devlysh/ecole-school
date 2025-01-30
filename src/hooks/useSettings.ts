@@ -1,5 +1,5 @@
 import { deleteBookedClassesRequest } from "@/app/api/v1/booked-classes/request";
-import { resetAssignedTeacherRequest } from "@/app/api/v1/reset-assigned-teacher/request";
+import { resetAssignedTeacherRequest } from "@/app/api/v1/assigned-teacher/request";
 import {
   getSettingsRequest,
   updateSettingsRequest,
@@ -17,18 +17,22 @@ export const useSettings = () => {
   const resetAssignedTeacher = useCallback(async () => {
     try {
       await resetAssignedTeacherRequest();
-    } catch (error) {
-      logger.error({ error }, "Failed to reset assigned teacher");
+      toast.success("Teacher reset successfully");
+    } catch (err: unknown) {
       setError("Failed to reset assigned teacher");
+      toast.error("Failed to reset assigned teacher");
+      logger.error(err, "Failed to reset assigned teacher");
     }
   }, []);
 
   const deleteBookedClasses = useCallback(async () => {
     try {
       await deleteBookedClassesRequest();
-    } catch (error) {
-      logger.error({ error }, "Failed to delete booked classes");
+      toast.success("Booked classes deleted successfully");
+    } catch (err: unknown) {
       setError("Failed to delete booked classes");
+      toast.error("Failed to delete booked classes");
+      logger.error(err, "Failed to delete booked classes");
     }
   }, []);
 
@@ -40,32 +44,29 @@ export const useSettings = () => {
         name,
       }));
       toast.success("Name updated successfully");
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-        toast.error(err.message);
-      } else {
-        setError("Failed to set name");
-        toast.error("Failed to set name");
-      }
+    } catch (err: unknown) {
+      setError("Failed to set name");
+      toast.error("Failed to set name");
+      logger.error(err, "Failed to set name");
     }
   }, []);
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const settings = await getSettingsRequest();
-        if (settings) {
-          setSettings(settings);
-        }
-      } catch (err) {
-        logger.error({ err }, "Failed to fetch settings");
-        setError("Failed to load settings. Please try again later.");
-      } finally {
-        setLoading(false);
+  const fetchSettings = async () => {
+    try {
+      const settings = await getSettingsRequest();
+      if (settings) {
+        setSettings(settings);
       }
-    };
+    } catch (err: unknown) {
+      setError("Failed to load settings");
+      toast.error("Failed to load settings");
+      logger.error(err, "Failed to fetch settings");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSettings();
   }, []);
 

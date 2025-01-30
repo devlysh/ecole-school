@@ -6,6 +6,7 @@ import { AvailableCalendarSlot } from "@/lib/types";
 import { format } from "date-fns";
 import logger from "@/lib/logger";
 import { expandTime } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 export const useAvailableSlots = () => {
   const [availableSlots, setAvailableSlots] = useState<AvailableCalendarSlot[]>(
@@ -28,8 +29,9 @@ export const useAvailableSlots = () => {
           return { day: date.getDay(), hour: date.getHours() };
         });
         setAvailableSlots(slots);
-      } catch (err) {
-        logger.error({ err }, "Error fetching available slots");
+      } catch (err: unknown) {
+        toast.error("Failed to fetch available slots");
+        logger.error(err, "Error fetching available slots");
       }
     },
     [isRecurrentSchedule, selectedSlots]

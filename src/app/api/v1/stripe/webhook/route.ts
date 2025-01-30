@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import logger from "@/lib/logger";
 import { handleCustomerUpdated } from "./customer.updated";
 import { handleInvoicePaymentSucceeded } from "./invoice.payment_succeeded";
+import { handleErrorResponse } from "@/lib/errorUtils";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SIGNING_SECRET = process.env.STRIPE_WEBHOOK_SIGNING_SECRET;
@@ -33,10 +34,7 @@ export const POST = async (request: NextRequest) => {
 
   if (!signature) {
     logger.error("Webhook signature missing");
-    return new Response(
-      JSON.stringify({ error: "Webhook signature missing" }),
-      { status: 400 }
-    );
+    return handleErrorResponse(new Error("Webhook signature missing"), 400);
   }
 
   let event: Stripe.Event;
@@ -48,10 +46,10 @@ export const POST = async (request: NextRequest) => {
       STRIPE_WEBHOOK_SIGNING_SECRET
     );
   } catch (err: unknown) {
-    logger.error({ err }, "Webhook signature verification failed");
-    return new Response(
-      JSON.stringify({ error: "Webhook signature verification failed" }),
-      { status: 400 }
+    logger.error(err, "Webhook signature verification failed");
+    return handleErrorResponse(
+      new Error("Webhook signature verification failed"),
+      400
     );
   }
 
@@ -77,9 +75,9 @@ export const POST = async (request: NextRequest) => {
       { err, eventType: event.type },
       "Error processing webhook event"
     );
-    return new Response(
-      JSON.stringify({ error: "Error processing webhook event" }),
-      { status: 500 }
+    return handleErrorResponse(
+      new Error("Error processing webhook event"),
+      500
     );
   }
 };

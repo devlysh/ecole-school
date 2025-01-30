@@ -1,5 +1,3 @@
-import logger from "@/lib/logger";
-
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 if (!NEXT_PUBLIC_BASE_URL) {
@@ -7,10 +5,13 @@ if (!NEXT_PUBLIC_BASE_URL) {
 }
 
 export const submitQuizRequest = async () => {
-  const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/submit-quiz`);
+  const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/quiz`, {
+    method: "POST",
+  });
 
   if (!response.ok) {
-    logger.error({ response }, "Error during quiz submission");
     throw new Error(response.statusText ?? "Failed to submit quiz");
   }
+
+  return await response.json();
 };

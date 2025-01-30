@@ -1,4 +1,3 @@
-import logger from "@/lib/logger";
 import { compressTime } from "@/lib/utils";
 
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -31,7 +30,6 @@ export const getAvailableSlotsRequest = async (
   const response = await fetch(url.toString());
 
   if (!response.ok) {
-    logger.error({ response }, "Error fetching available hours");
     throw new Error(response.statusText ?? "Failed to fetch available hours");
   }
 

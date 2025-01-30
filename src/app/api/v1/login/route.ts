@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { TokenType } from "@/lib/types";
+import { UnauthorizedError, UserNotFoundError } from "@/lib/errors";
+import { handleErrorResponse } from "@/lib/errorUtils";
 
 export const POST = async (request: Request) => {
   const { email, password } = await request.json();
@@ -21,9 +23,7 @@ export const POST = async (request: Request) => {
     });
 
     if (!user) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-      });
+      throw new UserNotFoundError();
     }
 
     const userRoles = user.roles.map((userRole) => userRole.role.name);
@@ -33,19 +33,15 @@ export const POST = async (request: Request) => {
       !user.passwordHash ||
       !(await bcrypt.compare(password, user.passwordHash))
     ) {
-      return Response.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
-      );
+      throw new UnauthorizedError("Invalid email or password");
     }
 
     if (!user.isActive) {
-      return Response.json({ error: "User is not active" }, { status: 401 });
+      throw new UnauthorizedError("User is not active");
     }
 
     if (!userRoles || userRoles.length === 0) {
-      logger.error({ user }, "User has no roles");
-      return Response.json({ error: "Internal server error" }, { status: 500 });
+      throw new UnauthorizedError("User has no roles");
     }
 
     const tokenData = {
@@ -60,12 +56,18 @@ export const POST = async (request: Request) => {
     cookieStore.set(TokenType.ACCESS, accessToken, {
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60 * 1, // 1 hour
+      maxAge: 60 * 60 * 10, // 10 hours
     });
 
     return Response.json({ message: "Login successful" }, { status: 200 });
-  } catch (err) {
-    logger.error({ err }, "Error during login");
-    return Response.json({ error: "Failed to login" }, { status: 500 });
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError) {
+      return handleErrorResponse(err, 401);
+    } else if (err instanceof UserNotFoundError) {
+      return handleErrorResponse(err, 401);
+    }
+
+    logger.error(err, "Error during login");
+    return handleErrorResponse(new Error("Failed to login"), 500);
   }
 };

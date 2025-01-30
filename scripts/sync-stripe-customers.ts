@@ -87,8 +87,8 @@ export const syncStripeCustomers = async () => {
     }
 
     console.log("Stripe customers synced successfully.");
-  } catch (error) {
-    console.error("Error syncing Stripe customers:", error);
+  } catch (err: unknown) {
+    console.error("Error syncing Stripe customers:", err);
   } finally {
     await prisma.$disconnect();
   }

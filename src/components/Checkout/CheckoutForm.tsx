@@ -4,7 +4,8 @@ import { Input } from "@nextui-org/input";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Plan } from "@/lib/types";
 import logger from "@/lib/logger";
-import { createSubscriptionRequest } from "@/app/api/v1/stripe/create-subscription/request";
+import { createSubscriptionRequest } from "@/app/api/v1/stripe/subscriptions/request";
+import { toast } from "react-toastify";
 
 interface CheckoutFormProps {
   email: string;
@@ -56,40 +57,30 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       const paymentMethodId = paymentMethod?.id;
 
       // Step 2: Send payment method ID to the server to create a subscription
-      try {
-        const { clientSecret } = await createSubscriptionRequest(
-          email,
-          name,
-          selectedPrice.id,
-          paymentMethodId
-        );
+      const { clientSecret } = await createSubscriptionRequest(
+        email,
+        name,
+        selectedPrice.id,
+        paymentMethodId
+      );
 
-        // Step 3: Confirm payment
-        const { error: confirmError } =
-          await stripe.confirmCardPayment(clientSecret);
+      // Step 3: Confirm payment
+      const { error: confirmError } =
+        await stripe.confirmCardPayment(clientSecret);
 
-        if (confirmError) {
-          setError(
-            confirmError.message ??
-              "An error occurred while confirming your payment."
-          );
-          setLoading(false);
-          return;
-        }
-
-        // Payment successful
-        onSuccessfulPayment();
-      } catch (err) {
-        logger.error({ err }, "Error during create subscription");
-        setError("An error occurred while processing your payment.");
-        setLoading(false);
-        return;
+      if (confirmError) {
+        throw new Error(confirmError.message);
       }
+
+      onSuccessfulPayment();
     } catch (err: unknown) {
-      logger.error({ err }, "Error during checkout");
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred.";
-      setError(errorMessage);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
+      toast.error("An error occurred while processing your payment.");
+      logger.error(err, "Error during checkout");
     } finally {
       setLoading(false);
     }

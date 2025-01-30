@@ -70,7 +70,7 @@ const FormStep: React.FC<FormStepProps> = ({
       if (value) {
         setValues((prevValues) => ({ ...prevValues, [step.name]: value }));
       }
-    } catch (err) {
+    } catch (err: unknown) {
       logger.error(err, "Failed to decode pre-auth token");
     }
   }, [step.name]);

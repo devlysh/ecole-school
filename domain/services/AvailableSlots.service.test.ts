@@ -60,7 +60,6 @@ function createMockBookedClass(
     studentId: 1,
     date: new Date(dateTime),
     recurring: false,
-    isActive: true,
   };
 }
 

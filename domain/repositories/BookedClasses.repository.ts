@@ -18,7 +18,7 @@ export class BookedClassesRepository {
     studentId: number
   ): Promise<Pick<BookedClass, "id" | "date" | "recurring">[]> {
     return prisma.bookedClass.findMany({
-      where: { studentId: studentId, isActive: true },
+      where: { studentId: studentId },
       select: {
         id: true,
         date: true,

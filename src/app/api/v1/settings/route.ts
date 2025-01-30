@@ -1,7 +1,9 @@
 import { verifyAccessToken } from "@/lib/jwt";
-import { handleErrorResponse, logError } from "@/lib/errorUtils";
+import { handleErrorResponse } from "@/lib/errorUtils";
 import { SettingsService } from "@domain/services/Settings.service";
 import { Settings } from "@/lib/types";
+import { EmailIsMissingError } from "@/lib/errors";
+import logger from "@/lib/logger";
 
 export const GET = async () => {
   return await handleGetSettingsRequest();
@@ -12,7 +14,7 @@ const handleGetSettingsRequest = async () => {
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
     if (!email) {
-      return handleErrorResponse("Unauthorized", 401);
+      throw new EmailIsMissingError();
     }
 
     const settingsService = new SettingsService();
@@ -20,10 +22,12 @@ const handleGetSettingsRequest = async () => {
 
     return Response.json(settings, { status: 200 });
   } catch (err: unknown) {
-    logError(err, "Error during getting settings", {
-      endpoint: "GET /settings",
-    });
-    return handleErrorResponse("Failed to get settings", 500);
+    if (err instanceof EmailIsMissingError) {
+      logger.error(err, "User not found");
+      return handleErrorResponse(err, 401);
+    }
+    logger.error(err, "Failed to get settings");
+    return handleErrorResponse(new Error("Failed to get settings"), 500);
   }
 };
 
@@ -36,7 +40,7 @@ const handleUpdateSettingsRequest = async (request: Request) => {
     const decodedToken = await verifyAccessToken();
     const email = decodedToken?.email;
     if (!email) {
-      return handleErrorResponse("Unauthorized", 401);
+      throw new EmailIsMissingError();
     }
 
     const settingsService = new SettingsService();
@@ -49,9 +53,11 @@ const handleUpdateSettingsRequest = async (request: Request) => {
 
     return Response.json(updatedSettings, { status: 200 });
   } catch (err: unknown) {
-    logError(err, "Error during updating settings", {
-      endpoint: "PUT /settings",
-    });
-    return handleErrorResponse("Failed to update settings", 500);
+    if (err instanceof EmailIsMissingError) {
+      logger.error(err, "User not found");
+      return handleErrorResponse(err, 401);
+    }
+    logger.error(err, "Error during updating settings");
+    return handleErrorResponse(new Error("Failed to update settings"), 500);
   }
 };

@@ -1,12 +1,16 @@
 import { BookedClassesRepository } from "../repositories/BookedClasses.repository";
 import { UserRepository } from "@domain/repositories/User.repository";
 import { StudentRepository } from "@domain/repositories/Student.repository";
-import logger from "@/lib/logger";
 import { AvailableSlotsService } from "./AvailableSlots.service";
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
 import { AvailableSlot, BookedClass, User } from "@prisma/client";
 import { addWeeks } from "date-fns";
-import { SlotIsNotAvailableError } from "@/lib/errors";
+import {
+  BookedClassNotFoundError,
+  SlotIsNotAvailableError,
+  UnauthorizedError,
+  UserNotFoundError,
+} from "@/lib/errors";
 
 export class BookedClassesService {
   private userRepository: UserRepository;
@@ -32,7 +36,7 @@ export class BookedClassesService {
   public async deleteAllBookedClassesByEmail(email: string) {
     const user = await this.userRepository.findStudentByEmail(email);
     if (!user) {
-      throw new Error("User not found");
+      throw new UserNotFoundError("User not found", { email });
     }
     await this.bookedClassesRepository.deleteAllBookedClassesByStudentId(
       user.id
@@ -47,20 +51,24 @@ export class BookedClassesService {
     const user = await this.userRepository.findStudentByEmail(email);
 
     if (!user?.student) {
-      throw new Error("You must be a student to book classes");
+      throw new UnauthorizedError("User is not a student", {
+        email,
+      });
     }
 
     const assignedTeacherId = user.student.assignedTeacherId;
 
     if (assignedTeacherId) {
       const result = this.bookedClassesRepository.createBookedClasses(
-        selectedSlots.map((date) => ({
-          date,
-          teacherId: assignedTeacherId,
-          studentId: user.id,
-          recurring: isRecurrent,
-          isActive: true,
-        }))
+        selectedSlots.map(
+          (date) =>
+            ({
+              date,
+              teacherId: assignedTeacherId,
+              studentId: user.id,
+              recurring: isRecurrent,
+            }) as BookedClass
+        )
       );
       return Response.json({ result }, { status: 200 });
     }
@@ -83,39 +91,38 @@ export class BookedClassesService {
     );
 
     await this.bookedClassesRepository.createBookedClasses(
-      selectedSlots.map((date) => ({
-        date,
-        teacherId: teacherToAssign,
-        studentId: user.id,
-        recurring: isRecurrent,
-        isActive: true,
-      }))
+      selectedSlots.map(
+        (date) =>
+          ({
+            date,
+            teacherId: teacherToAssign,
+            studentId: user.id,
+            recurring: isRecurrent,
+          }) as BookedClass
+      )
     );
 
     return { message: "Classes booked successfully" };
   }
 
   public async getBookedClasses() {
-    try {
-      const classes =
-        await this.bookedClassesRepository.fetchAllBookedClasses();
-      return classes;
-    } catch (error) {
-      logger.error(error, "Error fetching booked classes");
-      throw new Error("Failed to fetch booked classes");
-    }
+    return await this.bookedClassesRepository.fetchAllBookedClasses();
   }
 
   public async getBookedClassesByEmail(email: string) {
     const user = await this.userRepository.findStudentByEmail(email);
 
-    if (!user || !user.id || !user.student) {
-      throw new Error("User not found");
+    if (!user || !user.id) {
+      throw new UserNotFoundError();
     }
 
-    const classes =
-      await this.bookedClassesRepository.fetchBookedClassesByStudentId(user.id);
-    return classes;
+    if (!user.student) {
+      throw new UnauthorizedError();
+    }
+
+    return await this.bookedClassesRepository.fetchBookedClassesByStudentId(
+      user.id
+    );
   }
 
   public async deleteBookedClassById(
@@ -151,7 +158,7 @@ export class BookedClassesService {
       await this.bookedClassesRepository.fetchBookedClassById(classId);
 
     if (!bookedClass) {
-      throw new Error("Booked class not found");
+      throw new BookedClassNotFoundError({ classId });
     }
 
     const isAvailable = await this.availableSlotsService.isSlotAvailable(
@@ -160,7 +167,12 @@ export class BookedClassesService {
     );
 
     if (!isAvailable) {
-      throw new SlotIsNotAvailableError();
+      throw new SlotIsNotAvailableError({
+        bookedClassId: bookedClass.id,
+        teacherId: bookedClass.teacherId,
+        oldDate,
+        newDate,
+      });
     }
 
     await this.deleteBookedClassById(email, classId, oldDate);
@@ -171,9 +183,14 @@ export class BookedClassesService {
 
   private async getUserByEmail(email: string) {
     const user = await this.userRepository.findStudentByEmail(email);
-    if (!user || !user.id || !user.student) {
-      throw new Error("User not found");
+    if (!user || !user.id) {
+      throw new UserNotFoundError();
     }
+
+    if (!user.student) {
+      throw new UnauthorizedError("User is not a student", { email });
+    }
+
     return user;
   }
 
@@ -181,7 +198,7 @@ export class BookedClassesService {
     const bookedClass =
       await this.bookedClassesRepository.fetchBookedClassById(classId);
     if (!bookedClass) {
-      throw new Error("Booked class not found");
+      throw new BookedClassNotFoundError({ classId });
     }
     return bookedClass;
   }
@@ -192,34 +209,27 @@ export class BookedClassesService {
     classBeingDeletedDate: Date,
     deleteFutureOccurences: boolean = false
   ) {
-    try {
-      // Add singles classes for past occurrences
-      const singleClasses = this.generateSingleClasses(
-        bookedClass,
-        classBeingDeletedDate,
-        user
+    // Add singles classes for past occurrences
+    const singleClasses: BookedClass[] = this.generateSingleClasses(
+      bookedClass,
+      classBeingDeletedDate,
+      user
+    );
+    await this.bookedClassesRepository.createBookedClasses(singleClasses);
+
+    // Add recurring class for future occurrences if deleteFutureOccurences is true
+    if (!deleteFutureOccurences) {
+      const nextWeekDate = addWeeks(classBeingDeletedDate, 1);
+      const recurringClass: BookedClass = this.createRecurringClass(
+        nextWeekDate,
+        bookedClass.teacherId,
+        user.id
       );
-      await this.bookedClassesRepository.createBookedClasses(singleClasses);
-
-      // Add recurring class for future occurrences if deleteFutureOccurences is true
-      if (!deleteFutureOccurences) {
-        const nextWeekDate = addWeeks(classBeingDeletedDate, 1);
-        const recurringClass = this.createRecurringClass(
-          nextWeekDate,
-          bookedClass.teacherId,
-          user.id
-        );
-        await this.bookedClassesRepository.createBookedClasses([
-          recurringClass,
-        ]);
-      }
-
-      // Delete the class being deleted
-      await this.deleteClass(user.id, bookedClass.id);
-    } catch (error) {
-      logger.error(error, "Error creating booked classes");
-      throw new Error("Failed to create booked classes");
+      await this.bookedClassesRepository.createBookedClasses([recurringClass]);
     }
+
+    // Delete the class being deleted
+    await this.deleteClass(user.id, bookedClass.id);
   }
 
   private createRecurringClass(
@@ -232,8 +242,7 @@ export class BookedClassesService {
       teacherId,
       studentId,
       recurring: true,
-      isActive: true,
-    };
+    } as BookedClass;
   }
 
   private async deleteClass(studentId: number, classId: number) {
@@ -275,13 +284,15 @@ export class BookedClassesService {
       bookedClass.date,
       classBeingDeletedDate,
       new Date()
-    ).map((classDate) => ({
-      date: classDate,
-      teacherId: bookedClass.teacherId,
-      studentId: user.id,
-      recurring: false,
-      isActive: true,
-    }));
+    ).map(
+      (classDate) =>
+        ({
+          date: classDate,
+          teacherId: bookedClass.teacherId,
+          studentId: user.id,
+          recurring: false,
+        }) as BookedClass
+    );
   }
 
   private getWeeklyOccurrencesInPast(

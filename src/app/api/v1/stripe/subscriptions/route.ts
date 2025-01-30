@@ -6,11 +6,12 @@ import { cookies } from "next/headers";
 import {
   PreAuthTokenPayload,
   RegistrationTokenPayload,
-  Role,
   TokenType,
 } from "@/lib/types";
 import { signToken, verifyToken } from "@/lib/jwt";
-import prisma from "@/lib/prisma";
+import { handleErrorResponse } from "@/lib/errorUtils";
+import { UnauthorizedError } from "@/lib/errors";
+import { UserRepository } from "@domain/repositories/User.repository";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not set in the environment variables");
@@ -29,7 +30,7 @@ export const POST = async (request: NextRequest) => {
     const preAuthToken = cookieStore.get(TokenType.PRE_AUTH);
 
     if (!preAuthToken) {
-      return Response.json({ error: "Token is missing" }, { status: 400 });
+      throw new UnauthorizedError("Token is missing");
     }
 
     const decodedPreAuthToken = (await verifyToken(
@@ -37,12 +38,12 @@ export const POST = async (request: NextRequest) => {
     )) as unknown as PreAuthTokenPayload;
 
     if (!decodedPreAuthToken.email || !decodedPreAuthToken.name) {
-      return Response.json({ error: "Invalid token" }, { status: 400 });
+      throw new UnauthorizedError("Invalid token");
     }
 
     const customer = await getOrCreateCustomer(email, name);
-    await setupCustomerPaymentMethod(customer.id, paymentMethodId);
-    const subscription = await createSubscription(customer.id, planId);
+    await setupStripeCustomerPaymentMethod(customer.id, paymentMethodId);
+    const subscription = await createStripeSubscription(customer.id, planId);
 
     const invoice = subscription.latest_invoice as Stripe.Invoice;
     const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
@@ -51,11 +52,7 @@ export const POST = async (request: NextRequest) => {
 
     if (!clientSecret) {
       logger.error("Failed to obtain client secret from Stripe");
-
-      return Response.json(
-        { error: "Failed to process payment" },
-        { status: 500 }
-      );
+      throw new UnauthorizedError("Failed to obtain client secret from Stripe");
     }
 
     const registrationTokenData: RegistrationTokenPayload = {
@@ -68,19 +65,21 @@ export const POST = async (request: NextRequest) => {
       maxAge: 60 * 5, // 5 minutes
     });
 
-    return Response.json({
-      clientSecret,
-      subscriptionId,
-    });
-  } catch (err: unknown) {
-    logger.error({ err }, "Error creating subscription");
-    if (err instanceof Stripe.errors.StripeError) {
-      return Response.json({ error: err.message }, { status: 400 });
-    }
     return Response.json(
-      { error: "An unexpected error occurred" },
-      { status: 500 }
+      {
+        clientSecret,
+        subscriptionId,
+      },
+      { status: 200 }
     );
+  } catch (err: unknown) {
+    logger.error(err, "Error creating subscription");
+    if (err instanceof Stripe.errors.StripeError) {
+      return handleErrorResponse(err, 400);
+    } else if (err instanceof UnauthorizedError) {
+      return handleErrorResponse(err, 400);
+    }
+    return handleErrorResponse(new Error("An unexpected error occurred"), 500);
   }
 };
 
@@ -97,40 +96,14 @@ const getOrCreateCustomer = async (
     stripeCustomer = await stripe.customers.create({ email });
   }
 
-  await prisma.user.upsert({
-    where: { email },
-    create: {
-      email,
-      name,
-      roles: {
-        create: {
-          role: {
-            connect: {
-              name: Role.STUDENT,
-            },
-          },
-        },
-      },
-      student: {
-        create: {
-          stripeCustomerId: stripeCustomer.id,
-        },
-      },
-    },
-    update: {
-      student: {
-        upsert: {
-          create: { stripeCustomerId: stripeCustomer.id },
-          update: { stripeCustomerId: stripeCustomer.id },
-        },
-      },
-    },
-  });
+  const userRepository = new UserRepository();
+
+  await userRepository.upsertStudent(email, name, stripeCustomer);
 
   return stripeCustomer;
 };
 
-const setupCustomerPaymentMethod = async (
+const setupStripeCustomerPaymentMethod = async (
   customerId: string,
   paymentMethodId: string
 ): Promise<void> => {
@@ -140,7 +113,7 @@ const setupCustomerPaymentMethod = async (
   });
 };
 
-const createSubscription = async (
+const createStripeSubscription = async (
   customerId: string,
   planId: string
 ): Promise<Stripe.Subscription> => {

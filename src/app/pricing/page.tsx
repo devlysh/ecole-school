@@ -32,7 +32,7 @@ const PricingPage = async () => {
       <Pricing languages={languages} currencies={currencies} plans={plans} />
     );
   } catch (err: unknown) {
-    logger.error({ err }, "Error in PricingPage");
+    logger.error(err, "Error in PricingPage");
     redirect("/quiz");
   }
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import AccountSidebarItem from "./AccountSidebarItem";
-import { Role } from "@/lib/types";
+import { RoleName } from "@/lib/types";
 import clsx from "clsx";
 
 interface SidebarProps {
@@ -10,9 +10,9 @@ interface SidebarProps {
 }
 
 const AccountSidebar: React.FC<SidebarProps> = ({ name, roles, className }) => {
-  const isAdmin = roles.includes(Role.ADMIN);
-  const isStudent = roles.includes(Role.STUDENT);
-  const isTeacher = roles.includes(Role.TEACHER);
+  const isAdmin = roles.includes(RoleName.ADMIN);
+  const isStudent = roles.includes(RoleName.STUDENT);
+  const isTeacher = roles.includes(RoleName.TEACHER);
   return (
     <aside className={clsx("w-1/4 bg-gray-200 p-4", className)}>
       <h2 className="text-lg font-bold">Welcome, {name}!</h2>

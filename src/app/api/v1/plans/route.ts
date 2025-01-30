@@ -3,16 +3,21 @@ import { signToken, verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PreAuthTokenPayload, TokenType } from "@/lib/types";
+import { handleErrorResponse } from "@/lib/errorUtils";
 
-export const GET = async () => {
+export const POST = async () => {
   const cookieStore = cookies();
 
   try {
     const existingPreAuthToken = cookieStore.get(TokenType.PRE_AUTH);
-    const email = cookieStore.get("email")?.value;
+    const currency = cookieStore.get("currency")?.value;
+    const language = cookieStore.get("language")?.value;
+    const selectedPrice = cookieStore.get("selectedPrice")?.value;
 
     cookieStore.delete(TokenType.PRE_AUTH);
-    cookieStore.delete("email");
+    cookieStore.delete("currency");
+    cookieStore.delete("language");
+    cookieStore.delete("selectedPrice");
 
     if (!existingPreAuthToken) {
       redirect("/quiz");
@@ -22,25 +27,27 @@ export const GET = async () => {
       existingPreAuthToken.value
     )) as unknown as PreAuthTokenPayload;
 
-    if (!decodedPreAuthToken || !decodedPreAuthToken.email) {
+    if (!decodedPreAuthToken) {
       redirect("/quiz");
     }
 
-    delete decodedPreAuthToken.exp;
+    const { email, name, quizAnswers } = decodedPreAuthToken;
 
-    const tokenData: PreAuthTokenPayload = {
-      ...decodedPreAuthToken,
-      email: email ?? decodedPreAuthToken.email,
+    const tokenData = {
+      name,
+      email,
+      currency,
+      language,
+      selectedPrice,
+      quizAnswers,
     };
-
     const newPreAuthToken = await signToken(tokenData, "1h");
-
     cookieStore.set(TokenType.PRE_AUTH, newPreAuthToken, {
       maxAge: 60 * 60 * 1, // 1 hour
     });
-    return Response.json(null);
+    return Response.json(null, { status: 200 });
   } catch (err: unknown) {
-    logger.error(err, "Error during checkout submission");
-    return Response.json("Failed to submit checkout", { status: 500 });
+    logger.error(err, "Error during plan submission");
+    return handleErrorResponse(new Error("Error during plan submission"), 500);
   }
 };

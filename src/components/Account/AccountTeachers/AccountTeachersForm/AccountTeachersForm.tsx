@@ -6,14 +6,15 @@ import logger from "@/lib/logger";
 import { EventInput } from "@fullcalendar/core";
 import { useFormik } from "formik";
 import ScheduleCalendar from "./ScheduleCalendar";
-import { addTeacher } from "@/app/api/v1/teachers/add/request";
+import { addTeacherRequest } from "@/app/api/v1/teachers/request";
 import { useRouter } from "next/navigation";
-import { checkEmailRequest } from "@/app/api/v1/email/check/request";
+import { checkEmailRequest } from "@/app/api/v1/email/[email]/request";
 import { TeacherFormValues } from "@/lib/types";
-import { updateTeacher } from "@/app/api/v1/teachers/update/[email]/request";
-import { fetchTeacherByEmail } from "@/app/api/v1/teachers/[email]/request";
+import { updateTeacherRequest } from "@/app/api/v1/teachers/[email]/request";
+import { fetchTeacherByEmailRequest } from "@/app/api/v1/teachers/[email]/request";
 import { AvailableSlot, Teacher, User, Vacation } from "@prisma/client";
 import { convertToRruleDate } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 interface AccountTeachersFormProps {
   email?: string;
@@ -30,44 +31,49 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({ email }) => {
     const fetchTeacher = async () => {
       if (!email) return;
 
-      const user: User & {
-        teacher: Teacher & {
-          availableSlots: AvailableSlot[];
-          vacations: Vacation[];
-        };
-      } = await fetchTeacherByEmail(email);
+      try {
+        const user: User & {
+          teacher: Teacher & {
+            availableSlots: AvailableSlot[];
+            vacations: Vacation[];
+          };
+        } = await fetchTeacherByEmailRequest(email);
 
-      if (!user || !user.name || !user.teacher) return;
+        if (!user || !user.name || !user.teacher) return;
 
-      setName(user.name);
+        setName(user.name);
 
-      setTimeSlots(
-        shapeTimeSlots(
-          user.teacher.availableSlots.map((slot: AvailableSlot) => ({
-            start: slot.startTime,
-            end: slot.endTime,
-            rrule: slot.rrule || undefined,
-            extendedProps: {
+        setTimeSlots(
+          shapeTimeSlots(
+            user.teacher.availableSlots.map((slot: AvailableSlot) => ({
+              start: slot.startTime,
+              end: slot.endTime,
               rrule: slot.rrule || undefined,
-              dtStart:
-                convertToRruleDate(new Date(slot.startTime)) || undefined,
-              dtEnd: convertToRruleDate(new Date(slot.endTime)) || undefined,
-            },
-          }))
-        )
-      );
+              extendedProps: {
+                rrule: slot.rrule || undefined,
+                dtStart:
+                  convertToRruleDate(new Date(slot.startTime)) || undefined,
+                dtEnd: convertToRruleDate(new Date(slot.endTime)) || undefined,
+              },
+            }))
+          )
+        );
 
-      setVacations(
-        user.teacher.vacations.map((vac: Vacation) => ({
-          id: vac.id.toString(),
-          title: "Vacation",
-          start: vac.date,
-          end: vac.date,
-          allDay: true,
-          color: "tomato",
-          vacation: true,
-        }))
-      );
+        setVacations(
+          user.teacher.vacations.map((vac: Vacation) => ({
+            id: vac.id.toString(),
+            title: "Vacation",
+            start: vac.date,
+            end: vac.date,
+            allDay: true,
+            color: "tomato",
+            vacation: true,
+          }))
+        );
+      } catch (err: unknown) {
+        toast.error("Error fetching teacher data");
+        logger.error(err, "Error fetching teacher data");
+      }
     };
     fetchTeacher();
   }, [email]);
@@ -91,16 +97,17 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({ email }) => {
         };
 
         if (isTaken) {
-          const result = await updateTeacher(teacher);
+          const result = await updateTeacherRequest(teacher);
           logger.info({ result, teacher }, "Teacher updated successfully");
         } else {
-          const result = await addTeacher(teacher);
+          const result = await addTeacherRequest(teacher);
           logger.info({ result, teacher }, "Teacher added successfully");
         }
 
         router.push("/account/teachers");
-      } catch (err) {
-        logger.error({ err }, "Error adding/updating teacher");
+      } catch (err: unknown) {
+        toast.error("Error adding/updating teacher");
+        logger.error(err, "Error adding/updating teacher");
       }
     },
     [router, timeSlots, vacations]

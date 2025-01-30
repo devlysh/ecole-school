@@ -11,8 +11,8 @@ import MyClassesTable from "./MyClassesTable";
 import DeleteClassModal from "./DeleteClassModal";
 import RescheduleClassModal from "./RescheduleClassModal";
 import {
-  deleteBookedClass,
-  rescheduleBookedClass,
+  deleteBookedClassRequest,
+  rescheduleBookedClassRequest,
 } from "src/app/api/v1/booked-classes/[id]/request";
 import { determineBookedClassId } from "@/lib/utils";
 import useDeleteClass from "@/hooks/useDeleteClass";
@@ -40,19 +40,20 @@ const AccountMyClasses = () => {
     try {
       const bookedClassId = determineBookedClassId(selectedClass);
 
-      await rescheduleBookedClass(
+      await rescheduleBookedClassRequest(
         bookedClassId,
         new Date(selectedClass.date),
         new Date(rescheduleDate)
       );
       await fetchClasses();
-    } catch (err) {
+      toast.success("Class rescheduled successfully");
+    } catch (err: unknown) {
+      toast.error(
+        "The selected slot is not available. Please choose another date."
+      );
       logger.error(
         { err, classDate: selectedClass.date, rescheduleDate },
         "Failed to reschedule class"
-      );
-      toast.error(
-        "The selected slot is not available. Please choose another date."
       );
     } finally {
       rescheduleClassModal.onClose();
@@ -65,7 +66,7 @@ const AccountMyClasses = () => {
     try {
       const bookedClassId = determineBookedClassId(selectedClass);
 
-      await deleteBookedClass(
+      await deleteBookedClassRequest(
         bookedClassId,
         new Date(selectedClass.date),
         deleteFutureOccurences
@@ -75,8 +76,10 @@ const AccountMyClasses = () => {
         prevClasses.filter((c) => c.id !== selectedClass.id)
       );
       await fetchClasses();
-    } catch (err) {
-      logger.error({ err }, "Failed to delete class");
+      toast.success("Class deleted successfully");
+    } catch (err: unknown) {
+      toast.error("Failed to delete class");
+      logger.error(err, "Failed to delete class");
     } finally {
       deleteClassModal.onClose();
     }

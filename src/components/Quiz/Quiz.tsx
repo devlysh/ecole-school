@@ -11,8 +11,9 @@ import QuestionStep from "./Steps/QuestionStep";
 import FormStep from "./Steps/FormStep";
 import logger from "@/lib/logger";
 import Cookies from "js-cookie";
-import { checkEmailRequest } from "@/app/api/v1/email/check/request";
-import { submitQuizRequest } from "@/app/api/v1/submit-quiz/request";
+import { checkEmailRequest } from "@/app/api/v1/email/[email]/request";
+import { submitQuizRequest } from "@/app/api/v1/quiz/request";
+import { toast } from "react-toastify";
 
 const Quiz = () => {
   const router = useRouter();
@@ -45,7 +46,8 @@ const Quiz = () => {
       await submitQuizRequest();
 
       router.push("/pricing");
-    } catch (err) {
+    } catch (err: unknown) {
+      toast.error("Failed to register user");
       logger.error(err, "Error registering user");
     }
   }, [router]);
@@ -60,12 +62,12 @@ const Quiz = () => {
             setEmailError("Email is already taken");
             return;
           }
-        } catch (error) {
-          logger.error({ error }, "Error during check if email is taken");
-          if (error instanceof Error) {
-            setEmailError(error.message);
-          } else if (typeof error === "string") {
-            setEmailError(error);
+        } catch (err: unknown) {
+          logger.error(err, "Error during check if email is taken");
+          if (err instanceof Error) {
+            setEmailError(err.message);
+          } else if (typeof err === "string") {
+            setEmailError(err);
           } else {
             setEmailError("Failed to check if email is taken");
           }

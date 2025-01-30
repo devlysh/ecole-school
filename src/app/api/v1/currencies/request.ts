@@ -1,5 +1,3 @@
-import logger from "@/lib/logger";
-
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 if (!NEXT_PUBLIC_BASE_URL) {
@@ -10,7 +8,6 @@ export const getCurrenciesRequest = async () => {
   const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/currencies`);
 
   if (!response.ok) {
-    logger.error({ response }, "Error during fetch currencies");
     throw new Error(response.statusText ?? "Failed to fetch currencies");
   }
 

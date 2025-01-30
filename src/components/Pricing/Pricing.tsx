@@ -17,7 +17,8 @@ import LanguageSelect from "./LanguageSelect";
 import CurrencySelect from "./CurrencySelect";
 import logger from "@/lib/logger";
 import jwt from "jsonwebtoken";
-import { submitPlanRequest } from "@/app/api/v1/submit-plan/request";
+import { submitPlanRequest } from "@/app/api/v1/plans/request";
+import { toast } from "react-toastify";
 
 const Pricing = ({
   languages,
@@ -62,7 +63,7 @@ const Pricing = ({
         const priceId = JSON.parse(payload.selectedPrice).id;
         setSelectedPriceId(priceId);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       logger.error(err, "Failed to parse pricing data from cookies");
     }
   }, [router]);
@@ -92,19 +93,23 @@ const Pricing = ({
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (selectedPriceId) {
-      Cookies.set("language", selectedLanguage);
-      Cookies.set("currency", selectedCurrency);
-      Cookies.set(
-        "selectedPrice",
-        JSON.stringify(plans.find((plan) => plan.id === selectedPriceId))
-      );
-
-      await submitPlanRequest();
-
-      router.push("/checkout");
-    } else {
+    if (!selectedPriceId) {
       throw new Error("Selected plan ID should be defined");
+    }
+
+    Cookies.set("language", selectedLanguage);
+    Cookies.set("currency", selectedCurrency);
+    Cookies.set(
+      "selectedPrice",
+      JSON.stringify(plans.find((plan) => plan.id === selectedPriceId))
+    );
+
+    try {
+      await submitPlanRequest();
+      router.push("/checkout");
+    } catch (err: unknown) {
+      toast.error("Failed to submit plan");
+      logger.error(err, "Error during plan submission");
     }
   }, [plans, router, selectedCurrency, selectedLanguage, selectedPriceId]);
 

@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback } from "react";
 import { addMonths, addWeeks } from "date-fns";
 import { getWeeklyOccurencesForPeriod } from "@/lib/utils";
 import { fetchBookedClassesRequest } from "src/app/api/v1/booked-classes/request";
+import { toast } from "react-toastify";
 
 export const useClasses = (creditCount: number) => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -20,8 +21,9 @@ export const useClasses = (creditCount: number) => {
       classes = markClassesWithCredit(classes, creditCount);
 
       setClasses(classes);
-    } catch (err) {
-      logger.error({ err }, "Failed to fetch classes");
+    } catch (err: unknown) {
+      toast.error("Failed to fetch classes");
+      logger.error(err, "Failed to fetch classes");
     } finally {
       setLoading(false);
     }
