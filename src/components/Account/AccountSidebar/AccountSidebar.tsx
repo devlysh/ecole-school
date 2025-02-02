@@ -21,16 +21,10 @@ const AccountSidebar: React.FC<SidebarProps> = ({ name, roles, className }) => {
           <AccountSidebarItem href="/account/teachers" label="Teachers" />
         )}
 
-        {isTeacher && (
-          <AccountSidebarItem
-            href="/account/teachers-guide"
-            label="How to use Ecole"
-          />
-        )}
-
-        {isStudent && (
+        {(isStudent || isTeacher) && (
           <AccountSidebarItem href="/account/my-classes" label="My Classes" />
         )}
+
         {isStudent && (
           <AccountSidebarItem
             href="/account/book-classes"
@@ -39,13 +33,8 @@ const AccountSidebar: React.FC<SidebarProps> = ({ name, roles, className }) => {
         )}
 
         {isStudent && (
-          <AccountSidebarItem
-            href="/account/how-to-use"
-            label="How to use Ecole"
-          />
+          <AccountSidebarItem href="/account/settings" label="Settings" />
         )}
-
-        <AccountSidebarItem href="/account/settings" label="Settings" />
       </ul>
     </aside>
   );

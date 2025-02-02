@@ -6,8 +6,5 @@ export const handleErrorResponse = (
   additionalInfo?: Record<string, unknown>
 ) => {
   logger.error({ err, ...additionalInfo }, "Error");
-  return Response.json(
-    { error: err, message: err.message, ...additionalInfo },
-    { status }
-  );
+  return Response.json({ ...err, ...additionalInfo }, { status });
 };

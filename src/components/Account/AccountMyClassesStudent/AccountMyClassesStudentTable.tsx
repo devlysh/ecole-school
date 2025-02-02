@@ -10,13 +10,15 @@ import {
 } from "@nextui-org/react";
 import { VerticalDotsIcon } from "@/icons";
 
-interface MyClassesTableProps {
+interface AccountMyClassesStudentTableProps {
   classes: ClassItem[];
   handleOpenRescheduleBookingModal: (classItem: ClassItem) => void;
   handleOpenDeleteBookingModal: (classItem: ClassItem) => void;
 }
 
-const MyClassesTable: React.FC<MyClassesTableProps> = ({
+const AccountMyClassesStudentTable: React.FC<
+  AccountMyClassesStudentTableProps
+> = ({
   classes,
   handleOpenRescheduleBookingModal,
   handleOpenDeleteBookingModal,
@@ -102,4 +104,4 @@ const MyClassesTable: React.FC<MyClassesTableProps> = ({
   );
 };
 
-export default MyClassesTable;
+export default AccountMyClassesStudentTable;

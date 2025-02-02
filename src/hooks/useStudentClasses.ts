@@ -8,7 +8,7 @@ import { getWeeklyOccurencesForPeriod } from "@/lib/utils";
 import { fetchBookedClassesRequest } from "src/app/api/v1/booked-classes/request";
 import { toast } from "react-toastify";
 
-export const useClasses = (creditCount: number) => {
+export const useStudentClasses = (creditCount: number) => {
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 

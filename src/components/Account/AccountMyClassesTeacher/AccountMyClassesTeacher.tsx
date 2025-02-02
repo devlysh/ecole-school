@@ -3,13 +3,12 @@
 import React from "react";
 import { toast } from "react-toastify";
 import logger from "@/lib/logger";
-import { useClasses } from "@/hooks/useClasses";
-import { useCreditCount } from "@/hooks/useCreditCount";
+import { useTeacherClasses } from "@/hooks/useTeacherClasses";
 import useClassModals from "@/hooks/useClassModals";
 import useRescheduleClass from "@/hooks/useRescheduleClass";
-import MyClassesTable from "./MyClassesTable";
-import DeleteClassModal from "./DeleteClassModal";
-import RescheduleClassModal from "./RescheduleClassModal";
+import AccountMyClassesTeacherTable from "./AccountMyClassesTeacherTable";
+import DeleteClassModal from "../AccountMyClassesStudent/DeleteClassModal";
+import RescheduleClassModal from "../AccountMyClassesStudent/RescheduleClassModal";
 import {
   deleteBookedClassRequest,
   rescheduleBookedClassRequest,
@@ -17,10 +16,8 @@ import {
 import { determineBookedClassId } from "@/lib/utils";
 import useDeleteClass from "@/hooks/useDeleteClass";
 
-const AccountMyClasses = () => {
-  const creditCount = useCreditCount();
-  const { classes, loading, setClasses, fetchClasses } =
-    useClasses(creditCount);
+const AccountMyClassesTeacher = () => {
+  const { classes, loading, setClasses, fetchClasses } = useTeacherClasses();
   const {
     deleteClassModal,
     rescheduleClassModal,
@@ -72,9 +69,7 @@ const AccountMyClasses = () => {
         deleteFutureOccurences
       );
 
-      setClasses((prevClasses) =>
-        prevClasses.filter((c) => c.id !== selectedClass.id)
-      );
+      setClasses();
       await fetchClasses();
       toast.success("Class deleted successfully");
     } catch (err: unknown) {
@@ -91,7 +86,7 @@ const AccountMyClasses = () => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <MyClassesTable
+        <AccountMyClassesTeacherTable
           classes={classes}
           handleOpenRescheduleBookingModal={handleOpenRescheduleBookingModal}
           handleOpenDeleteBookingModal={handleOpenDeleteBookingModal}
@@ -116,4 +111,4 @@ const AccountMyClasses = () => {
   );
 };
 
-export default AccountMyClasses;
+export default AccountMyClassesTeacher;

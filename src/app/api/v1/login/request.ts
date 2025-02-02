@@ -1,3 +1,5 @@
+import { InvalidEmailOrPasswordError } from "@/lib/errors";
+
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 if (!NEXT_PUBLIC_BASE_URL) {
@@ -12,7 +14,13 @@ export const loginRequest = async (email: string, password: string) => {
   });
 
   if (!response.ok) {
-    throw new Error(response.statusText ?? "Failed to login");
+    const error = await response.json();
+
+    if (error.name === "InvalidEmailOrPasswordError") {
+      throw new InvalidEmailOrPasswordError();
+    }
+
+    throw new Error(error.message);
   }
 
   return await response.json();

@@ -1,4 +1,4 @@
-import { decodeClassId } from "@/hooks/useClasses";
+import { decodeClassId } from "@/hooks/useStudentClasses";
 import { ClassItem, Plan, PlansMap } from "./types";
 
 // Groups an array of plans by their currency and returns a map

@@ -19,7 +19,7 @@ const rolePaths: Record<RoleName, RegExp[]> = {
   [RoleName.TEACHER]: [
     /^\/account$/,
     /^\/account\/teacher$/,
-    /^\/account\/settings$/,
+    /^\/account\/my-classes$/,
   ],
 };
 
@@ -40,7 +40,7 @@ export const middleware = async (req: NextRequest) => {
     if (isGuestPath) {
       return NextResponse.next();
     }
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   try {
@@ -56,10 +56,10 @@ export const middleware = async (req: NextRequest) => {
       return NextResponse.next();
     }
 
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/account", req.url));
   } catch (err: unknown) {
     logger.error(err, "Error in middleware");
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 };
 

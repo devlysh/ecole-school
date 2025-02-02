@@ -33,6 +33,16 @@ export class UnauthorizedError extends ErrorWithMetadata {
   }
 }
 
+export class InvalidEmailOrPasswordError extends ErrorWithMetadata {
+  constructor(
+    message: string = "Invalid email or password",
+    metadata?: Record<string, unknown>
+  ) {
+    super(message, metadata);
+    this.name = "InvalidEmailOrPasswordError";
+  }
+}
+
 export class EmailIsMissingError extends Error {
   constructor(message: string = "Email is missing") {
     super(message);

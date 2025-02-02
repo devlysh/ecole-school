@@ -4,7 +4,11 @@ import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { TokenType } from "@/lib/types";
-import { UnauthorizedError, UserNotFoundError } from "@/lib/errors";
+import {
+  InvalidEmailOrPasswordError,
+  UnauthorizedError,
+  UserNotFoundError,
+} from "@/lib/errors";
 import { handleErrorResponse } from "@/lib/errorUtils";
 
 export const POST = async (request: Request) => {
@@ -33,7 +37,7 @@ export const POST = async (request: Request) => {
       !user.passwordHash ||
       !(await bcrypt.compare(password, user.passwordHash))
     ) {
-      throw new UnauthorizedError("Invalid email or password");
+      throw new InvalidEmailOrPasswordError();
     }
 
     if (!user.isActive) {
@@ -66,6 +70,8 @@ export const POST = async (request: Request) => {
     if (err instanceof UnauthorizedError) {
       return handleErrorResponse(err, 401);
     } else if (err instanceof UserNotFoundError) {
+      return handleErrorResponse(err, 401);
+    } else if (err instanceof InvalidEmailOrPasswordError) {
       return handleErrorResponse(err, 401);
     }
 

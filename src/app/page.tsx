@@ -1,7 +1,13 @@
-import UnderConstruction from "@/components/UnderConstruction";
+import { redirect } from "next/navigation";
+import { verifyAccessToken } from "@/lib/jwt";
+import logger from "@/lib/logger";
 
-const HomePage = () => {
-  return <UnderConstruction />;
-};
-
-export default HomePage;
+export default async function Home() {
+  try {
+    await verifyAccessToken();
+    redirect("/account");
+  } catch {
+    logger.info("No access token found, redirecting to login");
+    redirect("/login");
+  }
+}
