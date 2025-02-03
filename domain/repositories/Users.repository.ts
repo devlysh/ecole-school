@@ -1,17 +1,18 @@
 import prisma from "@/lib/prisma";
 import { RoleName } from "@/lib/types";
+import { EventInput } from "@fullcalendar/core/index.js";
 import { Role, Student, Teacher, User } from "@prisma/client";
 import Stripe from "stripe";
 
 export class UsersRepository {
-  public async upsertStudent(
+  upsertStudent(
     email: string,
     name: string,
     stripeCustomer: Stripe.Customer,
     language: string,
     quizAnswers: Record<string, string>
   ): Promise<User> {
-    return await prisma.user.upsert({
+    return prisma.user.upsert({
       where: { email },
       create: {
         email,
@@ -46,8 +47,8 @@ export class UsersRepository {
     });
   }
 
-  public async findTeachers(): Promise<User[]> {
-    return await prisma.user.findMany({
+  findTeachers(): Promise<User[]> {
+    return prisma.user.findMany({
       where: {
         roles: {
           some: {
@@ -95,16 +96,16 @@ export class UsersRepository {
     });
   }
 
-  public async findByEmail(email: string): Promise<User | null> {
+  findByEmail(email: string): Promise<User | null> {
     return prisma.user.findUnique({
       where: { email },
     });
   }
 
-  public async findByEmailWithRoles(
+  findByEmailWithRoles(
     email: string
   ): Promise<(User & { roles: { role: Role }[] }) | null> {
-    return await prisma.user.findUnique({
+    return prisma.user.findUnique({
       where: { email },
       include: {
         roles: {
@@ -116,7 +117,7 @@ export class UsersRepository {
     });
   }
 
-  public async findStudentsByIds(
+  findStudentsByIds(
     ids: number[]
   ): Promise<(User & { student: Student | null })[]> {
     return prisma.user.findMany({
@@ -125,7 +126,7 @@ export class UsersRepository {
     });
   }
 
-  public async findStudentByEmail(
+  findStudentByEmail(
     email: string
   ): Promise<(User & { student: Student | null }) | null> {
     return prisma.user.findUnique({
@@ -136,10 +137,10 @@ export class UsersRepository {
     });
   }
 
-  public async findTeacherByEmail(
+  findTeacherByEmail(
     email: string
   ): Promise<(User & { teacher: Teacher | null }) | null> {
-    return await prisma.user.findUnique({
+    return prisma.user.findUnique({
       where: { email },
       include: {
         teacher: {
@@ -152,15 +153,85 @@ export class UsersRepository {
     });
   }
 
-  public async updateName(id: number, name: string) {
-    return await prisma.user.update({
+  createTeacher(
+    name: string,
+    email: string,
+    passwordHash: string,
+    timeSlots: EventInput[]
+  ): Promise<User> {
+    return prisma.user.create({
+      data: {
+        name: `${name}`,
+        email,
+        passwordHash,
+        settings: {},
+        teacher: {
+          create: {
+            availableSlots: {
+              create: timeSlots.map((slot) => ({
+                startTime: slot.start as string,
+                endTime: slot.end as string,
+                rrule: slot.rrule as string,
+              })),
+            },
+          },
+        },
+        roles: {
+          create: {
+            role: {
+              connect: {
+                name: "teacher",
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  updateTeacherByEmail(
+    email: string,
+    name: string,
+    timezone: string,
+    timeSlots: EventInput[],
+    vacations: EventInput[]
+  ) {
+    return prisma.user.update({
+      where: { email },
+      data: {
+        name: `${name}`,
+        settings: { timezone },
+        teacher: {
+          update: {
+            availableSlots: {
+              deleteMany: {},
+              create: timeSlots.map((slot) => ({
+                startTime: slot.start as string,
+                endTime: slot.end as string,
+                rrule: slot.extendedProps?.rrule,
+              })),
+            },
+            vacations: {
+              deleteMany: {},
+              create: vacations.map((slot) => ({
+                date: new Date(slot.start as string).toISOString(),
+              })),
+            },
+          },
+        },
+      },
+    });
+  }
+
+  updateName(id: number, name: string) {
+    return prisma.user.update({
       where: { id },
       data: { name },
     });
   }
 
-  public async updatePassword(id: number, passwordHash: string) {
-    return await prisma.user.update({
+  updatePassword(id: number, passwordHash: string) {
+    return prisma.user.update({
       where: { id },
       data: {
         passwordHash,

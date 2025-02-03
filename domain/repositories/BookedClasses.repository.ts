@@ -3,19 +3,19 @@ import { StudentClass } from "@/lib/types";
 import { BookedClass } from "@prisma/client";
 
 export class BookedClassesRepository {
-  async create(bookedClasses: Omit<BookedClass, "id">[]) {
+  create(bookedClasses: Omit<BookedClass, "id">[]) {
     return prisma.bookedClass.createMany({ data: bookedClasses });
   }
 
-  async findAll(): Promise<BookedClass[]> {
+  findAll(): Promise<BookedClass[]> {
     return prisma.bookedClass.findMany({});
   }
 
-  async findById(id: number): Promise<BookedClass | null> {
+  findById(id: number): Promise<BookedClass | null> {
     return prisma.bookedClass.findUnique({ where: { id } });
   }
 
-  async findByStudentId(studentId: number): Promise<StudentClass[]> {
+  findByStudentId(studentId: number): Promise<StudentClass[]> {
     return prisma.bookedClass.findMany({
       where: { studentId: studentId },
       select: {
@@ -26,7 +26,7 @@ export class BookedClassesRepository {
     });
   }
 
-  async findByTeacherId(
+  findByTeacherId(
     teacherId: number
   ): Promise<Pick<BookedClass, "id" | "date" | "recurring" | "studentId">[]> {
     return prisma.bookedClass.findMany({
@@ -40,7 +40,7 @@ export class BookedClassesRepository {
     });
   }
 
-  async deleteById(id: number) {
+  deleteById(id: number) {
     return prisma.bookedClass.delete({
       where: {
         id,
@@ -48,7 +48,7 @@ export class BookedClassesRepository {
     });
   }
 
-  async deleteAllByStudentId(studentId: number) {
+  deleteAllByStudentId(studentId: number) {
     return prisma.bookedClass.deleteMany({
       where: { studentId: studentId },
     });

@@ -8,7 +8,7 @@ export class StudentsRepository {
    * @param teacherId The teacher's userId to assign.
    *                  Pass null if unassigning a teacher, if your logic allows.
    */
-  public async updateAssignedTeacher(
+  updateAssignedTeacher(
     studentId: number,
     teacherId: number | null
   ): Promise<Student> {
@@ -21,17 +21,27 @@ export class StudentsRepository {
     });
   }
 
-  public async resetAssignedTeacher(userId: number, student: Student) {
+  resetAssignedTeacher(userId: number, student: Student) {
     if (!student.assignedTeacherId) {
       throw new Error("User has no assigned teacher");
     }
 
-    return await prisma.student.update({
+    return prisma.student.update({
       where: { userId },
       data: {
         assignedTeacherId: null,
         exTeacherIds: [...student.exTeacherIds, student.assignedTeacherId],
       },
+    });
+  }
+
+  updateStripeCustomerId(
+    userId: number,
+    stripeCustomerId: string
+  ) {
+    return prisma.student.update({
+      where: { userId },
+      data: { stripeCustomerId },
     });
   }
 }
