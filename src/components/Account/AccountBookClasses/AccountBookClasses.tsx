@@ -35,7 +35,7 @@ const AccountBookClasses: React.FC = () => {
             isSelected={isRecurrentSchedule}
             onValueChange={setIsRecurrentSchedule}
           >
-            Recurrent schedule
+            Fixed schedule
           </Switch>
         </div>
       </div>
