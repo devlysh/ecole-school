@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { getAvailableSlotsRequest } from "@/app/api/v1/available-slots/request";
 import { AvailableCalendarSlot } from "@/lib/types";
 import { format } from "date-fns";
@@ -36,6 +36,10 @@ export const useAvailableSlots = () => {
     },
     [isRecurrentSchedule, selectedSlots]
   );
+
+  useEffect(() => {
+    setSelectedSlots([]);
+  }, [isRecurrentSchedule]);
 
   return {
     availableSlots,

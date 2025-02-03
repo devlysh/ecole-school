@@ -23,10 +23,9 @@ export const AccountBookClassesCalendar: React.FC<
   isRecurrentSchedule,
   fetchAvailableSlots,
 }) => {
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
-    const now = new Date();
-    return isRecurrentSchedule ? startOfWeek(now) : addDays(now, 1);
-  });
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
+    startOfWeek(new Date())
+  );
 
   const [hourRange, setHourRange] = useState<number[]>(() => hours);
 
@@ -114,7 +113,15 @@ export const AccountBookClassesCalendar: React.FC<
   useEffect(() => {
     const endOfWeek = addDays(currentWeekStart, 6);
     fetchAvailableSlots(currentWeekStart, endOfWeek);
-  }, [currentWeekStart, fetchAvailableSlots, isRecurrentSchedule]);
+  }, [currentWeekStart, fetchAvailableSlots]);
+
+  useEffect(() => {
+    if (isRecurrentSchedule) {
+      setCurrentWeekStart(startOfWeek(new Date()));
+    } else {
+      setCurrentWeekStart(addDays(new Date(), 1));
+    }
+  }, [isRecurrentSchedule]);
 
   return (
     <div className="flex flex-col gap-4 w-full">
