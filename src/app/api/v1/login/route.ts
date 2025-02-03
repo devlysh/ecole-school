@@ -1,7 +1,6 @@
 import { signToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { cookies } from "next/headers";
-import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { TokenType } from "@/lib/types";
 import {
@@ -10,21 +9,13 @@ import {
   UserNotFoundError,
 } from "@/lib/errors";
 import { handleErrorResponse } from "@/lib/errorUtils";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 
 export const POST = async (request: Request) => {
   const { email, password } = await request.json();
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        roles: {
-          include: {
-            role: true,
-          },
-        },
-      },
-    });
+    const user = await new UsersRepository().findByEmailWithRoles(email);
 
     if (!user) {
       throw new UserNotFoundError();

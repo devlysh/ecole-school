@@ -1,5 +1,6 @@
 import logger from "@/lib/logger";
-import prisma from "@/lib/prisma";
+import { StudentsRepository } from "@domain/repositories/Students.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 import Stripe from "stripe";
 
 export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
@@ -11,14 +12,11 @@ export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
   }
 
   try {
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        student: true,
-      },
-    });
+    const existingStudent = await new UsersRepository().findStudentByEmail(
+      email
+    );
 
-    if (!existingUser) {
+    if (!existingStudent) {
       logger.warn(
         { email, stripeCustomerId },
         "Received customer.updated event for non-existent user"
@@ -26,7 +24,7 @@ export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
       return;
     }
 
-    if (!existingUser.student) {
+    if (!existingStudent.student) {
       logger.warn(
         { email, stripeCustomerId },
         "Received customer.updated event for user without student record"
@@ -35,13 +33,11 @@ export const handleCustomerUpdated = async (eventData: Stripe.Customer) => {
     }
 
     // Only update if the stripeCustomerId has changed
-    if (existingUser.student.stripeCustomerId !== stripeCustomerId) {
-      await prisma.student.update({
-        where: { userId: existingUser.id },
-        data: {
-          stripeCustomerId,
-        },
-      });
+    if (existingStudent.student.stripeCustomerId !== stripeCustomerId) {
+      await new StudentsRepository().updateStripeCustomerId(
+        existingStudent.id,
+        stripeCustomerId
+      );
       logger.info(
         { email, stripeCustomerId },
         "Updated student's Stripe customer ID"

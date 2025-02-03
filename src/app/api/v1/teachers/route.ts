@@ -47,34 +47,12 @@ export const POST = async (request: Request) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newTeacher = await prisma.user.create({
-      data: {
-        name: `${name}`,
-        email,
-        passwordHash,
-        settings: {},
-        teacher: {
-          create: {
-            availableSlots: {
-              create: timeSlots.map((slot) => ({
-                startTime: slot.start as string,
-                endTime: slot.end as string,
-                rrule: slot.rrule as string,
-              })),
-            },
-          },
-        },
-        roles: {
-          create: {
-            role: {
-              connect: {
-                name: "teacher",
-              },
-            },
-          },
-        },
-      },
-    });
+    const newTeacher = await new UsersRepository().createTeacher(
+      name,
+      email,
+      passwordHash,
+      timeSlots
+    );
 
     return Response.json(newTeacher, { status: 201 });
   } catch (err: unknown) {

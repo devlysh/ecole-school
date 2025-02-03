@@ -1,4 +1,3 @@
-import prisma from "@/lib/prisma";
 import logger from "@/lib/logger";
 import { AccessTokenPayload, RoleName, TeacherFormValues } from "@/lib/types";
 import { EventInput } from "@fullcalendar/core/index.js";
@@ -45,31 +44,13 @@ export const PUT = async (
       throw new BadRequestError();
     }
 
-    const updatedTeacher = await prisma.user.update({
-      where: { email: params.email },
-      data: {
-        name: `${name}`,
-        settings: { timezone },
-        teacher: {
-          update: {
-            availableSlots: {
-              deleteMany: {},
-              create: timeSlots.map((slot) => ({
-                startTime: slot.start as string,
-                endTime: slot.end as string,
-                rrule: slot.extendedProps?.rrule,
-              })),
-            },
-            vacations: {
-              deleteMany: {},
-              create: vacations.map((slot) => ({
-                date: new Date(slot.start as string).toISOString(),
-              })),
-            },
-          },
-        },
-      },
-    });
+    const updatedTeacher = await new UsersRepository().updateTeacherByEmail(
+      params.email,
+      name,
+      timezone,
+      timeSlots,
+      vacations
+    );
 
     return Response.json(updatedTeacher, { status: 200 });
   } catch (err: unknown) {

@@ -2,9 +2,9 @@ import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { CreditsRepository } from "@domain/repositories/Credits.repository";
 import { CreditService } from "@domain/services/Credit.service";
-import prisma from "@/lib/prisma";
 import { EmailIsMissingError, UnauthorizedError } from "@/lib/errors";
 import { handleErrorResponse } from "@/lib/errorUtils";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 
 export const GET = async () => {
   try {
@@ -15,12 +15,7 @@ export const GET = async () => {
       throw new EmailIsMissingError();
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        student: true,
-      },
-    });
+    const user = await new UsersRepository().findStudentByEmail(email);
 
     if (!user || !user.student) {
       throw new UnauthorizedError("User is not a student");

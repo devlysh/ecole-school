@@ -1,10 +1,10 @@
 import { handleErrorResponse } from "@/lib/errorUtils";
 import logger from "@/lib/logger";
-import prisma from "@/lib/prisma";
+import { CurrenciesRepository } from "@domain/repositories/Currencies.repository";
 
 export const GET = async () => {
   try {
-    const currencies = await prisma.currency.findMany();
+    const currencies = await new CurrenciesRepository().findAll();
 
     return Response.json(currencies, { status: 200 });
   } catch (err: unknown) {

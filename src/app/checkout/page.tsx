@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import Checkout from "@/components/Checkout";
 import { Plan, PreAuthTokenPayload, TokenType } from "@/lib/types";
-import { getLanguagesRequest } from "../api/v1/languages/request";
+import { LanguagesRepository } from "@domain/repositories/Languages.repository";
 
 const ChecokutPage = async () => {
   const cookieStore = cookies();
@@ -26,7 +26,7 @@ const ChecokutPage = async () => {
     redirect("/pricing");
   }
 
-  const languages = await getLanguagesRequest();
+  const languages = await new LanguagesRepository().findAll();
 
   return (
     <Checkout
