@@ -35,10 +35,7 @@ export class StudentsRepository {
     });
   }
 
-  updateStripeCustomerId(
-    userId: number,
-    stripeCustomerId: string
-  ) {
+  updateStripeCustomerId(userId: number, stripeCustomerId: string) {
     return prisma.student.update({
       where: { userId },
       data: { stripeCustomerId },

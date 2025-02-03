@@ -1,3 +1,5 @@
+import prisma from "@/lib/prisma";
+
 export class TeacherLanguagesRepository {
   create(teacherId: number, languageId: number) {
     return prisma.teacherLanguage.create({
@@ -13,7 +15,7 @@ export class TeacherLanguagesRepository {
 
   delete(teacherId: number, languageId: number) {
     return prisma.teacherLanguage.delete({
-      where: { teacherId, languageId },
+      where: { teacherId_languageId: { teacherId, languageId } },
     });
   }
 }
