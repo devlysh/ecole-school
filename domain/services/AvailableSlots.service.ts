@@ -196,12 +196,12 @@ export class AvailableSlotsService {
 
   private async fetchSlots(
     isRecurrentSchedule: boolean,
-    teacherId?: number
+    assignedTeacherId?: number
   ): Promise<AvailableSlot[] | null> {
-    if (teacherId) {
+    if (assignedTeacherId) {
       return isRecurrentSchedule
-        ? this.availableSlotsRepo.findRecurringByTeacherId(teacherId)
-        : this.availableSlotsRepo.findByTeacherId(teacherId);
+        ? this.availableSlotsRepo.findRecurringByTeacherId(assignedTeacherId)
+        : this.availableSlotsRepo.findByTeacherId(assignedTeacherId);
     } else {
       return isRecurrentSchedule
         ? this.availableSlotsRepo.findRecurringSlots()
@@ -322,19 +322,19 @@ export class AvailableSlotsService {
 
   private getDefaultStrategies(config: Config): SlotAvailibilityStrategy[] {
     return [
-      new IsSlotAvailableStrategy(),
-      new IsSlotBookedStrategy(),
-      new HandleSelectedSlotsStrategy(),
-      new IsAssignedTeacherStrategy(),
-      new IsOnVacationStrategy(),
       new IsAtPermittedTimeStrategy(
         config.permittedTime.duration,
         config.permittedTime.unit,
         config.permittedTime.direction,
         config.permittedTime.date
       ),
-      new IsSlotRecurringStrategy(),
+      new IsSlotAvailableStrategy(),
+      new IsSlotBookedStrategy(),
+      new HandleSelectedSlotsStrategy(),
+      new IsOnVacationStrategy(),
       new IsExTeachersSlotStrategy(),
+      new IsAssignedTeacherStrategy(),
+      new IsSlotRecurringStrategy(),
     ];
   }
 }

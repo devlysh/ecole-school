@@ -7,32 +7,36 @@ import logger from "@/lib/logger";
 
 export class IsSlotBookedStrategy implements SlotAvailibilityStrategy {
   isAvailable(context: SlotAvailibilityContext): boolean {
-    const { slot, dateTime, bookedClasses } = context;
+    const { slot, dateTime, bookedClasses, isRecurrentSchedule } = context;
 
     if (!slot || !dateTime || !bookedClasses) {
       logger.warn("Missing context in IsSlotBookedStrategy");
       return true;
     }
 
-    return !this.isBooked(bookedClasses, slot, dateTime);
+    return !this.isBooked(bookedClasses, slot, dateTime, isRecurrentSchedule);
   }
 
   private isBooked(
     bookedClasses: BookedClass[],
     slot: AvailableSlot,
-    dateTime: Date
+    dateTime: Date,
+    isRecurrentSchedule?: boolean
   ): boolean {
     return bookedClasses.some((bookedClass) => {
-      if (bookedClass.teacherId !== slot.teacherId) {
-        return false;
-      }
-      if (
-        bookedClass.recurring &&
-        this.isRecurrentMatch(bookedClass.date, dateTime)
-      ) {
-        return true;
-      }
-      return bookedClass.date.getTime() === dateTime.getTime();
+      const isSameTeacher = bookedClass.teacherId === slot.teacherId;
+      const isDateMatch = bookedClass.date.getTime() === dateTime.getTime();
+      const isRecurrentMatch = this.isRecurrentMatch(
+        bookedClass.date,
+        dateTime
+      );
+
+      return (
+        isSameTeacher &&
+        (isDateMatch ||
+          (bookedClass.recurring && isRecurrentMatch) ||
+          (isRecurrentSchedule && isRecurrentMatch))
+      );
     });
   }
 
