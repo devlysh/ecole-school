@@ -85,15 +85,6 @@ export class UsersRepository {
             },
           },
         },
-        roles: {
-          select: {
-            role: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
       },
     });
   }
@@ -241,15 +232,15 @@ export class UsersRepository {
     });
   }
 
-  async updateTeacherByEmail(
+  updateTeacherByEmail(
     email: string,
     name: string,
     timezone: string,
     timeSlots: EventInput[],
     vacations: EventInput[],
-    languages: Language[]
+    teacherLanguages: Language[]
   ): Promise<User> {
-    return await prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx) => {
       const updatedUser = await tx.user.update({
         where: { email },
         data: {
@@ -271,34 +262,29 @@ export class UsersRepository {
                   date: new Date(slot.start as string).toISOString(),
                 })),
               },
-              // Remove any nested languages update here!
             },
           },
         },
         include: { teacher: true },
       });
 
-      // Use updatedUser.id as teacherId (since teacher.userId == user.id)
       const teacherId = updatedUser.id;
       if (!teacherId) {
         throw new Error("Teacher record not found for user update");
       }
 
-      // Remove existing teacher_language associations.
       await tx.teacherLanguage.deleteMany({ where: { teacherId } });
 
-      // Look up language IDs for the provided language codes.
-      const languageRecords = await tx.language.findMany({
-        where: { code: { in: languages.map((l) => l.code) } },
+      const languages = await tx.language.findMany({
+        where: { code: { in: teacherLanguages.map((l) => l.code) } },
         select: { id: true },
       });
 
-      if (languageRecords.length !== languages.length) {
+      if (languages.length !== teacherLanguages.length) {
         throw new Error("One or more provided languages do not exist");
       }
 
-      // Create join records using the valid language IDs.
-      const teacherLanguageData = languageRecords.map((langRec) => ({
+      const teacherLanguageData = languages.map((langRec) => ({
         teacherId,
         languageId: langRec.id,
       }));
