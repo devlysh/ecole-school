@@ -1,6 +1,6 @@
 import { AvailableSlotsRepository } from "../repositories/AvailableSlots.repository";
 import { BookedClassesRepository } from "../repositories/BookedClasses.repository";
-import { AvailableSlot, Language } from "@prisma/client";
+import { AvailableSlot, BookedClass, Language, Vacation } from "@prisma/client";
 import { UsersRepository } from "../repositories/Users.repository";
 import { compressTime } from "@/lib/utils";
 import {
@@ -22,7 +22,7 @@ import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.stra
 import { IsExTeachersSlotStrategy } from "@domain/strategies/IsExTeachersSlot.strategy";
 import { IsLanguageMatchingStrategy } from "@domain/strategies/IsLanguageMatching.strategy";
 
-interface AvailableSlotsServiceParams {
+export interface AvailableSlotsServiceParams {
   userRepo?: UsersRepository;
   availableSlotsRepo?: AvailableSlotsRepository;
   bookClassesRepo?: BookedClassesRepository;
@@ -31,7 +31,7 @@ interface AvailableSlotsServiceParams {
   config?: Config;
 }
 
-interface GetAvailableSlotsParams {
+export interface GetAvailableSlotsParams {
   startDate: Date;
   endDate: Date;
   isRecurrentSchedule: boolean;
@@ -39,12 +39,12 @@ interface GetAvailableSlotsParams {
   email: string;
 }
 
-enum RangeUnit {
+export enum RangeUnit {
   Day = "Date",
   Hour = "Hours",
 }
 
-interface Config {
+export interface Config {
   permittedTime: {
     duration: number;
     unit: PermittedTimeUnit;
@@ -77,51 +77,35 @@ export class AvailableSlotsService {
     params: GetAvailableSlotsParams
   ): Promise<number[]> {
     this.validateParams(params);
+    const {
+      email,
+      startDate,
+      endDate,
+      isRecurrentSchedule,
+      selectedSlots = [],
+    } = params;
 
-    const { email, startDate, endDate, isRecurrentSchedule, selectedSlots } =
-      params;
-
-    const user = await this.userRepo.findStudentByEmail(email);
-    const teachers = await this.userRepo.findAllTeachers();
-    const assignedTeacherId = user?.student?.assignedTeacherId ?? undefined;
-    const exTeacherIds = user?.student?.exTeacherIds ?? [];
+    const strategyData = await this.loadStrategyData(email);
+    if (!strategyData) return [];
 
     const availableSlots = await this.fetchSlots(
       isRecurrentSchedule,
-      assignedTeacherId
+      strategyData.assignedTeacherId
     );
-
-    if (!availableSlots) {
-      return [];
-    }
-
-    const studentLanguages =
-      user?.student?.studentLanguages?.map((l) => l.language) ?? [];
-
-    const teachersLanguages = new Map<number, Language[]>();
-
-    for (const teacher of teachers) {
-      teachersLanguages.set(
-        teacher.id,
-        teacher.teacher?.languages.map((l) => l.language) ?? []
-      );
-    }
-
-    const bookedClasses = await this.bookClassesRepo.findAll();
-    const vacations = await this.vacationsRepo.findAll();
+    if (!availableSlots) return [];
 
     const selectedTeacherIds =
       AvailableSlotsService.collectTeachersForSelectedSlots(
         availableSlots,
-        selectedSlots ?? []
+        selectedSlots
       );
 
-    const availableDateTimes: Date[] = [];
     const dailyRange = this.generateDateRange(
       startDate,
       endDate,
       RangeUnit.Day
     );
+    const availableDateTimes: Date[] = [];
 
     for (const slot of availableSlots) {
       const hourlyIncrements = this.generateDateRange(
@@ -129,26 +113,24 @@ export class AvailableSlotsService {
         slot.endTime,
         RangeUnit.Hour
       );
-
       for (const currentDay of dailyRange) {
         for (const hourSlot of hourlyIncrements) {
           const dateTime = AvailableSlotsService.createDateTime(
             currentDay,
             hourSlot
           );
-
           const context: SlotAvailibilityContext = {
             slot,
             dateTime,
-            bookedClasses,
+            bookedClasses: strategyData.bookedClasses,
             selectedSlots,
-            assignedTeacherId,
+            assignedTeacherId: strategyData.assignedTeacherId,
             selectedTeacherIds,
-            vacations,
+            vacations: strategyData.vacations,
             isRecurrentSchedule,
-            exTeacherIds,
-            teachersLanguages,
-            studentLanguages,
+            exTeacherIds: strategyData.exTeacherIds,
+            teachersLanguages: strategyData.teachersLanguages,
+            studentLanguages: strategyData.studentLanguages,
           };
 
           if (this.isAvailable(this.strategies, context)) {
@@ -166,41 +148,31 @@ export class AvailableSlotsService {
     date: Date,
     assignedTeacherId?: number
   ): Promise<boolean> {
-    const availableSlots = await this.fetchSlots(false);
+    const strategyData = await this.loadStrategyData(email);
+    if (!strategyData) return false;
 
-    if (!availableSlots || !availableSlots.length) {
-      return false;
-    }
-
-    const teachers = await this.userRepo.findAllTeachers();
-    const user = await this.userRepo.findStudentByEmail(email);
-    const bookedClasses = await this.bookClassesRepo.findAll();
-    const vacations = await this.vacationsRepo.findAll();
-    const studentLanguages =
-      user?.student?.studentLanguages?.map((l) => l.language) ?? [];
-
-    const teachersLanguages = new Map<number, Language[]>();
-
-    for (const teacher of teachers) {
-      teachersLanguages.set(
-        teacher.id,
-        teacher.teacher?.languages.map((l) => l.language) ?? []
-      );
-    }
+    const effectiveAssignedTeacherId =
+      assignedTeacherId ?? strategyData.assignedTeacherId;
+    const availableSlots = await this.fetchSlots(
+      false,
+      effectiveAssignedTeacherId
+    );
+    if (!availableSlots || availableSlots.length === 0) return false;
 
     return availableSlots.some((slot) => {
       const context: SlotAvailibilityContext = {
-        dateTime: date,
         slot,
-        assignedTeacherId,
-        bookedClasses,
-        vacations,
+        dateTime: date,
+        bookedClasses: strategyData.bookedClasses,
+        vacations: strategyData.vacations,
         selectedSlots: [],
-        selectedTeacherIds: new Set(),
+        selectedTeacherIds: new Set<number>(),
         isRecurrentSchedule: false,
-        studentLanguages,
-        teachersLanguages,
+        assignedTeacherId: effectiveAssignedTeacherId,
+        studentLanguages: strategyData.studentLanguages,
+        teachersLanguages: strategyData.teachersLanguages,
       };
+
       return this.isAvailable(this.strategies, context);
     });
   }
@@ -209,9 +181,8 @@ export class AvailableSlotsService {
     availableSlots: AvailableSlot[],
     selectedSlots: Date[]
   ): Set<number> {
-    if (!selectedSlots.length) return new Set<number>();
-
-    const isSlotAvailableStrategy = new IsSlotAvailableStrategy();
+    if (selectedSlots.length === 0) return new Set<number>();
+    const isSlotAvailStrategy = new IsSlotAvailableStrategy();
 
     const teacherSlotsMap = availableSlots.reduce((acc, slot) => {
       if (!acc.has(slot.teacherId)) {
@@ -225,10 +196,7 @@ export class AvailableSlotsService {
       .filter(([, slots]) =>
         selectedSlots.every((selectedSlot) =>
           slots.some((slot) =>
-            isSlotAvailableStrategy.isAvailable({
-              slot,
-              dateTime: selectedSlot,
-            })
+            isSlotAvailStrategy.isAvailable({ slot, dateTime: selectedSlot })
           )
         )
       )
@@ -258,6 +226,24 @@ export class AvailableSlotsService {
         ? await this.availableSlotsRepo.findRecurringSlots()
         : await this.availableSlotsRepo.findAll();
     }
+  }
+
+  private getTeachersLanguagesMap(
+    teachers: {
+      id: number;
+      teacher?: {
+        languages?: { language: Language }[];
+      } | null;
+    }[]
+  ): Map<number, Language[]> {
+    const languagesMap = new Map<number, Language[]>();
+    teachers.forEach((teacher) => {
+      languagesMap.set(
+        teacher.id,
+        teacher.teacher?.languages?.map(({ language }) => language) ?? []
+      );
+    });
+    return languagesMap;
   }
 
   private static createDateTime(currentDay: Date, hourSlot: Date): Date {
@@ -293,7 +279,6 @@ export class AvailableSlotsService {
         current.setHours(current.getHours() + 1);
       }
     }
-
     return range;
   }
 
@@ -325,5 +310,38 @@ export class AvailableSlotsService {
       new IsSlotRecurringStrategy(),
       new IsLanguageMatchingStrategy(),
     ];
+  }
+
+  private async loadStrategyData(email: string): Promise<{
+    assignedTeacherId?: number;
+    exTeacherIds: number[];
+    studentLanguages: Language[];
+    bookedClasses: BookedClass[];
+    vacations: Vacation[];
+    teachersLanguages: Map<number, Language[]>;
+  } | null> {
+    const user = await this.userRepo.findStudentByEmail(email);
+    if (!user) return null;
+
+    const [teachers, bookedClasses, vacations] = await Promise.all([
+      this.userRepo.findAllTeachers(),
+      this.bookClassesRepo.findAll(),
+      this.vacationsRepo.findAll(),
+    ]);
+
+    const assignedTeacherId = user.student?.assignedTeacherId ?? undefined;
+    const exTeacherIds = user.student?.exTeacherIds ?? [];
+    const studentLanguages =
+      user.student?.studentLanguages?.map((l) => l.language) ?? [];
+    const teachersLanguages = this.getTeachersLanguagesMap(teachers);
+
+    return {
+      assignedTeacherId,
+      exTeacherIds,
+      studentLanguages,
+      bookedClasses,
+      vacations,
+      teachersLanguages,
+    };
   }
 }
