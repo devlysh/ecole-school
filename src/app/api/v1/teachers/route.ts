@@ -3,7 +3,7 @@ import { verifyAccessToken } from "@/lib/jwt";
 import { AccessTokenPayload, RoleName, TeacherFormValues } from "@/lib/types";
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { UnauthorizedError } from "@/lib/errors";
-import { UserRepository } from "@domain/repositories/User.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 import { EventInput } from "@fullcalendar/core/index.js";
 import bcrypt from "bcrypt";
 
@@ -15,7 +15,7 @@ export const GET = async () => {
       throw new UnauthorizedError("You are not authorized to fetch teachers");
     }
 
-    const userRepository = new UserRepository();
+    const userRepository = new UsersRepository();
     const teachers = await userRepository.findTeachers();
     return Response.json(teachers, { status: 200 });
   } catch (err: unknown) {

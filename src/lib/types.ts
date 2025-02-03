@@ -156,11 +156,6 @@ export interface AvailableCalendarSlot {
   hour: number;
 }
 
-export type ClassItem = { id: string } & Pick<
-  BookedClass,
-  "date" | "recurring"
->;
-
 export interface Settings {
   name: string;
   email: string;
@@ -169,3 +164,9 @@ export interface Settings {
   // timezone: string;
   // timeFormat: string;
 }
+
+export type StudentClass = Pick<BookedClass, "id" | "date" | "recurring">;
+
+export type TeacherClass = Pick<BookedClass, "id" | "date" | "recurring"> & {
+  studentName: string;
+};

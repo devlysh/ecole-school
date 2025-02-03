@@ -2,11 +2,11 @@ import prisma from "@/lib/prisma";
 import { AvailableSlot } from "@prisma/client";
 
 export class AvailableSlotsRepository {
-  public async fetchAll(): Promise<AvailableSlot[]> {
+  public async findAll(): Promise<AvailableSlot[]> {
     return prisma.availableSlot.findMany({});
   }
 
-  public async fetchByTeacherId(teacherId: number): Promise<AvailableSlot[]> {
+  public async findByTeacherId(teacherId: number): Promise<AvailableSlot[]> {
     return prisma.availableSlot.findMany({
       where: {
         teacherId: teacherId,
@@ -14,7 +14,7 @@ export class AvailableSlotsRepository {
     });
   }
 
-  public async fetchRecurringSlots(): Promise<AvailableSlot[]> {
+  public async findRecurringSlots(): Promise<AvailableSlot[]> {
     return prisma.availableSlot.findMany({
       where: {
         rrule: {
@@ -24,7 +24,7 @@ export class AvailableSlotsRepository {
     });
   }
 
-  public async fetchRecurringByTeacherId(
+  public async findRecurringByTeacherId(
     teacherId: number
   ): Promise<AvailableSlot[]> {
     return prisma.availableSlot.findMany({

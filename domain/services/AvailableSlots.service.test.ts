@@ -1,7 +1,7 @@
 import { AvailableSlotsService } from "./AvailableSlots.service";
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
 import { BookedClassesRepository } from "@domain/repositories/BookedClasses.repository";
-import { UserRepository } from "@domain/repositories/User.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 import { AvailableSlot, BookedClass, Student, User } from "@prisma/client";
 import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.strategy";
 import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
@@ -12,7 +12,7 @@ import { VacationsRepository } from "@domain/repositories/Vacations.repostiroy";
 jest.mock("@domain/repositories/AvailableSlots.repository");
 jest.mock("@domain/repositories/BookedClasses.repository");
 jest.mock("@domain/repositories/Vacations.repostiroy");
-jest.mock("@domain/repositories/User.repository");
+jest.mock("@domain/repositories/Users.repository");
 
 /**
  * Helper to create a mock user object with optional assignedTeacherId
@@ -64,13 +64,13 @@ function createMockBookedClass(
 }
 
 const mockFetchAllBookedClasses = BookedClassesRepository.prototype
-  .fetchAllBookedClasses as jest.Mock;
+  .findAllBookedClasses as jest.Mock;
 const mockFetchByTeacherId = AvailableSlotsRepository.prototype
-  .fetchByTeacherId as jest.Mock;
-const mockFindByEmail = UserRepository.prototype
+  .findByTeacherId as jest.Mock;
+const mockFindByEmail = UsersRepository.prototype
   .findStudentByEmail as jest.Mock;
 const mockFetchAllVacations = VacationsRepository.prototype
-  .fetchAllVacations as jest.Mock;
+  .findAllVacations as jest.Mock;
 
 describe("AvailableHoursService", () => {
   let service: AvailableSlotsService;

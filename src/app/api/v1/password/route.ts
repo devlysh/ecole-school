@@ -14,7 +14,7 @@ import {
   InvalidUserError,
   UserNotFoundError,
 } from "@/lib/errors";
-import { UserRepository } from "@domain/repositories/User.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 import { handleErrorResponse } from "@/lib/errorUtils";
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -37,7 +37,7 @@ export const PUT = async (request: Request) => {
       throw new BadRequestError("Some of passwords are missing");
     }
 
-    const userRepository = new UserRepository();
+    const userRepository = new UsersRepository();
     const user = await userRepository.findByEmail(email);
 
     if (!user) {
@@ -95,7 +95,7 @@ export const POST = async (request: Request) => {
       throw new EmailIsMissingError();
     }
 
-    const userRepository = new UserRepository();
+    const userRepository = new UsersRepository();
     const existingUser = await userRepository.findByEmailWithRoles(email);
 
     if (!existingUser) {

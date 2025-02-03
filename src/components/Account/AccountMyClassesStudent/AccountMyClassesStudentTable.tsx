@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import GenericTable from "src/components/GenericTable";
-import { ClassItem } from "@/lib/types";
+import { StudentClass } from "@/lib/types";
 import {
   Button,
   Dropdown,
@@ -11,9 +11,9 @@ import {
 import { VerticalDotsIcon } from "@/icons";
 
 interface AccountMyClassesStudentTableProps {
-  classes: ClassItem[];
-  handleOpenRescheduleBookingModal: (classItem: ClassItem) => void;
-  handleOpenDeleteBookingModal: (classItem: ClassItem) => void;
+  classes: StudentClass[];
+  handleOpenRescheduleBookingModal: (classItem: StudentClass) => void;
+  handleOpenDeleteBookingModal: (classItem: StudentClass) => void;
 }
 
 const AccountMyClassesStudentTable: React.FC<
@@ -59,7 +59,7 @@ const AccountMyClassesStudentTable: React.FC<
         name: "Actions",
         uid: "actions",
         key: "actions",
-        render: (item: ClassItem) => (
+        render: (item: StudentClass) => (
           <div className="relative flex justify-end items-center gap-2">
             <Dropdown className="bg-background border-1 border-default-200">
               <DropdownTrigger>

@@ -1,11 +1,9 @@
 import React, { useMemo } from "react";
 import GenericTable from "src/components/GenericTable";
-import { ClassItem } from "@/lib/types";
+import { TeacherClass } from "@/lib/types";
 
 interface AccountMyClassesTeacherTableProps {
-  classes: ClassItem[];
-  handleOpenRescheduleBookingModal: (classItem: ClassItem) => void;
-  handleOpenDeleteBookingModal: (classItem: ClassItem) => void;
+  classes: TeacherClass[];
 }
 
 const AccountMyClassesTeacherTable: React.FC<
@@ -17,25 +15,23 @@ const AccountMyClassesTeacherTable: React.FC<
         name: "Class Date",
         uid: "date",
         key: "date",
-        render: (item: Record<string, unknown>) => (
-          <span>{new Date(item.date as string).toLocaleDateString()}</span>
+        render: (item: TeacherClass) => (
+          <span>{new Date(item.date).toLocaleDateString()}</span>
         ),
       },
       {
         name: "Class Time",
         uid: "time",
         key: "time",
-        render: (item: Record<string, unknown>) => (
-          <span>{new Date(item.date as string).toLocaleTimeString()}</span>
+        render: (item: TeacherClass) => (
+          <span>{new Date(item.date).toLocaleTimeString()}</span>
         ),
       },
       {
-        name: "Student info",
-        uid: "studentInfo",
-        key: "studentInfo",
-        render: (item: Record<string, unknown>) => (
-          <span>{JSON.stringify(item.studentInfo)}</span>
-        ),
+        name: "Student Name",
+        uid: "studentName",
+        key: "studentName",
+        render: (item: TeacherClass) => <span>{item.studentName}</span>,
       },
       {
         name: "Join",
@@ -47,13 +43,7 @@ const AccountMyClassesTeacherTable: React.FC<
     []
   );
 
-  const initialVisibleColumns = [
-    "date",
-    "time",
-    "join",
-    "actions",
-    "hasCredit",
-  ];
+  const initialVisibleColumns = ["date", "time", "studentName", "join"];
 
   return (
     <GenericTable

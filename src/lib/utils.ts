@@ -1,5 +1,5 @@
-import { decodeClassId } from "@/hooks/useStudentClasses";
-import { ClassItem, Plan, PlansMap } from "./types";
+import { StudentClass, Plan, PlansMap, TeacherClass } from "./types";
+import { addMonths, addWeeks } from "date-fns";
 
 // Groups an array of plans by their currency and returns a map
 export const groupByCurrency = (plans: Plan[]): PlansMap => {
@@ -55,8 +55,82 @@ export const getWeeklyOccurencesForPeriod = (
   return occurences;
 };
 
-export const determineBookedClassId = (selectedClass: ClassItem) => {
+export const determineBookedClassId = (
+  selectedClass: StudentClass | TeacherClass
+) => {
   return selectedClass.recurring
-    ? decodeClassId(selectedClass.id).bookedClassId
+    ? decodeClassId(selectedClass.id.toString()).bookedClassId
     : Number(selectedClass.id);
+};
+
+export const expandClasses = (classes: StudentClass[]) => {
+  return classes.flatMap((classItem: StudentClass) => {
+    const classDate = new Date(classItem.date);
+    const isRecurring = classItem.recurring === true;
+    const classes = [];
+
+    if (isRecurring) {
+      const occurencesForMonth = getWeeklyOccurencesForPeriod(
+        classDate,
+        addMonths(new Date(), 1)
+      );
+
+      for (let i = 0; i < occurencesForMonth.length; i++) {
+        const recurringClassDate = addWeeks(classDate, i);
+
+        const recurringClassItem = {
+          ...classItem,
+          id: encodeClassId(classItem.id.toString(), i),
+        };
+
+        classes.push({
+          ...recurringClassItem,
+          date: recurringClassDate,
+        });
+      }
+    } else {
+      classes.push({
+        ...classItem,
+        date: new Date(classItem.date),
+        id: classItem.id.toString(),
+      });
+    }
+
+    return classes;
+  });
+};
+
+export const filterClasses = (classes: StudentClass[]) => {
+  return classes.filter((classItem) => {
+    return new Date() < new Date(classItem.date);
+  });
+};
+
+export const sortClasses = (classes: StudentClass[]) => {
+  return classes.sort((a, b) => {
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  });
+};
+
+export const markClassesWithCredit = (
+  classes: StudentClass[],
+  creditCount: number
+) => {
+  return classes.map((classItem, index) => {
+    if (creditCount > index) {
+      return { ...classItem, hasCredit: true };
+    }
+    return { ...classItem, hasCredit: false };
+  });
+};
+
+export const encodeClassId = (classId: string, index: number) => {
+  return encodeURIComponent(`recurring-${classId}-${index}`);
+};
+
+export const decodeClassId = (
+  classId: string
+): { bookedClassId: number; index: number } => {
+  const [, bookedClassId, index] = classId.split("-");
+  return { bookedClassId: Number(bookedClassId), index: Number(index) };
 };

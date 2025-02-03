@@ -13,7 +13,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Input,
   Button,
   DropdownTrigger,
   Dropdown,
@@ -25,7 +24,6 @@ import {
 } from "@nextui-org/react";
 import { PlusIcon } from "@/icons";
 import { ChevronDownIcon } from "@/icons";
-import { SearchIcon } from "@/icons";
 import { capitalize } from "@/lib/utils";
 
 interface GenericTableProps<T> {

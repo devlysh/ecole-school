@@ -15,7 +15,7 @@ import {
   UnauthorizedError,
   UserNotFoundError,
 } from "@/lib/errors";
-import { UserRepository } from "@domain/repositories/User.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not set in the environment variables");
@@ -162,7 +162,7 @@ const getOrCreateCustomer = async (
     stripeCustomer = await stripe.customers.create({ email });
   }
 
-  const userRepository = new UserRepository();
+  const userRepository = new UsersRepository();
 
   await userRepository.upsertStudent(
     email,

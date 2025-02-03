@@ -1,5 +1,5 @@
 import logger from "@/lib/logger";
-import { UserRepository } from "@domain/repositories/User.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 import { handleErrorResponse } from "@/lib/errorUtils";
 
 export const GET = async (
@@ -7,7 +7,7 @@ export const GET = async (
   { params }: { params: { email: string } }
 ) => {
   try {
-    const userRepository = new UserRepository();
+    const userRepository = new UsersRepository();
     const user = await userRepository.findByEmail(params.email);
 
     return Response.json({ isTaken: !!user }, { status: 200 });

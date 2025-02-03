@@ -1,7 +1,7 @@
 import { AvailableSlotsRepository } from "../repositories/AvailableSlots.repository";
 import { BookedClassesRepository } from "../repositories/BookedClasses.repository";
 import { AvailableSlot, BookedClass, Vacation } from "@prisma/client";
-import { UserRepository } from "../repositories/User.repository";
+import { UsersRepository } from "../repositories/Users.repository";
 import { compressTime } from "@/lib/utils";
 import {
   SlotAvailibilityContext,
@@ -22,7 +22,7 @@ import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.stra
 import { IsExTeachersSlotStrategy } from "@domain/strategies/IsExTeachersSlot.strategy";
 
 interface AvailableSlotsServiceParams {
-  userRepo?: UserRepository;
+  userRepo?: UsersRepository;
   availableSlotsRepo?: AvailableSlotsRepository;
   bookClassesRepo?: BookedClassesRepository;
   vacationsRepo?: VacationsRepository;
@@ -66,7 +66,7 @@ interface Config {
 }
 
 export class AvailableSlotsService {
-  private userRepo: UserRepository;
+  private userRepo: UsersRepository;
   private availableSlotsRepo: AvailableSlotsRepository;
   private bookClassesRepo: BookedClassesRepository;
   private vacationsRepo: VacationsRepository;
@@ -74,7 +74,7 @@ export class AvailableSlotsService {
   private config: Config;
 
   constructor(params?: AvailableSlotsServiceParams) {
-    this.userRepo = params?.userRepo ?? new UserRepository();
+    this.userRepo = params?.userRepo ?? new UsersRepository();
     this.availableSlotsRepo =
       params?.availableSlotsRepo ?? new AvailableSlotsRepository();
     this.bookClassesRepo =
@@ -106,8 +106,8 @@ export class AvailableSlotsService {
       return [];
     }
 
-    const bookedClasses = await this.bookClassesRepo.fetchAllBookedClasses();
-    const vacations = await this.vacationsRepo.fetchAllVacations();
+    const bookedClasses = await this.bookClassesRepo.findAllBookedClasses();
+    const vacations = await this.vacationsRepo.findAllVacations();
 
     return this.computeAvailableTimes({
       availableSlots,
@@ -133,8 +133,8 @@ export class AvailableSlotsService {
       return false;
     }
 
-    const bookedClasses = await this.bookClassesRepo.fetchAllBookedClasses();
-    const vacations = await this.vacationsRepo.fetchAllVacations();
+    const bookedClasses = await this.bookClassesRepo.findAllBookedClasses();
+    const vacations = await this.vacationsRepo.findAllVacations();
 
     return availableSlots.some((slot) => {
       const context: SlotAvailibilityContext = {
@@ -200,12 +200,12 @@ export class AvailableSlotsService {
   ): Promise<AvailableSlot[] | null> {
     if (teacherId) {
       return isRecurrentSchedule
-        ? this.availableSlotsRepo.fetchRecurringByTeacherId(teacherId)
-        : this.availableSlotsRepo.fetchByTeacherId(teacherId);
+        ? this.availableSlotsRepo.findRecurringByTeacherId(teacherId)
+        : this.availableSlotsRepo.findByTeacherId(teacherId);
     } else {
       return isRecurrentSchedule
-        ? this.availableSlotsRepo.fetchRecurringSlots()
-        : this.availableSlotsRepo.fetchAll();
+        ? this.availableSlotsRepo.findRecurringSlots()
+        : this.availableSlotsRepo.findAll();
     }
   }
 

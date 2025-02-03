@@ -3,7 +3,7 @@ import { RoleName } from "@/lib/types";
 import { Role, Student, Teacher, User } from "@prisma/client";
 import Stripe from "stripe";
 
-export class UserRepository {
+export class UsersRepository {
   public async upsertStudent(
     email: string,
     name: string,
@@ -116,6 +116,26 @@ export class UserRepository {
     });
   }
 
+  public async findStudentById(
+    id: number
+  ): Promise<(User & { student: Student | null }) | null> {
+    return prisma.user.findUnique({
+      where: { id },
+      include: {
+        student: true,
+      },
+    });
+  }
+
+  public async findStudentsByIds(
+    ids: number[]
+  ): Promise<(User & { student: Student | null })[]> {
+    return prisma.user.findMany({
+      where: { id: { in: ids } },
+      include: { student: true },
+    });
+  }
+
   public async findStudentByEmail(
     email: string
   ): Promise<(User & { student: Student | null }) | null> {
@@ -156,20 +176,6 @@ export class UserRepository {
       data: {
         passwordHash,
         isActive: true,
-      },
-    });
-  }
-
-  public async resetAssignedTeacher(userId: number, student: Student) {
-    if (!student.assignedTeacherId) {
-      throw new Error("User has no assigned teacher");
-    }
-
-    return await prisma.student.update({
-      where: { userId },
-      data: {
-        assignedTeacherId: null,
-        exTeacherIds: [...student.exTeacherIds, student.assignedTeacherId],
       },
     });
   }

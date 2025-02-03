@@ -5,7 +5,7 @@ import { EventInput } from "@fullcalendar/core/index.js";
 import { BadRequestError, UnauthorizedError } from "@/lib/errors";
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { verifyAccessToken } from "@/lib/jwt";
-import { UserRepository } from "@domain/repositories/User.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 
 export const GET = async (
   request: Request,
@@ -13,7 +13,7 @@ export const GET = async (
 ) => {
   try {
     await verifyAccessToken();
-    const userRepository = new UserRepository();
+    const userRepository = new UsersRepository();
     const teacher = await userRepository.findTeacherByEmail(params.email);
     return Response.json(teacher, { status: 200 });
   } catch (err: unknown) {

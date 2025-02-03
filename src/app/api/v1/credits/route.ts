@@ -1,6 +1,6 @@
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
-import { CreditRepository } from "@domain/repositories/Credit.repository";
+import { CreditsRepository } from "@domain/repositories/Credits.repository";
 import { CreditService } from "@domain/services/Credit.service";
 import prisma from "@/lib/prisma";
 import { EmailIsMissingError, UnauthorizedError } from "@/lib/errors";
@@ -26,7 +26,7 @@ export const GET = async () => {
       throw new UnauthorizedError("User is not a student");
     }
 
-    const creditService = new CreditService(new CreditRepository());
+    const creditService = new CreditService(new CreditsRepository());
 
     const creditCount = await creditService.getActiveCreditsCount(user.id);
 

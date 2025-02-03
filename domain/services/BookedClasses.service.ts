@@ -1,6 +1,6 @@
 import { BookedClassesRepository } from "../repositories/BookedClasses.repository";
-import { UserRepository } from "@domain/repositories/User.repository";
-import { StudentRepository } from "@domain/repositories/Student.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
+import { StudentsRepository } from "@domain/repositories/Students.repository";
 import { AvailableSlotsService } from "./AvailableSlots.service";
 import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.repository";
 import { AvailableSlot, BookedClass, User } from "@prisma/client";
@@ -13,15 +13,15 @@ import {
 } from "@/lib/errors";
 
 export class BookedClassesService {
-  private userRepository: UserRepository;
-  private studentRepository: StudentRepository;
+  private userRepository: UsersRepository;
+  private studentRepository: StudentsRepository;
   private bookedClassesRepository: BookedClassesRepository;
   private availableSlotsService: AvailableSlotsService;
   private availableSlotsRepository: AvailableSlotsRepository;
 
   constructor() {
-    this.userRepository = new UserRepository();
-    this.studentRepository = new StudentRepository();
+    this.userRepository = new UsersRepository();
+    this.studentRepository = new StudentsRepository();
     this.bookedClassesRepository = new BookedClassesRepository();
     this.availableSlotsService = new AvailableSlotsService();
     this.availableSlotsRepository = new AvailableSlotsRepository();
@@ -105,11 +105,7 @@ export class BookedClassesService {
     return { message: "Classes booked successfully" };
   }
 
-  public async getBookedClasses() {
-    return await this.bookedClassesRepository.fetchAllBookedClasses();
-  }
-
-  public async getBookedClassesByEmail(email: string) {
+  public async getStudentBookedClassesByEmail(email: string) {
     const user = await this.userRepository.findStudentByEmail(email);
 
     if (!user || !user.id) {
@@ -117,10 +113,26 @@ export class BookedClassesService {
     }
 
     if (!user.student) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedError("User is not a student", { email });
     }
 
-    return await this.bookedClassesRepository.fetchBookedClassesByStudentId(
+    return await this.bookedClassesRepository.findBookedClassesByStudentId(
+      user.id
+    );
+  }
+
+  public async getTeacherBookedClassesByEmail(email: string) {
+    const user = await this.userRepository.findTeacherByEmail(email);
+
+    if (!user || !user.id) {
+      throw new UserNotFoundError();
+    }
+
+    if (!user.teacher) {
+      throw new UnauthorizedError("User is not a teacher", { email });
+    }
+
+    return await this.bookedClassesRepository.findBookedClassesByTeacherId(
       user.id
     );
   }
@@ -155,7 +167,7 @@ export class BookedClassesService {
     newDate: Date
   ) {
     const bookedClass =
-      await this.bookedClassesRepository.fetchBookedClassById(classId);
+      await this.bookedClassesRepository.findBookedClassById(classId);
 
     if (!bookedClass) {
       throw new BookedClassNotFoundError({ classId });
@@ -196,7 +208,7 @@ export class BookedClassesService {
 
   private async getBookedClassById(classId: number) {
     const bookedClass =
-      await this.bookedClassesRepository.fetchBookedClassById(classId);
+      await this.bookedClassesRepository.findBookedClassById(classId);
     if (!bookedClass) {
       throw new BookedClassNotFoundError({ classId });
     }
@@ -258,14 +270,14 @@ export class BookedClassesService {
   ): Promise<AvailableSlot[]> {
     if (assignedTeacherId) {
       return isRecurrentSchedule
-        ? this.availableSlotsRepository.fetchByTeacherId(assignedTeacherId)
-        : this.availableSlotsRepository.fetchRecurringByTeacherId(
+        ? this.availableSlotsRepository.findByTeacherId(assignedTeacherId)
+        : this.availableSlotsRepository.findRecurringByTeacherId(
             assignedTeacherId
           );
     } else {
       return isRecurrentSchedule
-        ? this.availableSlotsRepository.fetchAll()
-        : this.availableSlotsRepository.fetchRecurringSlots();
+        ? this.availableSlotsRepository.findAll()
+        : this.availableSlotsRepository.findRecurringSlots();
     }
   }
 

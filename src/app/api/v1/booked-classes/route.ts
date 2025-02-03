@@ -3,6 +3,13 @@ import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { EmailIsMissingError } from "@/lib/errors";
+import { StudentClass, TeacherClass, RoleName } from "@/lib/types";
+import { UsersRepository } from "@domain/repositories/Users.repository";
+
+interface GetBookedClassesResponse {
+  student?: StudentClass[];
+  teacher?: TeacherClass[];
+}
 
 export const GET = async () => {
   try {
@@ -13,8 +20,38 @@ export const GET = async () => {
       throw new EmailIsMissingError();
     }
 
+    const isStudent = decodedToken.roles.includes(RoleName.STUDENT);
+    const isTeacher = decodedToken.roles.includes(RoleName.TEACHER);
+
     const bookedClassesService = new BookedClassesService();
-    const classes = await bookedClassesService.getBookedClassesByEmail(email);
+    const usersRepository = new UsersRepository();
+
+    const classes: GetBookedClassesResponse = {};
+
+    if (isStudent) {
+      classes.student =
+        await bookedClassesService.getStudentBookedClassesByEmail(email);
+    }
+
+    if (isTeacher) {
+      const teacherClasses =
+        await bookedClassesService.getTeacherBookedClassesByEmail(email);
+
+      const studentIds = new Set(teacherClasses.map((c) => c.studentId));
+
+      const students = await usersRepository.findStudentsByIds(
+        Array.from(studentIds)
+      );
+
+      classes.teacher = teacherClasses.map((teacherClass) => ({
+        id: teacherClass.id,
+        date: teacherClass.date,
+        recurring: teacherClass.recurring,
+        studentName:
+          students.find((s) => s.id === teacherClass.studentId)?.name ?? "",
+      }));
+    }
+
     return Response.json(classes, { status: 200 });
   } catch (err: unknown) {
     if (err instanceof EmailIsMissingError) {

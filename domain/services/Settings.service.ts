@@ -1,22 +1,26 @@
 import { Settings } from "@/lib/types";
 import { BookedClassesRepository } from "@domain/repositories/BookedClasses.repository";
-import { UserRepository } from "@domain/repositories/User.repository";
+import { UsersRepository } from "@domain/repositories/Users.repository";
 import { User } from "@prisma/client";
 import { UserNotFoundError } from "@/lib/errors";
 import { UnauthorizedError } from "@/lib/errors";
 import { JsonObject } from "@prisma/client/runtime/library";
+import { StudentsRepository } from "@domain/repositories/Students.repository";
 
 interface SettingsServiceParams {
-  userRepo?: UserRepository;
+  userRepo?: UsersRepository;
+  studentsRepo?: StudentsRepository;
   bookedClassesRepo?: BookedClassesRepository;
 }
 
 export class SettingsService {
-  private userRepo: UserRepository;
+  private userRepo: UsersRepository;
+  private studentsRepo: StudentsRepository;
   private bookedClassesRepo: BookedClassesRepository;
 
   constructor(params?: SettingsServiceParams) {
-    this.userRepo = params?.userRepo ?? new UserRepository();
+    this.userRepo = params?.userRepo ?? new UsersRepository();
+    this.studentsRepo = params?.studentsRepo ?? new StudentsRepository();
     this.bookedClassesRepo =
       params?.bookedClassesRepo ?? new BookedClassesRepository();
   }
@@ -82,7 +86,7 @@ export class SettingsService {
       throw new UnauthorizedError("User has no assigned teacher");
     }
 
-    await this.userRepo.resetAssignedTeacher(user.id, user.student);
+    await this.studentsRepo.resetAssignedTeacher(user.id, user.student);
     await this.bookedClassesRepo.deleteAllBookedClassesByStudentId(user.id);
   }
 

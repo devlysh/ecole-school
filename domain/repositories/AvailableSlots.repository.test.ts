@@ -17,7 +17,7 @@ describe("AvailableHoursRepository", () => {
     (prisma.availableSlot.findMany as jest.Mock).mockResolvedValue(mockSlots);
 
     const repo = new AvailableSlotsRepository();
-    const result = await repo.fetchAll();
+    const result = await repo.findAll();
 
     expect(prisma.availableSlot.findMany).toHaveBeenCalledTimes(1);
     expect(result).toEqual(mockSlots);
@@ -28,7 +28,7 @@ describe("AvailableHoursRepository", () => {
     (prisma.availableSlot.findMany as jest.Mock).mockResolvedValue(mockSlots);
 
     const repo = new AvailableSlotsRepository();
-    const result = await repo.fetchRecurringSlots();
+    const result = await repo.findRecurringSlots();
 
     expect(prisma.availableSlot.findMany).toHaveBeenCalledWith({
       where: {
@@ -47,7 +47,7 @@ describe("AvailableHoursRepository", () => {
     (prisma.availableSlot.findMany as jest.Mock).mockResolvedValue(mockSlots);
 
     const repo = new AvailableSlotsRepository();
-    const result = await repo.fetchByTeacherId(101);
+    const result = await repo.findByTeacherId(101);
 
     expect(prisma.availableSlot.findMany).toHaveBeenCalledWith({
       where: {

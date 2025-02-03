@@ -20,8 +20,8 @@ export const bookClassesRequest = async (
   });
 
   if (!response.ok) {
-    const { error } = await response.json();
-    throw new Error(error || "Failed to book classes");
+    const { message } = await response.json();
+    throw new Error(message || "Failed to book classes");
   }
 
   return response.json();
