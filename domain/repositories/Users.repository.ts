@@ -197,7 +197,7 @@ export class UsersRepository {
     passwordHash: string,
     timeSlots: EventInput[],
     vacations: EventInput[],
-    languages: Pick<Language, "name" | "code">[]
+    languages: Language[]
   ): Promise<User> {
     return prisma.user.create({
       data: {
@@ -247,7 +247,7 @@ export class UsersRepository {
     timezone: string,
     timeSlots: EventInput[],
     vacations: EventInput[],
-    languages: Pick<Language, "code" | "name">[]
+    languages: Language[]
   ): Promise<User> {
     return await prisma.$transaction(async (tx) => {
       const updatedUser = await tx.user.update({

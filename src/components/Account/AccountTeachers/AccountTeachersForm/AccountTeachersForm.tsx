@@ -30,7 +30,7 @@ import { convertToRruleDate } from "@/lib/utils";
 import { toast } from "react-toastify";
 
 interface AccountTeachersFormProps {
-  languages: Pick<Language, "code" | "name">[];
+  languages: Language[];
   email?: string;
 }
 
@@ -42,9 +42,7 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
   const [timeSlots, setTimeSlots] = useState<EventInput[]>([]);
   const [vacations, setVacations] = useState<EventInput[]>([]);
   const [name, setName] = useState<string>("");
-  const [teacherLanguages, setTeacherLanguages] = useState<
-    Pick<Language, "code" | "name">[]
-  >([]);
+  const [teacherLanguages, setTeacherLanguages] = useState<Language[]>([]);
   const emailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -56,7 +54,7 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
           teacher: Teacher & {
             availableSlots: AvailableSlot[];
             vacations: Vacation[];
-            languages?: { language: Pick<Language, "code" | "name"> }[];
+            languages?: { language: Language }[];
           };
         } = await fetchTeacherByEmailRequest(email);
 

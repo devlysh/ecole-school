@@ -169,6 +169,7 @@ export class BookedClassesService {
     }
 
     const isAvailable = await this.availableSlotsService.isSlotAvailable(
+      email,
       newDate,
       bookedClass.teacherId
     );

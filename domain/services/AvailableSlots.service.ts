@@ -162,6 +162,7 @@ export class AvailableSlotsService {
   }
 
   public async isSlotAvailable(
+    email: string,
     date: Date,
     assignedTeacherId?: number
   ): Promise<boolean> {
@@ -171,8 +172,21 @@ export class AvailableSlotsService {
       return false;
     }
 
+    const teachers = await this.userRepo.findAllTeachers();
+    const user = await this.userRepo.findStudentByEmail(email);
     const bookedClasses = await this.bookClassesRepo.findAll();
     const vacations = await this.vacationsRepo.findAll();
+    const studentLanguages =
+      user?.student?.studentLanguages?.map((l) => l.language) ?? [];
+
+    const teachersLanguages = new Map<number, Language[]>();
+
+    for (const teacher of teachers) {
+      teachersLanguages.set(
+        teacher.id,
+        teacher.teacher?.languages.map((l) => l.language) ?? []
+      );
+    }
 
     return availableSlots.some((slot) => {
       const context: SlotAvailibilityContext = {
@@ -184,6 +198,8 @@ export class AvailableSlotsService {
         selectedSlots: [],
         selectedTeacherIds: new Set(),
         isRecurrentSchedule: false,
+        studentLanguages,
+        teachersLanguages,
       };
       return this.isAvailable(this.strategies, context);
     });
