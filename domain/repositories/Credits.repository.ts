@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { Credit } from "@prisma/client";
 
 export class CreditsRepository {
-  public async createCredits(studentId: number): Promise<Credit> {
+  public async create(studentId: number): Promise<Credit> {
     return await prisma.credit.create({
       data: {
         studentId,
@@ -11,7 +11,7 @@ export class CreditsRepository {
     });
   }
 
-  public async getActiveCreditsCount(studentId: number): Promise<number> {
+  public async getActiveCount(studentId: number): Promise<number> {
     return prisma.credit.count({
       where: {
         studentId,
@@ -21,9 +21,7 @@ export class CreditsRepository {
     });
   }
 
-  public async findFirstUnusedCredit(
-    studentId: number
-  ): Promise<Credit | null> {
+  public async findFirstUnused(studentId: number): Promise<Credit | null> {
     return prisma.credit.findFirst({
       where: {
         studentId,
@@ -35,7 +33,7 @@ export class CreditsRepository {
     });
   }
 
-  public async markCreditAsUsed(
+  public async markAsUsed(
     creditId: number,
     bookedClass: number
   ): Promise<Credit> {

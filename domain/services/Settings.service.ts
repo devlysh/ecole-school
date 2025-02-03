@@ -87,7 +87,7 @@ export class SettingsService {
     }
 
     await this.studentsRepo.resetAssignedTeacher(user.id, user.student);
-    await this.bookedClassesRepo.deleteAllBookedClassesByStudentId(user.id);
+    await this.bookedClassesRepo.deleteAllByStudentId(user.id);
   }
 
   private async setName(user: User, name: string) {

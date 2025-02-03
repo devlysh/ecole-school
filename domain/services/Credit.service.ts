@@ -10,7 +10,7 @@ export class CreditService {
   ): Promise<Credit[]> {
     const credits = [];
     for (let i = 0; i < amount; i++) {
-      const credit = await this.creditRepository.createCredits(studentId);
+      const credit = await this.creditRepository.create(studentId);
       credits.push(credit);
     }
     return credits;
@@ -20,14 +20,14 @@ export class CreditService {
     studentId: number,
     bookedClass: number
   ): Promise<Credit> {
-    const credit = await this.creditRepository.findFirstUnusedCredit(studentId);
+    const credit = await this.creditRepository.findFirstUnused(studentId);
     if (!credit) {
       throw new Error("No unused credits available");
     }
-    return this.creditRepository.markCreditAsUsed(credit.id, bookedClass);
+    return this.creditRepository.markAsUsed(credit.id, bookedClass);
   }
 
   public async getActiveCreditsCount(studentId: number): Promise<number> {
-    return this.creditRepository.getActiveCreditsCount(studentId);
+    return this.creditRepository.getActiveCount(studentId);
   }
 }

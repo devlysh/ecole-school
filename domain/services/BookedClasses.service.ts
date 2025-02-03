@@ -28,7 +28,7 @@ export class BookedClassesService {
   }
 
   public async deleteAllBookedClassesById(studentId: number) {
-    await this.bookedClassesRepository.deleteAllBookedClassesByStudentId(
+    await this.bookedClassesRepository.deleteAllByStudentId(
       studentId
     );
   }
@@ -38,7 +38,7 @@ export class BookedClassesService {
     if (!user) {
       throw new UserNotFoundError("User not found", { email });
     }
-    await this.bookedClassesRepository.deleteAllBookedClassesByStudentId(
+    await this.bookedClassesRepository.deleteAllByStudentId(
       user.id
     );
   }
@@ -59,7 +59,7 @@ export class BookedClassesService {
     const assignedTeacherId = user.student.assignedTeacherId;
 
     if (assignedTeacherId) {
-      const result = this.bookedClassesRepository.createBookedClasses(
+      const result = this.bookedClassesRepository.create(
         selectedSlots.map(
           (date) =>
             ({
@@ -90,7 +90,7 @@ export class BookedClassesService {
       teacherToAssign
     );
 
-    await this.bookedClassesRepository.createBookedClasses(
+    await this.bookedClassesRepository.create(
       selectedSlots.map(
         (date) =>
           ({
@@ -116,9 +116,7 @@ export class BookedClassesService {
       throw new UnauthorizedError("User is not a student", { email });
     }
 
-    return await this.bookedClassesRepository.findBookedClassesByStudentId(
-      user.id
-    );
+    return await this.bookedClassesRepository.findByStudentId(user.id);
   }
 
   public async getTeacherBookedClassesByEmail(email: string) {
@@ -132,9 +130,7 @@ export class BookedClassesService {
       throw new UnauthorizedError("User is not a teacher", { email });
     }
 
-    return await this.bookedClassesRepository.findBookedClassesByTeacherId(
-      user.id
-    );
+    return await this.bookedClassesRepository.findByTeacherId(user.id);
   }
 
   public async deleteBookedClassById(
@@ -154,7 +150,7 @@ export class BookedClassesService {
         deleteFutureOccurences
       );
     } else {
-      await this.deleteClass(user.id, classBeingDeletedId);
+      await this.deleteClass(classBeingDeletedId);
     }
 
     return { message: "Classes deleted successfully" };
@@ -166,8 +162,7 @@ export class BookedClassesService {
     oldDate: Date,
     newDate: Date
   ) {
-    const bookedClass =
-      await this.bookedClassesRepository.findBookedClassById(classId);
+    const bookedClass = await this.bookedClassesRepository.findById(classId);
 
     if (!bookedClass) {
       throw new BookedClassNotFoundError({ classId });
@@ -207,8 +202,7 @@ export class BookedClassesService {
   }
 
   private async getBookedClassById(classId: number) {
-    const bookedClass =
-      await this.bookedClassesRepository.findBookedClassById(classId);
+    const bookedClass = await this.bookedClassesRepository.findById(classId);
     if (!bookedClass) {
       throw new BookedClassNotFoundError({ classId });
     }
@@ -227,9 +221,8 @@ export class BookedClassesService {
       classBeingDeletedDate,
       user
     );
-    await this.bookedClassesRepository.createBookedClasses(singleClasses);
+    await this.bookedClassesRepository.create(singleClasses);
 
-    // Add recurring class for future occurrences if deleteFutureOccurences is true
     if (!deleteFutureOccurences) {
       const nextWeekDate = addWeeks(classBeingDeletedDate, 1);
       const recurringClass: BookedClass = this.createRecurringClass(
@@ -237,11 +230,10 @@ export class BookedClassesService {
         bookedClass.teacherId,
         user.id
       );
-      await this.bookedClassesRepository.createBookedClasses([recurringClass]);
+      await this.bookedClassesRepository.create([recurringClass]);
     }
 
-    // Delete the class being deleted
-    await this.deleteClass(user.id, bookedClass.id);
+    await this.deleteClass(bookedClass.id);
   }
 
   private createRecurringClass(
@@ -257,11 +249,8 @@ export class BookedClassesService {
     } as BookedClass;
   }
 
-  private async deleteClass(studentId: number, classId: number) {
-    await this.bookedClassesRepository.deleteByIdAndStudentId(
-      classId,
-      studentId
-    );
+  private async deleteClass(id: number) {
+    await this.bookedClassesRepository.deleteById(id);
   }
 
   private async getAvailableSlots(

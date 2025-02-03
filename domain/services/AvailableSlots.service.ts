@@ -106,8 +106,8 @@ export class AvailableSlotsService {
       return [];
     }
 
-    const bookedClasses = await this.bookClassesRepo.findAllBookedClasses();
-    const vacations = await this.vacationsRepo.findAllVacations();
+    const bookedClasses = await this.bookClassesRepo.findAll();
+    const vacations = await this.vacationsRepo.findAll();
 
     return this.computeAvailableTimes({
       availableSlots,
@@ -133,8 +133,8 @@ export class AvailableSlotsService {
       return false;
     }
 
-    const bookedClasses = await this.bookClassesRepo.findAllBookedClasses();
-    const vacations = await this.vacationsRepo.findAllVacations();
+    const bookedClasses = await this.bookClassesRepo.findAll();
+    const vacations = await this.vacationsRepo.findAll();
 
     return availableSlots.some((slot) => {
       const context: SlotAvailibilityContext = {

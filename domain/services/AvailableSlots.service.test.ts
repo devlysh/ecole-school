@@ -64,13 +64,13 @@ function createMockBookedClass(
 }
 
 const mockFetchAllBookedClasses = BookedClassesRepository.prototype
-  .findAllBookedClasses as jest.Mock;
+  .findAll as jest.Mock;
 const mockFetchByTeacherId = AvailableSlotsRepository.prototype
   .findByTeacherId as jest.Mock;
 const mockFindByEmail = UsersRepository.prototype
   .findStudentByEmail as jest.Mock;
 const mockFetchAllVacations = VacationsRepository.prototype
-  .findAllVacations as jest.Mock;
+  .findAll as jest.Mock;
 
 describe("AvailableHoursService", () => {
   let service: AvailableSlotsService;

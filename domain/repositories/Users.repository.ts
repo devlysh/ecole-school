@@ -116,17 +116,6 @@ export class UsersRepository {
     });
   }
 
-  public async findStudentById(
-    id: number
-  ): Promise<(User & { student: Student | null }) | null> {
-    return prisma.user.findUnique({
-      where: { id },
-      include: {
-        student: true,
-      },
-    });
-  }
-
   public async findStudentsByIds(
     ids: number[]
   ): Promise<(User & { student: Student | null })[]> {
