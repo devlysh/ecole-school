@@ -4,13 +4,7 @@ import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Spinner } from "@nextui-org/react";
 import { SubscriptionPlan } from "./SubscriptionPlan";
 import { groupByCurrency } from "@/lib/utils";
-import {
-  PreAuthTokenPayload,
-  Currency,
-  Language,
-  Plan,
-  TokenType,
-} from "@/lib/types";
+import { PreAuthTokenPayload, Currency, Plan, TokenType } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import LanguageSelect from "./LanguageSelect";
@@ -19,6 +13,7 @@ import logger from "@/lib/logger";
 import jwt from "jsonwebtoken";
 import { submitPlanRequest } from "@/app/api/v1/plans/request";
 import { toast } from "react-toastify";
+import { Language } from "@prisma/client";
 
 const Pricing = ({
   languages,
