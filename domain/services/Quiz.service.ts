@@ -42,10 +42,3 @@ export const QuizService = {
   calculateProgress: (state: QuizState): number =>
     (state.currentStep / (state.steps.length - 1)) * 100,
 };
-
-export const pipe =
-  (prevState: QuizState) =>
-  (...methods: ((state: QuizState) => QuizState)[]) =>
-    methods.reduce((state, method) => {
-      return method(state);
-    }, prevState);

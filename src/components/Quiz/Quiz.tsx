@@ -1,11 +1,11 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { steps } from "@domain/models/Quiz.model";
-import { QuizService, pipe } from "@domain/services/Quiz.service";
+import { QuizService } from "@domain/services/Quiz.service";
 import { useRouter } from "next/navigation";
 import { Progress } from "@nextui-org/progress";
 import { Button } from "@nextui-org/button";
-import { QuizState, QuizStep, StepType } from "@/lib/types";
+import { QuizState, StepType } from "@/lib/types";
 import InfoStep from "./Steps/InfoStep";
 import QuestionStep from "./Steps/QuestionStep";
 import FormStep from "./Steps/FormStep";
@@ -22,29 +22,14 @@ const Quiz = () => {
   );
   const [emailError, setEmailError] = useState<string | null>(null);
 
-  const currentStep = useMemo<QuizStep>(
-    () => quizState.steps[quizState.currentStep],
-    [quizState.currentStep, quizState.steps]
-  );
-  const isFirstStep = useMemo<boolean>(
-    () => QuizService.isFirstStep(quizState),
-    [quizState]
-  );
-
-  const isLastStep = useMemo<boolean>(
-    () => quizState.currentStep === quizState.steps.length - 1,
-    [quizState]
-  );
-
-  const percent = useMemo<number>(
-    () => QuizService.calculateProgress(quizState),
-    [quizState]
-  );
+  const currentStep = quizState.steps[quizState.currentStep];
+  const isFirstStep = quizState.currentStep === 0;
+  const isLastStep = quizState.currentStep === quizState.steps.length - 1;
+  const percent = QuizService.calculateProgress(quizState);
 
   const preRegisterUserAndNavigateToPricing = useCallback(async () => {
     try {
       await submitQuizRequest();
-
       router.push("/pricing");
     } catch (err: unknown) {
       toast.error("Failed to register user");
@@ -52,28 +37,35 @@ const Quiz = () => {
     }
   }, [router]);
 
+  const handleEmailValidation = useCallback(async (email: string) => {
+    try {
+      const { isTaken } = await checkEmailRequest(email);
+      if (isTaken) {
+        setEmailError("Email is already taken");
+        return false;
+      }
+    } catch (err: unknown) {
+      logger.error(err, "Error during email validation");
+      if (err instanceof Error) {
+        setEmailError(err.message);
+      } else if (typeof err === "string") {
+        setEmailError(err);
+      } else {
+        setEmailError("Failed to check if email is taken");
+      }
+      return false;
+    }
+    return true;
+  }, []);
+
   const handleNext = useCallback(
     async (answer?: string) => {
       if (currentStep.name === "email" && answer) {
-        try {
-          const { isTaken } = await checkEmailRequest(answer);
-
-          if (isTaken) {
-            setEmailError("Email is already taken");
-            return;
-          }
-        } catch (err: unknown) {
-          logger.error(err, "Error during check if email is taken");
-          if (err instanceof Error) {
-            setEmailError(err.message);
-          } else if (typeof err === "string") {
-            setEmailError(err);
-          } else {
-            setEmailError("Failed to check if email is taken");
-          }
-          return;
-        }
+        const valid = await handleEmailValidation(answer);
+        if (!valid) return;
       }
+
+      if (emailError) setEmailError(null);
 
       setQuizState((prevState) => {
         if (!answer) {
@@ -81,23 +73,25 @@ const Quiz = () => {
         }
 
         Cookies.set(currentStep.name, answer, { path: "/" });
-        return pipe(prevState)(
-          (state: QuizState) => QuizService.submitAnswer(state, answer),
-          (state: QuizState) => QuizService.goToNextStep(state)
-        );
+        const updatedState = QuizService.submitAnswer(prevState, answer);
+        return QuizService.goToNextStep(updatedState);
       });
 
       if (isLastStep) {
-        preRegisterUserAndNavigateToPricing();
+        await preRegisterUserAndNavigateToPricing();
       }
     },
-    [currentStep, isLastStep, preRegisterUserAndNavigateToPricing]
+    [
+      currentStep,
+      isLastStep,
+      emailError,
+      handleEmailValidation,
+      preRegisterUserAndNavigateToPricing,
+    ]
   );
 
   const handlePrevious = useCallback(() => {
-    setQuizState((prevState) => {
-      return QuizService.goToPreviousStep(prevState);
-    });
+    setQuizState((prevState) => QuizService.goToPreviousStep(prevState));
   }, []);
 
   const renderStep = useCallback(() => {
