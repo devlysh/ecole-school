@@ -1,5 +1,4 @@
-import { TeacherFormValues } from "@/lib/types";
-import { EventInput } from "@fullcalendar/core/index.js";
+import { AddUpdateTeacherRequest } from "@/lib/types";
 
 const NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -16,12 +15,7 @@ export const fetchTeachersRequest = async () => {
   return await response.json();
 };
 
-export const addTeacherRequest = async (
-  teacher: TeacherFormValues & {
-    timeSlots: EventInput[];
-    vacations: EventInput[];
-  }
-) => {
+export const addTeacherRequest = async (teacher: AddUpdateTeacherRequest) => {
   const response = await fetch(`${NEXT_PUBLIC_BASE_URL}/api/v1/teachers`, {
     method: "POST",
     headers: {

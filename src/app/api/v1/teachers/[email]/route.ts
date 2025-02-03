@@ -1,6 +1,9 @@
 import logger from "@/lib/logger";
-import { AccessTokenPayload, RoleName, TeacherFormValues } from "@/lib/types";
-import { EventInput } from "@fullcalendar/core/index.js";
+import {
+  AccessTokenPayload,
+  AddUpdateTeacherRequest,
+  RoleName,
+} from "@/lib/types";
 import { BadRequestError, UnauthorizedError } from "@/lib/errors";
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { verifyAccessToken } from "@/lib/jwt";
@@ -34,11 +37,8 @@ export const PUT = async (
       throw new UnauthorizedError();
     }
 
-    const { name, timezone, timeSlots, vacations } =
-      (await request.json()) as TeacherFormValues & {
-        timeSlots: EventInput[];
-        vacations: EventInput[];
-      };
+    const { name, timezone, timeSlots, vacations, languages } =
+      (await request.json()) as AddUpdateTeacherRequest;
 
     if (!name || !timezone) {
       throw new BadRequestError();
@@ -49,7 +49,8 @@ export const PUT = async (
       name,
       timezone,
       timeSlots,
-      vacations
+      vacations,
+      languages
     );
 
     return Response.json(updatedTeacher, { status: 200 });

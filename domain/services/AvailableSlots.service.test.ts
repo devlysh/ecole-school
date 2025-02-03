@@ -71,6 +71,8 @@ const mockFindByEmail = UsersRepository.prototype
   .findStudentByEmail as jest.Mock;
 const mockFetchAllVacations = VacationsRepository.prototype
   .findAll as jest.Mock;
+const mockFetchAllTeachers = UsersRepository.prototype
+  .findAllTeachers as jest.Mock;
 
 describe("AvailableHoursService", () => {
   let service: AvailableSlotsService;
@@ -105,6 +107,7 @@ describe("AvailableHoursService", () => {
       mockFindByEmail.mockResolvedValue(mockUser);
       mockFetchByTeacherId.mockResolvedValue([]);
       mockFetchAllBookedClasses.mockResolvedValue([]);
+      mockFetchAllTeachers.mockResolvedValue([]);
 
       const result = await service.getAvailableSlots({
         email: "student@example.com",
@@ -360,6 +363,7 @@ describe("AvailableHoursService", () => {
       mockFetchByTeacherId.mockResolvedValue(availableSlots);
       mockFetchAllBookedClasses.mockResolvedValue([]);
       mockFetchAllVacations.mockResolvedValue([]);
+      mockFetchAllTeachers.mockResolvedValue([]);
 
       const result = await service.getAvailableSlots({
         email: "student@example.com",

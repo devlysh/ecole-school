@@ -1,10 +1,13 @@
 import logger from "@/lib/logger";
 import { verifyAccessToken } from "@/lib/jwt";
-import { AccessTokenPayload, RoleName, TeacherFormValues } from "@/lib/types";
+import {
+  AccessTokenPayload,
+  AddUpdateTeacherRequest,
+  RoleName,
+} from "@/lib/types";
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { UnauthorizedError } from "@/lib/errors";
 import { UsersRepository } from "@domain/repositories/Users.repository";
-import { EventInput } from "@fullcalendar/core/index.js";
 import bcrypt from "bcrypt";
 
 export const GET = async () => {
@@ -16,7 +19,7 @@ export const GET = async () => {
     }
 
     const userRepository = new UsersRepository();
-    const teachers = await userRepository.findTeachers();
+    const teachers = await userRepository.findAllTeachers();
     return Response.json(teachers, { status: 200 });
   } catch (err: unknown) {
     if (err instanceof UnauthorizedError) {
@@ -35,8 +38,8 @@ export const POST = async (request: Request) => {
       throw new UnauthorizedError("You are not authorized to add a teacher");
     }
 
-    const { name, email, password, timeSlots } =
-      (await request.json()) as TeacherFormValues & { timeSlots: EventInput[] };
+    const { name, email, password, timeSlots, vacations, languages } =
+      (await request.json()) as AddUpdateTeacherRequest;
 
     if (!name || !email || !password) {
       return Response.json(
@@ -51,7 +54,9 @@ export const POST = async (request: Request) => {
       name,
       email,
       passwordHash,
-      timeSlots
+      timeSlots,
+      vacations,
+      languages
     );
 
     return Response.json(newTeacher, { status: 201 });

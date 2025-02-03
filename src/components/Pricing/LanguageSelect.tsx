@@ -2,7 +2,7 @@
 
 import { ChangeEvent } from "react";
 import { Select, SelectItem } from "@nextui-org/react";
-import { Language } from "@/lib/types";
+import { Language } from "@prisma/client";
 
 const LanguageSelect = ({
   languages,

@@ -24,10 +24,10 @@ export class CreditService {
     if (!credit) {
       throw new Error("No unused credits available");
     }
-    return this.creditRepository.markAsUsed(credit.id, bookedClass);
+    return await this.creditRepository.markAsUsed(credit.id, bookedClass);
   }
 
   public async getActiveCreditsCount(studentId: number): Promise<number> {
-    return this.creditRepository.getActiveCount(studentId);
+    return await this.creditRepository.getActiveCount(studentId);
   }
 }

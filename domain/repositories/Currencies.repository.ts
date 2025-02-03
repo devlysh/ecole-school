@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
+import { Currency } from "@prisma/client";
 
 export class CurrenciesRepository {
-  findAll() {
-    return prisma.currency.findMany();
+  findAll(): Promise<Currency[]> {
+    return prisma.currency.findMany({});
   }
 }

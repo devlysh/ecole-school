@@ -10,8 +10,9 @@ import jwt from "jsonwebtoken";
 
 import { submitCheckoutRequest } from "@/app/api/v1/checkout/request";
 import logger from "@/lib/logger";
-import { PreAuthTokenPayload, Language, Plan, TokenType } from "@/lib/types";
+import { PreAuthTokenPayload, Plan, TokenType } from "@/lib/types";
 import CheckoutForm from "./CheckoutForm";
+import { Language } from "@prisma/client";
 
 interface CheckoutProps {
   email: string;

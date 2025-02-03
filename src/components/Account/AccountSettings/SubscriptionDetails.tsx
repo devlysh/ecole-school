@@ -3,18 +3,25 @@ import { useSubscriptionDetails } from "@/hooks/useSubscriptionDetails";
 import React from "react";
 
 interface SubscriptionDetailsProps {
-  language: string;
+  languages: string[];
 }
 
 const SubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({
-  language,
+  languages,
 }) => {
-  const { languages } = useLanguages();
+  const { languages: languagesList } = useLanguages();
   const { subscriptionDetails } = useSubscriptionDetails();
 
   return (
     <div>
-      <p>Language: {languages.find((l) => l.code === language)?.name}</p>
+      <p>
+        Language:{" "}
+        {languages
+          .map(
+            (language) => languagesList.find((l) => l.code === language)?.name
+          )
+          .join(", ")}
+      </p>
       {subscriptionDetails?.planName && (
         <p>Current Plan: {subscriptionDetails?.planName}</p>
       )}

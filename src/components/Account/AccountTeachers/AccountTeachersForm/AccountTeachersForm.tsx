@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useState, FC, useRef, useCallback, useEffect } from "react";
+import React, {
+  useState,
+  FC,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import logger from "@/lib/logger";
 import { EventInput } from "@fullcalendar/core";
@@ -9,22 +16,35 @@ import ScheduleCalendar from "./ScheduleCalendar";
 import { addTeacherRequest } from "@/app/api/v1/teachers/request";
 import { useRouter } from "next/navigation";
 import { checkEmailRequest } from "@/app/api/v1/email/[email]/request";
-import { TeacherFormValues } from "@/lib/types";
+import { AddUpdateTeacherRequest, TeacherFormValues } from "@/lib/types";
 import { updateTeacherRequest } from "@/app/api/v1/teachers/[email]/request";
 import { fetchTeacherByEmailRequest } from "@/app/api/v1/teachers/[email]/request";
-import { AvailableSlot, Teacher, User, Vacation } from "@prisma/client";
+import {
+  AvailableSlot,
+  Language,
+  Teacher,
+  User,
+  Vacation,
+} from "@prisma/client";
 import { convertToRruleDate } from "@/lib/utils";
 import { toast } from "react-toastify";
 
 interface AccountTeachersFormProps {
+  languages: Pick<Language, "code" | "name">[];
   email?: string;
 }
 
-const AccountTeachersForm: FC<AccountTeachersFormProps> = ({ email }) => {
+const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
+  email,
+  languages,
+}) => {
   const router = useRouter();
   const [timeSlots, setTimeSlots] = useState<EventInput[]>([]);
   const [vacations, setVacations] = useState<EventInput[]>([]);
   const [name, setName] = useState<string>("");
+  const [teacherLanguages, setTeacherLanguages] = useState<
+    Pick<Language, "code" | "name">[]
+  >([]);
   const emailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -36,12 +56,16 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({ email }) => {
           teacher: Teacher & {
             availableSlots: AvailableSlot[];
             vacations: Vacation[];
+            languages?: { language: Pick<Language, "code" | "name"> }[];
           };
         } = await fetchTeacherByEmailRequest(email);
 
         if (!user || !user.name || !user.teacher) return;
 
         setName(user.name);
+        setTeacherLanguages(
+          user.teacher.languages?.map((l) => l.language) || []
+        );
 
         setTimeSlots(
           shapeTimeSlots(
@@ -82,14 +106,12 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({ email }) => {
     async (values: TeacherFormValues) => {
       try {
         const { isTaken } = await checkEmailRequest(values.email);
-        const teacher: TeacherFormValues & {
-          timeSlots: EventInput[];
-          vacations: EventInput[];
-        } = {
+        const teacher: AddUpdateTeacherRequest = {
           name: values.name,
           email: values.email,
           password: values.password,
           timezone: values.timezone,
+          languages: values.languages,
           timeSlots,
           vacations: vacations.map((vacation) => ({
             start: new Date(vacation.start as string).toISOString(),
@@ -119,10 +141,26 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({ email }) => {
       email: email ?? "",
       password: email ? "********" : "",
       timezone: "utc",
+      languages: teacherLanguages,
     },
     enableReinitialize: true,
     onSubmit: handleSubmit,
   });
+
+  const selectedLanguageKeys = useMemo(() => {
+    return new Set(
+      formik.values.languages.map((lang) => {
+        return lang.code;
+      })
+    );
+  }, [formik.values.languages]);
+
+  const handleLanguagesChange = (selected: string[]) => {
+    const selectedLanguages = languages.filter((lang) => {
+      return selected.includes(lang.code);
+    });
+    formik.setFieldValue("languages", selectedLanguages);
+  };
 
   return (
     <div className="w-full">
@@ -171,6 +209,25 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({ email }) => {
             defaultSelectedKeys={[formik.values.timezone]}
           >
             <SelectItem key="utc">UTC</SelectItem>
+          </Select>
+        </div>
+        <div className="w-1/2 p-2">
+          <Select
+            placeholder="Select Languages"
+            selectedKeys={selectedLanguageKeys}
+            onSelectionChange={(keys) => {
+              const selected = Array.from(keys as Set<string>);
+              handleLanguagesChange(selected);
+            }}
+            selectionMode="multiple"
+            label="Languages"
+            required
+          >
+            {languages.map((language) => (
+              <SelectItem key={language.code} value={language.code}>
+                {language.name}
+              </SelectItem>
+            ))}
           </Select>
         </div>
         <div className="w-full mt-4">

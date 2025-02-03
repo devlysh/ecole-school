@@ -56,11 +56,12 @@ model Currency {
 }
 
 model Language {
-  id   Int     @id @default(autoincrement())
-  name String  @unique
-  code String? @unique
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  code String @unique
 
   teacherLanguages TeacherLanguage[]
+  StudentLanguage  StudentLanguage[]
 
   @@map("languages")
 }
@@ -87,6 +88,17 @@ model TeacherLanguage {
 
   @@id([teacherId, languageId])
   @@map("teacher_languages")
+}
+
+model StudentLanguage {
+  studentId  Int @map("student_id")
+  languageId Int @map("language_id")
+
+  student  Student  @relation(fields: [studentId], references: [userId])
+  language Language @relation(fields: [languageId], references: [id])
+
+  @@id([studentId, languageId])
+  @@map("student_languages")
 }
 
 model AvailableSlot {
@@ -130,10 +142,11 @@ model Student {
   stripeCustomerId     String  @unique @map("stripe_customer_id")
   stripeSubscriptionId String? @unique @map("stripe_subscription_id")
 
-  user          User          @relation(fields: [userId], references: [id])
-  teacher       Teacher?      @relation(fields: [assignedTeacherId], references: [userId])
-  bookedClasses BookedClass[]
-  credits       Credit[]
+  user             User              @relation(fields: [userId], references: [id])
+  teacher          Teacher?          @relation(fields: [assignedTeacherId], references: [userId])
+  bookedClasses    BookedClass[]
+  credits          Credit[]
+  studentLanguages StudentLanguage[]
 
   @@index([assignedTeacherId], name: "idx_student_assigned_teacher_id")
   @@map("students")

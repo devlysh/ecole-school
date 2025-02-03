@@ -33,7 +33,7 @@ export const GET = async () => {
       return handleErrorResponse(err, 401);
     }
 
-    logger.error(err, "Error fetching vacations");
-    return handleErrorResponse(new Error("Failed to fetch vacations"), 500);
+    logger.error(err, "Error fetching credits");
+    return handleErrorResponse(new Error("Failed to fetch credits"), 500);
   }
 };

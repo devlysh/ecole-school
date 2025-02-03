@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { RoleName } from "@/lib/types";
 import { EventInput } from "@fullcalendar/core/index.js";
-import { Role, Student, Teacher, User } from "@prisma/client";
+import { Language, Role, Student, Teacher, User } from "@prisma/client";
 import Stripe from "stripe";
 
 export class UsersRepository {
@@ -33,6 +33,13 @@ export class UsersRepository {
         student: {
           create: {
             stripeCustomerId: stripeCustomer.id,
+            studentLanguages: {
+              create: {
+                language: {
+                  connect: { code: language },
+                },
+              },
+            },
           },
         },
       },
@@ -47,7 +54,7 @@ export class UsersRepository {
     });
   }
 
-  findTeachers(): Promise<User[]> {
+  findAllTeachers() {
     return prisma.user.findMany({
       where: {
         roles: {
@@ -73,12 +80,7 @@ export class UsersRepository {
           select: {
             languages: {
               select: {
-                language: {
-                  select: {
-                    name: true,
-                    code: true,
-                  },
-                },
+                language: true,
               },
             },
           },
@@ -126,27 +128,63 @@ export class UsersRepository {
     });
   }
 
-  findStudentByEmail(
-    email: string
-  ): Promise<(User & { student: Student | null }) | null> {
+  findStudentByEmail(email: string) {
     return prisma.user.findUnique({
       where: { email },
-      include: {
-        student: true,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        settings: true,
+        roles: true,
+        dateJoined: true,
+        isActive: true,
+        student: {
+          select: {
+            userId: true,
+            assignedTeacherId: true,
+            exTeacherIds: true,
+            stripeCustomerId: true,
+            stripeSubscriptionId: true,
+            studentLanguages: {
+              select: {
+                language: true,
+              },
+            },
+          },
+        },
       },
     });
   }
 
   findTeacherByEmail(
     email: string
-  ): Promise<(User & { teacher: Teacher | null }) | null> {
+  ): Promise<
+    (Omit<User, "passwordHash"> & { teacher: Teacher | null }) | null
+  > {
     return prisma.user.findUnique({
       where: { email },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        dateJoined: true,
+        isActive: true,
+        settings: true,
         teacher: {
           include: {
             availableSlots: true,
             vacations: true,
+            languages: {
+              select: {
+                language: {
+                  select: {
+                    name: true,
+                    code: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -157,7 +195,9 @@ export class UsersRepository {
     name: string,
     email: string,
     passwordHash: string,
-    timeSlots: EventInput[]
+    timeSlots: EventInput[],
+    vacations: EventInput[],
+    languages: Pick<Language, "name" | "code">[]
   ): Promise<User> {
     return prisma.user.create({
       data: {
@@ -172,6 +212,18 @@ export class UsersRepository {
                 startTime: slot.start as string,
                 endTime: slot.end as string,
                 rrule: slot.rrule as string,
+              })),
+            },
+            vacations: {
+              create: vacations.map((slot) => ({
+                date: new Date(slot.start as string).toISOString(),
+              })),
+            },
+            languages: {
+              create: languages.map((language) => ({
+                language: {
+                  connect: { code: language.code },
+                },
               })),
             },
           },
@@ -189,37 +241,73 @@ export class UsersRepository {
     });
   }
 
-  updateTeacherByEmail(
+  async updateTeacherByEmail(
     email: string,
     name: string,
     timezone: string,
     timeSlots: EventInput[],
-    vacations: EventInput[]
-  ) {
-    return prisma.user.update({
-      where: { email },
-      data: {
-        name: `${name}`,
-        settings: { timezone },
-        teacher: {
-          update: {
-            availableSlots: {
-              deleteMany: {},
-              create: timeSlots.map((slot) => ({
-                startTime: slot.start as string,
-                endTime: slot.end as string,
-                rrule: slot.extendedProps?.rrule,
-              })),
-            },
-            vacations: {
-              deleteMany: {},
-              create: vacations.map((slot) => ({
-                date: new Date(slot.start as string).toISOString(),
-              })),
+    vacations: EventInput[],
+    languages: Pick<Language, "code" | "name">[]
+  ): Promise<User> {
+    return await prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.user.update({
+        where: { email },
+        data: {
+          name,
+          settings: { timezone },
+          teacher: {
+            update: {
+              availableSlots: {
+                deleteMany: {},
+                create: timeSlots.map((slot) => ({
+                  startTime: String(slot.start),
+                  endTime: String(slot.end),
+                  rrule: slot.extendedProps?.rrule,
+                })),
+              },
+              vacations: {
+                deleteMany: {},
+                create: vacations.map((slot) => ({
+                  date: new Date(slot.start as string).toISOString(),
+                })),
+              },
+              // Remove any nested languages update here!
             },
           },
         },
-      },
+        include: { teacher: true },
+      });
+
+      // Use updatedUser.id as teacherId (since teacher.userId == user.id)
+      const teacherId = updatedUser.id;
+      if (!teacherId) {
+        throw new Error("Teacher record not found for user update");
+      }
+
+      // Remove existing teacher_language associations.
+      await tx.teacherLanguage.deleteMany({ where: { teacherId } });
+
+      // Look up language IDs for the provided language codes.
+      const languageRecords = await tx.language.findMany({
+        where: { code: { in: languages.map((l) => l.code) } },
+        select: { id: true },
+      });
+
+      if (languageRecords.length !== languages.length) {
+        throw new Error("One or more provided languages do not exist");
+      }
+
+      // Create join records using the valid language IDs.
+      const teacherLanguageData = languageRecords.map((langRec) => ({
+        teacherId,
+        languageId: langRec.id,
+      }));
+
+      await tx.teacherLanguage.createMany({
+        data: teacherLanguageData,
+      });
+
+      return updatedUser;
     });
   }
 

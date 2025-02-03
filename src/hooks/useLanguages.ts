@@ -1,7 +1,7 @@
 "use client";
 
 import { getLanguagesRequest } from "@/app/api/v1/languages/request";
-import { Language } from "@/lib/types";
+import { Language } from "@prisma/client";
 import { useState, useEffect } from "react";
 
 const useLanguages = () => {

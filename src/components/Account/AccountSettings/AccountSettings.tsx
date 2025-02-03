@@ -39,7 +39,7 @@ const AccountSettingsPage: React.FC = () => {
       />
       <PasswordChangeForm setPassword={setPassword} />
       {/* <TimeSetupForm /> */}
-      <SubscriptionDetails language={settings.language} />
+      <SubscriptionDetails languages={settings.languages} />
     </div>
   );
 };

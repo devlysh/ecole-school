@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AvailableCalendarSlot } from "@/lib/types";
 import { addDays, format, startOfWeek, getDay } from "date-fns";
 
@@ -25,15 +25,29 @@ export const AccountBookClassesCalendar: React.FC<
   fetchAvailableSlots,
   clearAvailableSlots,
 }) => {
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
-    startOfWeek(new Date())
+  const baselineDate = useMemo(() => {
+    return isRecurrentSchedule
+      ? startOfWeek(new Date())
+      : addDays(new Date(), 1);
+  }, [isRecurrentSchedule]);
+
+  const [weekOffset, setWeekOffset] = useState<number>(0);
+
+  const weekStart = useMemo(
+    () => addDays(baselineDate, weekOffset * 7),
+    [baselineDate, weekOffset]
   );
+  const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
 
   const [hourRange, setHourRange] = useState<number[]>(() => hours);
 
+  useEffect(() => {
+    fetchAvailableSlots(weekStart, weekEnd);
+  }, [weekStart, weekEnd, fetchAvailableSlots]);
+
   const handleWeekChange = useCallback(
     (direction: number) => {
-      setCurrentWeekStart((prev) => addDays(prev, direction * 7));
+      setWeekOffset((prev) => prev + direction);
       clearAvailableSlots();
     },
     [clearAvailableSlots]
@@ -48,9 +62,13 @@ export const AccountBookClassesCalendar: React.FC<
     });
   }, []);
 
-  const weekDates = Array.from({ length: 7 }, (_, i) =>
-    addDays(currentWeekStart, i)
-  );
+  const weekDates = useMemo(() => {
+    const dates: Date[] = [];
+    for (let d = new Date(weekStart); d <= weekEnd; d = addDays(d, 1)) {
+      dates.push(new Date(d));
+    }
+    return dates;
+  }, [weekStart, weekEnd]);
 
   const renderHour = (hour: number) => (
     <div
@@ -116,25 +134,12 @@ export const AccountBookClassesCalendar: React.FC<
     );
   };
 
-  useEffect(() => {
-    const endOfWeek = addDays(currentWeekStart, 6);
-    fetchAvailableSlots(currentWeekStart, endOfWeek);
-  }, [currentWeekStart, fetchAvailableSlots]);
-
-  useEffect(() => {
-    if (isRecurrentSchedule) {
-      setCurrentWeekStart(startOfWeek(new Date()));
-    } else {
-      setCurrentWeekStart(addDays(new Date(), 1));
-    }
-  }, [isRecurrentSchedule]);
-
   return (
     <div className="flex flex-col gap-4 w-full">
       <WeekNavigation
         handlePrevWeek={() => handleWeekChange(-1)}
         handleNextWeek={() => handleWeekChange(1)}
-        currentWeekStart={currentWeekStart}
+        currentWeekStart={weekStart}
         oneWeek={isRecurrentSchedule}
       />
       <div className="flex gap-8 w-full">

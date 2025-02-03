@@ -1,4 +1,5 @@
-import { BookedClass } from "@prisma/client";
+import { EventInput } from "@fullcalendar/core/index.js";
+import { BookedClass, Language } from "@prisma/client";
 import { SVGProps } from "react";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -75,11 +76,6 @@ export interface QuizState {
   answers: (Answer | null)[];
 }
 
-export interface Language {
-  code: string;
-  name: string;
-}
-
 export interface Currency {
   code: string;
   name: string;
@@ -135,7 +131,7 @@ export interface Teacher extends Record<string, unknown> {
   email: string;
   roles: { name: string }[];
   avatar?: string;
-  languages?: { name: string }[];
+  languages?: Language[];
 }
 
 export interface TeacherFormValues {
@@ -143,7 +139,13 @@ export interface TeacherFormValues {
   email: string;
   password: string;
   timezone: string;
+  languages: Language[];
 }
+
+export type AddUpdateTeacherRequest = TeacherFormValues & {
+  timeSlots: EventInput[];
+  vacations: EventInput[];
+};
 
 export interface SettingsFormValues {
   name: string;
@@ -159,7 +161,7 @@ export interface AvailableCalendarSlot {
 export interface Settings {
   name: string;
   email: string;
-  language: string;
+  languages: string[];
   quizAnswers: Record<string, string>;
   // timezone: string;
   // timeFormat: string;

@@ -33,11 +33,12 @@ export class SettingsService {
     }
 
     const userSettings = user.settings as JsonObject;
+    const languages = user.student?.studentLanguages;
 
     const settings = {
       email: user.email,
       name: user.name,
-      language: userSettings.language ?? null,
+      languages: languages?.map((language) => language.language.code) ?? [],
       quizAnswers: userSettings.quizAnswers ?? null,
     };
 
@@ -90,7 +91,7 @@ export class SettingsService {
     await this.bookedClassesRepo.deleteAllByStudentId(user.id);
   }
 
-  private async setName(user: User, name: string) {
+  private async setName(user: Omit<User, "passwordHash">, name: string) {
     await this.userRepo.updateName(user.id, name);
   }
 }

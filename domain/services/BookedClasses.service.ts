@@ -11,6 +11,7 @@ import {
   UnauthorizedError,
   UserNotFoundError,
 } from "@/lib/errors";
+import logger from "@/lib/logger";
 
 export class BookedClassesService {
   private userRepository: UsersRepository;
@@ -28,9 +29,7 @@ export class BookedClassesService {
   }
 
   public async deleteAllBookedClassesById(studentId: number) {
-    await this.bookedClassesRepository.deleteAllByStudentId(
-      studentId
-    );
+    await this.bookedClassesRepository.deleteAllByStudentId(studentId);
   }
 
   public async deleteAllBookedClassesByEmail(email: string) {
@@ -38,9 +37,7 @@ export class BookedClassesService {
     if (!user) {
       throw new UserNotFoundError("User not found", { email });
     }
-    await this.bookedClassesRepository.deleteAllByStudentId(
-      user.id
-    );
+    await this.bookedClassesRepository.deleteAllByStudentId(user.id);
   }
 
   public async bookClasses(
@@ -59,7 +56,7 @@ export class BookedClassesService {
     const assignedTeacherId = user.student.assignedTeacherId;
 
     if (assignedTeacherId) {
-      const result = this.bookedClassesRepository.create(
+      const result = await this.bookedClassesRepository.create(
         selectedSlots.map(
           (date) =>
             ({
@@ -77,6 +74,7 @@ export class BookedClassesService {
       assignedTeacherId,
       isRecurrent
     );
+
     const selectedTeachers =
       AvailableSlotsService.collectTeachersForSelectedSlots(
         availableSlots,
@@ -84,6 +82,8 @@ export class BookedClassesService {
       );
 
     const teacherToAssign = this.determineTeacherToAssign(selectedTeachers);
+
+    logger.debug({ selectedTeachers, teacherToAssign }, "Selected teachers");
 
     await this.studentRepository.updateAssignedTeacher(
       user.id,
@@ -210,7 +210,7 @@ export class BookedClassesService {
   }
 
   private async handleRecurringClassDeletion(
-    user: User,
+    user: Omit<User, "passwordHash">,
     bookedClass: BookedClass,
     classBeingDeletedDate: Date,
     deleteFutureOccurences: boolean = false
@@ -259,14 +259,14 @@ export class BookedClassesService {
   ): Promise<AvailableSlot[]> {
     if (assignedTeacherId) {
       return isRecurrentSchedule
-        ? this.availableSlotsRepository.findByTeacherId(assignedTeacherId)
-        : this.availableSlotsRepository.findRecurringByTeacherId(
+        ? await this.availableSlotsRepository.findByTeacherId(assignedTeacherId)
+        : await this.availableSlotsRepository.findRecurringByTeacherId(
             assignedTeacherId
           );
     } else {
       return isRecurrentSchedule
-        ? this.availableSlotsRepository.findAll()
-        : this.availableSlotsRepository.findRecurringSlots();
+        ? await this.availableSlotsRepository.findAll()
+        : await this.availableSlotsRepository.findRecurringSlots();
     }
   }
 
@@ -279,7 +279,7 @@ export class BookedClassesService {
   private generateSingleClasses(
     bookedClass: BookedClass,
     classBeingDeletedDate: Date,
-    user: User
+    user: Omit<User, "passwordHash">
   ) {
     return this.getWeeklyOccurrencesInPast(
       bookedClass.date,

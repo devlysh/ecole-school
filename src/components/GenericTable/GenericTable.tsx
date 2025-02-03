@@ -44,7 +44,6 @@ const GenericTable = <T extends Record<string, unknown>>({
   initialVisibleColumns,
   onNew,
 }: GenericTableProps<T>) => {
-  const [filterValue, setFilterValue] = useState("");
   const [visibleColumns, setVisibleColumns] = useState<Selection>(
     new Set(initialVisibleColumns)
   );
@@ -60,8 +59,6 @@ const GenericTable = <T extends Record<string, unknown>>({
     [list, rowsPerPage]
   );
 
-  const hasSearchFilter = useMemo(() => Boolean(filterValue), [filterValue]);
-
   const headerColumns = useMemo(() => {
     if (visibleColumns === "all") return columns;
 
@@ -70,27 +67,12 @@ const GenericTable = <T extends Record<string, unknown>>({
     );
   }, [columns, visibleColumns]);
 
-  const filteredItems = useMemo(() => {
-    let filteredList = [...list];
-
-    if (hasSearchFilter) {
-      filteredList = filteredList.filter((item) => {
-        return columns.some((column) => {
-          const value = item[column.uid] as string;
-          return value.toLowerCase().includes(filterValue.toLowerCase());
-        });
-      });
-    }
-
-    return filteredList;
-  }, [list, hasSearchFilter, filterValue, columns]);
-
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    return filteredItems.slice(start, end);
-  }, [page, filteredItems, rowsPerPage]);
+    return list.slice(start, end);
+  }, [page, list, rowsPerPage]);
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a: T, b: T) => {
@@ -109,15 +91,6 @@ const GenericTable = <T extends Record<string, unknown>>({
     },
     []
   );
-
-  const onSearchChange = useCallback((value?: string) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue("");
-    }
-  }, []);
 
   const renderCell = useCallback(
     (item: T, columnKey: string): ReactNode => {
@@ -189,15 +162,7 @@ const GenericTable = <T extends Record<string, unknown>>({
         </div>
       </div>
     );
-  }, [
-    filterValue,
-    onSearchChange,
-    visibleColumns,
-    columns,
-    list.length,
-    onRowsPerPageChange,
-    onNew,
-  ]);
+  }, [visibleColumns, columns, list.length, onRowsPerPageChange, onNew]);
 
   const bottomContent = useMemo(() => {
     return (
@@ -208,7 +173,6 @@ const GenericTable = <T extends Record<string, unknown>>({
             cursor: "",
           }}
           color="default"
-          isDisabled={hasSearchFilter}
           page={page}
           total={pages}
           variant="light"
@@ -216,7 +180,7 @@ const GenericTable = <T extends Record<string, unknown>>({
         />
       </div>
     );
-  }, [page, pages, hasSearchFilter]);
+  }, [page, pages]);
 
   return (
     <Table
