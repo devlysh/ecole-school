@@ -37,6 +37,10 @@ export const useAvailableSlots = () => {
     [isRecurrentSchedule, selectedSlots]
   );
 
+  const clearAvailableSlots = useCallback(() => {
+    setAvailableSlots([]);
+  }, []);
+
   useEffect(() => {
     setSelectedSlots([]);
   }, [isRecurrentSchedule]);
@@ -48,5 +52,6 @@ export const useAvailableSlots = () => {
     isRecurrentSchedule,
     setIsRecurrentSchedule,
     fetchAvailableSlots,
+    clearAvailableSlots,
   };
 };

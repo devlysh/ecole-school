@@ -16,6 +16,7 @@ const AccountBookClasses: React.FC = () => {
     isRecurrentSchedule,
     setIsRecurrentSchedule,
     fetchAvailableSlots,
+    clearAvailableSlots,
   } = useAvailableSlots();
 
   const { handleBook } = useBooking(selectedSlots, isRecurrentSchedule);
@@ -33,7 +34,10 @@ const AccountBookClasses: React.FC = () => {
           <Button onClick={handleBook}>Book</Button>
           <Switch
             isSelected={isRecurrentSchedule}
-            onValueChange={setIsRecurrentSchedule}
+            onValueChange={(value) => {
+              setIsRecurrentSchedule(value);
+              clearAvailableSlots();
+            }}
           >
             Fixed schedule
           </Switch>
@@ -46,6 +50,7 @@ const AccountBookClasses: React.FC = () => {
         setSelectedSlots={setSelectedSlots}
         isRecurrentSchedule={isRecurrentSchedule}
         fetchAvailableSlots={fetchAvailableSlots}
+        clearAvailableSlots={clearAvailableSlots}
       />
     </div>
   );

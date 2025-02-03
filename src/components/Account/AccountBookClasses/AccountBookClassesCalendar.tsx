@@ -11,6 +11,7 @@ interface AccountBookClassesCalendarProps {
   setSelectedSlots: React.Dispatch<React.SetStateAction<Date[]>>;
   isRecurrentSchedule: boolean;
   fetchAvailableSlots: (startDate: Date, endDate: Date) => void;
+  clearAvailableSlots: () => void;
 }
 
 export const AccountBookClassesCalendar: React.FC<
@@ -22,6 +23,7 @@ export const AccountBookClassesCalendar: React.FC<
   setSelectedSlots,
   isRecurrentSchedule,
   fetchAvailableSlots,
+  clearAvailableSlots,
 }) => {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
     startOfWeek(new Date())
@@ -29,9 +31,13 @@ export const AccountBookClassesCalendar: React.FC<
 
   const [hourRange, setHourRange] = useState<number[]>(() => hours);
 
-  const handleWeekChange = useCallback((direction: number) => {
-    setCurrentWeekStart((prev) => addDays(prev, direction * 7));
-  }, []);
+  const handleWeekChange = useCallback(
+    (direction: number) => {
+      setCurrentWeekStart((prev) => addDays(prev, direction * 7));
+      clearAvailableSlots();
+    },
+    [clearAvailableSlots]
+  );
 
   const handleHourScroll = useCallback((direction: number) => {
     setHourRange((prev) => {
