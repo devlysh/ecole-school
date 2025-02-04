@@ -25,7 +25,7 @@ export const syncStripeCustomers = async () => {
       });
 
       for (const customer of customers.data) {
-        const { id: stripeCustomerId, email, name, subscriptions } = customer;
+        const { id: stripeCustomerId, email, name } = customer;
 
         if (!email) {
           console.warn(
@@ -33,8 +33,6 @@ export const syncStripeCustomers = async () => {
           );
           continue;
         }
-
-        const stripeSubscriptionId = subscriptions?.data[0]?.id;
 
         const existingUser = await prisma.user.findUnique({
           where: { email },
@@ -54,7 +52,6 @@ export const syncStripeCustomers = async () => {
               student: {
                 create: {
                   stripeCustomerId,
-                  stripeSubscriptionId,
                 },
               },
             },
@@ -65,7 +62,6 @@ export const syncStripeCustomers = async () => {
             data: {
               userId: existingUser.id,
               stripeCustomerId,
-              stripeSubscriptionId,
             },
           });
         } else {
@@ -74,7 +70,6 @@ export const syncStripeCustomers = async () => {
             where: { userId: existingUser.id },
             data: {
               stripeCustomerId,
-              stripeSubscriptionId,
             },
           });
         }

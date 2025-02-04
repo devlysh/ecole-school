@@ -8,6 +8,7 @@ const rolePaths: Record<RoleName, RegExp[]> = {
     /^\/account$/,
     /^\/account\/teachers$/,
     /^\/account\/teachers\/.+$/,
+    /^\/account\/students$/,
     /^\/admin$/,
   ],
   [RoleName.STUDENT]: [

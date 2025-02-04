@@ -1,5 +1,5 @@
 import { IsAssignedTeacherStrategy } from "./IsAssignedTeacher.strategy";
-import { AvailableSlot, Student } from "@prisma/client";
+import { AvailableSlot } from "@prisma/client";
 
 describe("IsAssignedTeacherStrategy", () => {
   it("should validate a slot assigned to the correct teacher", () => {
@@ -11,18 +11,11 @@ describe("IsAssignedTeacherStrategy", () => {
       rrule: null,
     };
 
-    const student: Student = {
-      userId: 1,
-      assignedTeacherId: 1,
-      stripeCustomerId: "1",
-      stripeSubscriptionId: "1",
-    };
-
     const strategy = new IsAssignedTeacherStrategy();
     expect(
       strategy.isAvailable({
         slot,
-        assignedTeacherId: student.assignedTeacherId ?? undefined,
+        assignedTeacherId: 1,
       })
     ).toBe(true);
   });

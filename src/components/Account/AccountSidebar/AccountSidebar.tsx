@@ -21,6 +21,10 @@ const AccountSidebar: React.FC<SidebarProps> = ({ name, roles, className }) => {
           <AccountSidebarItem href="/account/teachers" label="Teachers" />
         )}
 
+        {isAdmin && (
+          <AccountSidebarItem href="/account/students" label="Students" />
+        )}
+
         {(isStudent || isTeacher) && (
           <AccountSidebarItem href="/account/my-classes" label="My Classes" />
         )}

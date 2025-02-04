@@ -35,7 +35,7 @@ const AccountTeachers: React.FC = () => {
   }, []);
 
   const INITIAL_VISIBLE_COLUMNS = useMemo(
-    () => ["name", "email", "language", "role", "actions"],
+    () => ["name", "email", "language", "actions"],
     []
   );
 
@@ -51,7 +51,6 @@ const AccountTeachers: React.FC = () => {
             classNames={{
               description: "text-default-500",
             }}
-            description={user.roles.map((r) => r.name).join(", ")}
             name={user.name}
           />
         ),

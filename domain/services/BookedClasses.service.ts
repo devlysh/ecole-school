@@ -83,8 +83,6 @@ export class BookedClassesService {
 
     const teacherToAssign = this.determineTeacherToAssign(selectedTeachers);
 
-    logger.debug({ selectedTeachers, teacherToAssign }, "Selected teachers");
-
     await this.studentRepository.updateAssignedTeacher(
       user.id,
       teacherToAssign

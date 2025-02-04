@@ -89,6 +89,30 @@ export class UsersRepository {
     });
   }
 
+  findAllStudents() {
+    return prisma.user.findMany({
+      where: {
+        roles: {
+          some: { role: { name: RoleName.STUDENT } },
+        },
+        student: {
+          isNot: null,
+        },
+      },
+      include: {
+        student: {
+          include: {
+            studentLanguages: {
+              include: {
+                language: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   findByEmail(email: string): Promise<User | null> {
     return prisma.user.findUnique({
       where: { email },
@@ -136,7 +160,6 @@ export class UsersRepository {
             assignedTeacherId: true,
             exTeacherIds: true,
             stripeCustomerId: true,
-            stripeSubscriptionId: true,
             studentLanguages: {
               select: {
                 language: true,
