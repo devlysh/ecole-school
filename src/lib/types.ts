@@ -19,6 +19,14 @@ export enum RoleName {
   STUDENT = "student",
 }
 
+export enum LanguageCode {
+  EN = "en",
+  ES = "es",
+  FR = "fr",
+  DE = "de",
+  IT = "it",
+}
+
 export enum StepType {
   INFO,
   QUESTION,

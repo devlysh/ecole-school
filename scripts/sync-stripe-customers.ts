@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import Stripe from "stripe";
+import bcrypt from "bcrypt";
+import { LanguageCode, RoleName } from "@/lib/types";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 
@@ -44,14 +46,32 @@ export const syncStripeCustomers = async () => {
           await prisma.user.create({
             data: {
               email,
-              passwordHash: "",
-              name,
+              passwordHash: await bcrypt.hash("qwerQWER1234!@#$", 10),
+              name: name ?? email,
               dateJoined: new Date(),
-              isActive: false,
+              isActive: true,
               settings: {},
               student: {
                 create: {
                   stripeCustomerId,
+                  studentLanguages: {
+                    create: {
+                      language: {
+                        connect: {
+                          code: LanguageCode.EN,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              roles: {
+                create: {
+                  role: {
+                    connect: {
+                      name: RoleName.STUDENT,
+                    },
+                  },
                 },
               },
             },

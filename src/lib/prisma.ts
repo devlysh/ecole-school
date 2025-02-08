@@ -8,6 +8,7 @@ try {
     // Uncomment, when to see the prisma queries in the console
     //
     // log: ["info", "warn", "error"], // this line
+    log: ["error"], // this line
     //
     // */
   });

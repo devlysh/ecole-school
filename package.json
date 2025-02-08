@@ -22,7 +22,7 @@
     "seed:admin": "tsx prisma/seed-admin.ts",
     "seed:admin:local": "npx dotenv -e .env.local -- npm run seed:admin",
     "prisma:migrate": "npx prisma migrate dev",
-    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:seed": "tsx prisma/seed.ts",
     "sync": "npm run stripe:sync",
     "sync:local": "npx dotenv -e .env.local -- npm run sync",
     "stripe:sync": "npm run stripe:sync:customers",

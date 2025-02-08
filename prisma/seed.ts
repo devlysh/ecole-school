@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+import { LanguageCode } from "@/lib/types";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -42,12 +43,11 @@ const main = async () => {
 
   // Seed languages
   const languages = [
-    { code: "en", name: "English" },
-    { code: "es", name: "Spanish" },
-    { code: "fr", name: "French" },
-    { code: "de", name: "German" },
-    { code: "it", name: "Italian" },
-    { code: "uk", name: "Ukrainian" },
+    { code: LanguageCode.EN, name: "English" },
+    { code: LanguageCode.ES, name: "Spanish" },
+    { code: LanguageCode.FR, name: "French" },
+    { code: LanguageCode.DE, name: "German" },
+    { code: LanguageCode.IT, name: "Italian" },
   ];
 
   for (const language of languages) {
