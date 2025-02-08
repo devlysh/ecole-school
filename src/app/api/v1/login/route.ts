@@ -11,6 +11,12 @@ import {
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { UsersRepository } from "@domain/repositories/Users.repository";
 
+export const GET = async () => {
+  const cookieStore = cookies();
+  const accessToken = cookieStore.get(TokenType.ACCESS);
+  return Response.json({ isLoggedIn: !!accessToken }, { status: 200 });
+};
+
 export const POST = async (request: Request) => {
   const { email, password } = await request.json();
 

@@ -6,6 +6,12 @@ class ErrorWithMetadata extends Error {
     this.metadata = metadata;
   }
 }
+export class AccessTokenMissingError extends ErrorWithMetadata {
+  constructor(metadata?: Record<string, unknown>) {
+    super("Access token is missing", metadata);
+    this.name = "AccessTokenMissingError";
+  }
+}
 
 export class SlotIsNotAvailableError extends ErrorWithMetadata {
   constructor(metadata?: Record<string, unknown>) {

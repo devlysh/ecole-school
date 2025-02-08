@@ -7,9 +7,11 @@ import { useRouter } from "next/navigation";
 import { loginRequest } from "@/app/api/v1/login/request";
 import logger from "@/lib/logger";
 import { InvalidEmailOrPasswordError } from "@/lib/errors";
+import { useAuth } from "@/providers/AuthProvider";
 
 const Login = () => {
   const router = useRouter();
+  const { setIsLoggedIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +22,7 @@ const Login = () => {
 
     try {
       await loginRequest(email, password);
+      setIsLoggedIn(true);
       router.push("/account");
     } catch (err: unknown) {
       if (err instanceof InvalidEmailOrPasswordError) {
@@ -41,6 +44,7 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full"
+            autoComplete="email"
           />
           <Input
             type="password"
@@ -48,6 +52,7 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full"
+            autoComplete="current-password"
           />
           {error && <p className="text-red-500">{error}</p>}
           <Button type="submit" className="w-full">
