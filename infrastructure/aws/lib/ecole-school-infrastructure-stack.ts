@@ -163,7 +163,7 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       {
         runtime: lambda.Runtime.NODEJS_18_X,
         handler: "refresh-booked-classes.handler",
-        code: lambda.Code.fromAsset("./lambda"),
+        code: lambda.Code.fromAsset("./dist"),
         environment: {},
       }
     );
