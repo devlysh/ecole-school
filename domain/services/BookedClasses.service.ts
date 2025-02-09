@@ -28,6 +28,11 @@ export class BookedClassesService {
     this.availableSlotsRepository = new AvailableSlotsRepository();
   }
 
+  public async refreshBookedClasses() {
+    const bookedClasses = await this.bookedClassesRepository.findAll();
+    logger.debug({ bookedClasses }, "Booked classes");
+  }
+
   public async deleteAllBookedClassesById(studentId: number) {
     await this.bookedClassesRepository.deleteAllByStudentId(studentId);
   }
