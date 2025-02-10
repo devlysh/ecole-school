@@ -162,11 +162,17 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       "RefreshBookedClassesLambda",
       {
         runtime: lambda.Runtime.NODEJS_18_X,
-        handler: "refresh-booked-classes.handler",
-        code: lambda.Code.fromAsset("./dist"),
-        environment: {},
+        handler: "lambda/refresh-booked-classes.handler",
+        code: lambda.Code.fromAsset("dist"),
+        vpc: vpc,
+        securityGroups: [dbSecurityGroup],
+        environment: {
+          DATABASE_URL: databaseUrl,
+        },
       }
     );
+
+    dbCredentialsSecret.grantRead(refreshBookedClassesLambda);
 
     // EventBridge Rule for Lambda
     const rule = new events.Rule(this, "HourlyRefreshRule", {

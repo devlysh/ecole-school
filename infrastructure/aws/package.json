@@ -5,11 +5,11 @@
     "infrastructure": "bin/infrastructure.js"
   },
   "scripts": {
-    "build": "esbuild lambda/refresh-booked-classes.ts --bundle --platform=node --target=node18 --outdir=dist",
+    "build": "esbuild lambda/refresh-booked-classes.ts --bundle --platform=node --target=node18 --outdir=dist/lambda",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "postbuild": "mkdir -p dist/.prisma/client && cp -r ../../node_modules/.prisma/client dist/.prisma/client"
+    "postbuild": "mkdir -p dist/node_modules/.prisma/client && cp -r ../../node_modules/.prisma/client dist/node_modules/.prisma/"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
