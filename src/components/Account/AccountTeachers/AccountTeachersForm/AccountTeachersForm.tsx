@@ -160,6 +160,13 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
     formik.setFieldValue("languages", selectedLanguages);
   };
 
+  const handleTimezoneChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const newTimezone = event.target.value;
+    formik.setFieldValue("timezone", newTimezone);
+  };
+
   return (
     <div className="w-full">
       <form onSubmit={formik.handleSubmit} className="flex flex-wrap w-full">
@@ -200,13 +207,15 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
           <Select
             placeholder="Select Timezone"
             value={formik.values.timezone}
-            onChange={formik.handleChange}
+            onChange={handleTimezoneChange}
             label="Timezone"
             required
-            isDisabled
             defaultSelectedKeys={[formik.values.timezone]}
           >
             <SelectItem key="utc">UTC</SelectItem>
+            <SelectItem key="Europe/London">London</SelectItem>
+            <SelectItem key="America/New_York">New York</SelectItem>
+            <SelectItem key="America/Los_Angeles">Los Angeles</SelectItem>
           </Select>
         </div>
         <div className="w-1/2 p-2">
@@ -228,6 +237,7 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
             ))}
           </Select>
         </div>
+        {formik.values.timezone}
         <div className="w-full mt-4">
           <ScheduleCalendar
             email={email ?? ""}
@@ -235,6 +245,7 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
             vacations={vacations}
             setTimeSlots={setTimeSlots}
             setVacations={setVacations}
+            timeZone={formik.values.timezone}
           />
         </div>
         <div className="w-full p-2">

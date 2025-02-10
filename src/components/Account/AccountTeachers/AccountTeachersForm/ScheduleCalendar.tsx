@@ -4,6 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import rrulePlugin from "@fullcalendar/rrule";
+import momentTimezonePlugin from "@fullcalendar/moment-timezone";
 import { ALL_WEEKDAYS, RRule } from "rrule";
 import {
   DateSelectArg,
@@ -27,6 +28,7 @@ interface ScheduleCalendarProps {
   vacations: EventInput[];
   setTimeSlots?: React.Dispatch<React.SetStateAction<EventInput[]>>;
   setVacations?: React.Dispatch<React.SetStateAction<EventInput[]>>;
+  timeZone: string;
 }
 
 const DEFAULT_RECURRENCE_RULE = new RRule({
@@ -115,6 +117,7 @@ export default function ScheduleCalendar({
   vacations,
   setTimeSlots,
   setVacations,
+  timeZone,
 }: ScheduleCalendarProps) {
   const [isRecurrent, setIsRecurrent] = useState<boolean>(true);
   const [endCondition, setEndCondition] = useState<EndCondition>(
@@ -280,9 +283,10 @@ export default function ScheduleCalendar({
           timeGridPlugin,
           interactionPlugin,
           rrulePlugin,
+          momentTimezonePlugin,
         ]}
         initialView="timeGridWeek"
-        timeZone="UTC"
+        timeZone={timeZone}
         locale="en-US"
         nowIndicator
         /*

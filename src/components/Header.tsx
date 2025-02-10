@@ -11,8 +11,6 @@ import CreditCountBadge from "./CreditCountBadge";
 const Header: React.FC<{ roles: string[] }> = ({ roles }) => {
   const { isLoggedIn } = useAuth();
 
-  logger.debug({ roles }, "DEBUG");
-
   return (
     <header className="flex items-center justify-between max-w-screen-xl mx-auto p-4">
       <Link href="/">
