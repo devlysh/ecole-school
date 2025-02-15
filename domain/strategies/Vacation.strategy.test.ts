@@ -1,11 +1,11 @@
-import { IsOnVacationStrategy } from "./IsOnVacation.strategy";
+import { VacationStrategy } from "./Vacation.strategy";
 import { SlotAvailibilityContext } from "./SlotAvailibilityStrategy.interface";
 
-describe("IsOnVacationStrategy", () => {
-  let strategy: IsOnVacationStrategy;
+describe("VacationStrategy", () => {
+  let strategy: VacationStrategy;
 
   beforeEach(() => {
-    strategy = new IsOnVacationStrategy();
+    strategy = new VacationStrategy();
   });
 
   it("should return true if the slot is not during a vacation", () => {

@@ -14,7 +14,7 @@ export enum PermittedTimeDirection {
   AFTER = "after",
 }
 
-export class IsAtPermittedTimeStrategy implements SlotAvailibilityStrategy {
+export class PermittedTimeStrategy implements SlotAvailibilityStrategy {
   constructor(
     private timeThreshold: number,
     private timeThresholdUnit: PermittedTimeUnit,
@@ -26,7 +26,7 @@ export class IsAtPermittedTimeStrategy implements SlotAvailibilityStrategy {
     const { dateTime, slot, isRecurrentSchedule } = context;
 
     if (!dateTime || !slot || typeof isRecurrentSchedule !== "boolean") {
-      logger.warn("Missing context in IsAtPermittedTimeStrategy");
+      logger.warn("Missing context in PermittedTimeStrategy");
       return true;
     }
 

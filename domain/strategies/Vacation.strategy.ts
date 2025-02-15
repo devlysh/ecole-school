@@ -4,14 +4,14 @@ import {
   SlotAvailibilityStrategy,
 } from "./SlotAvailibilityStrategy.interface";
 
-export class IsOnVacationStrategy implements SlotAvailibilityStrategy {
+export class VacationStrategy implements SlotAvailibilityStrategy {
   constructor() {}
 
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { dateTime, slot, vacations } = context;
 
     if (!dateTime || !slot || !vacations) {
-      logger.warn("Missing context in IsOnVacationStrategy");
+      logger.warn("Missing context in VacationStrategy");
       return true;
     }
 

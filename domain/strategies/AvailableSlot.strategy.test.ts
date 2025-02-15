@@ -1,12 +1,12 @@
-import { IsSlotAvailableStrategy } from "./IsSlotAvailable.strategy";
+import { AvailableSlotStrategy } from "./AvailableSlot.strategy";
 import { AvailableSlot } from "@prisma/client";
 import { RRule } from "rrule";
 
-describe("IsAvailableSlotStrategy", () => {
-  let strategy: IsSlotAvailableStrategy;
+describe("AvailableSlotStrategy", () => {
+  let strategy: AvailableSlotStrategy;
 
   beforeEach(() => {
-    strategy = new IsSlotAvailableStrategy();
+    strategy = new AvailableSlotStrategy();
   });
 
   it("should return true for a slot within the time range without rrule", () => {

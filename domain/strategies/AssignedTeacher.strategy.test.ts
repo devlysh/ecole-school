@@ -1,7 +1,7 @@
-import { IsAssignedTeacherStrategy } from "./IsAssignedTeacher.strategy";
+import { AssignedTeacherStrategy } from "./AssignedTeacher.strategy";
 import { AvailableSlot } from "@prisma/client";
 
-describe("IsAssignedTeacherStrategy", () => {
+describe("AssignedTeacherStrategy", () => {
   it("should validate a slot assigned to the correct teacher", () => {
     const slot: AvailableSlot = {
       id: 1,
@@ -11,7 +11,7 @@ describe("IsAssignedTeacherStrategy", () => {
       rrule: null,
     };
 
-    const strategy = new IsAssignedTeacherStrategy();
+    const strategy = new AssignedTeacherStrategy();
     expect(
       strategy.isAvailable({
         slot,
@@ -29,7 +29,7 @@ describe("IsAssignedTeacherStrategy", () => {
       rrule: null,
     };
 
-    const strategy = new IsAssignedTeacherStrategy();
+    const strategy = new AssignedTeacherStrategy();
     expect(
       strategy.isAvailable({
         slot,

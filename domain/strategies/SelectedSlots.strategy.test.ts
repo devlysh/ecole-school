@@ -1,12 +1,12 @@
-import { HandleSelectedSlotsStrategy } from "./HandleSelectedSlots.strategy";
+import { SelectedSlotsStrategy } from "./SelectedSlots.strategy";
 import { AvailableSlot } from "@prisma/client";
 import { SlotAvailibilityContext } from "./SlotAvailibilityStrategy.interface";
 
-describe("HandleSelectedSlotsStrategy", () => {
-  let strategy: HandleSelectedSlotsStrategy;
+describe("SelectedSlotsStrategy", () => {
+  let strategy: SelectedSlotsStrategy;
 
   beforeEach(() => {
-    strategy = new HandleSelectedSlotsStrategy();
+    strategy = new SelectedSlotsStrategy();
   });
 
   it("should return true if teacher matches", () => {

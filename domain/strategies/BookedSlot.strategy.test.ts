@@ -1,7 +1,7 @@
-import { IsSlotBookedStrategy } from "./IsSlotBooked.strategy";
+import { BookedSlotStrategy } from "./BookedSlot.strategy";
 import { AvailableSlot, BookedClass } from "@prisma/client";
 
-describe("BookedClassStrategy", () => {
+describe("BookedSlotStrategy", () => {
   it("should return true if the slot is not booked", () => {
     const bookedClasses: BookedClass[] = [];
     const availableSlots: AvailableSlot[] = [
@@ -13,7 +13,7 @@ describe("BookedClassStrategy", () => {
         rrule: null,
       },
     ];
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
     const dateTime = new Date("2023-01-01T09:00:00Z");
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
@@ -40,7 +40,7 @@ describe("BookedClassStrategy", () => {
     ];
     const dateTime = new Date("2023-01-01T09:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
@@ -67,7 +67,7 @@ describe("BookedClassStrategy", () => {
     ];
     const dateTime = new Date("2023-01-08T09:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
@@ -93,13 +93,13 @@ describe("BookedClassStrategy", () => {
 
     const dateTime = new Date("2023-01-09T09:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
   });
 });
 
-describe("IsSlotBookedStrategy Additional Tests", () => {
+describe("BookedSlotStrategy Additional Tests", () => {
   it("should return true if there are no bookings", () => {
     const bookedClasses: BookedClass[] = [];
     const availableSlots: AvailableSlot[] = [
@@ -111,7 +111,7 @@ describe("IsSlotBookedStrategy Additional Tests", () => {
         rrule: null,
       },
     ];
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
     const dateTime = new Date("2023-01-01T09:00:00Z");
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
@@ -136,7 +136,7 @@ describe("IsSlotBookedStrategy Additional Tests", () => {
         rrule: null,
       },
     ];
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
     const dateTime = new Date("2023-01-01T09:30:00Z");
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
@@ -153,7 +153,7 @@ describe("IsSlotBookedStrategy Additional Tests", () => {
         rrule: "INVALID_RRULE",
       },
     ];
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
     const dateTime = new Date("2023-01-01T09:00:00Z");
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
@@ -178,7 +178,7 @@ describe("IsSlotBookedStrategy Additional Tests", () => {
         rrule: null,
       },
     ];
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
     const dateTime = new Date("2023-01-01T14:00:00Z"); // Equivalent to 09:00 in -05:00
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
@@ -203,7 +203,7 @@ describe("IsSlotBookedStrategy Additional Tests", () => {
         rrule: null,
       },
     ];
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
     const dateTime = new Date("2023-01-01T09:00:00Z");
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
@@ -220,14 +220,14 @@ describe("IsSlotBookedStrategy Additional Tests", () => {
         rrule: "FREQ=WEEKLY;BYDAY=MO",
       },
     ];
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
     const dateTime = new Date("2023-01-01T09:00:00Z");
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
   });
 });
 
-describe("IsSlotBookedStrategy - Weekly Recurrence", () => {
+describe("BookedSlotStrategy - Weekly Recurrence", () => {
   it("should return false for a slot booked on Monday at 08:00", () => {
     const bookedClasses: BookedClass[] = [
       {
@@ -249,7 +249,7 @@ describe("IsSlotBookedStrategy - Weekly Recurrence", () => {
     ];
     const dateTime = new Date("2025-01-06T08:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
@@ -276,7 +276,7 @@ describe("IsSlotBookedStrategy - Weekly Recurrence", () => {
     ];
     const dateTime = new Date("2025-01-10T08:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(false);
@@ -295,7 +295,7 @@ describe("IsSlotBookedStrategy - Weekly Recurrence", () => {
     ];
     const dateTime = new Date("2025-01-06T09:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
@@ -314,7 +314,7 @@ describe("IsSlotBookedStrategy - Weekly Recurrence", () => {
     ];
     const dateTime = new Date("2025-01-10T09:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
@@ -333,7 +333,7 @@ describe("IsSlotBookedStrategy - Weekly Recurrence", () => {
     ];
     const dateTime = new Date("2025-01-07T08:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);
@@ -352,7 +352,7 @@ describe("IsSlotBookedStrategy - Weekly Recurrence", () => {
     ];
     const dateTime = new Date("2025-01-11T08:00:00Z");
 
-    const strategy = new IsSlotBookedStrategy();
+    const strategy = new BookedSlotStrategy();
     const slot: AvailableSlot = availableSlots[0];
 
     expect(strategy.isAvailable({ slot, dateTime, bookedClasses })).toBe(true);

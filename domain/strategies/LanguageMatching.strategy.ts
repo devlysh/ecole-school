@@ -1,17 +1,20 @@
+import logger from "@/lib/logger";
 import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,
 } from "./SlotAvailibilityStrategy.interface";
 
-export class IsLanguageMatchingStrategy implements SlotAvailibilityStrategy {
+export class LanguageMatchingStrategy implements SlotAvailibilityStrategy {
   public isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, teachersLanguages, studentLanguages } = context;
 
-    if (!studentLanguages || !studentLanguages.length) {
-      return false;
-    }
-
-    if (!slot || !teachersLanguages) {
+    if (
+      !studentLanguages ||
+      !studentLanguages.length ||
+      !slot ||
+      !teachersLanguages
+    ) {
+      logger.warn("Missing context in LanguageMatchingStrategy");
       return false;
     }
 

@@ -3,9 +3,9 @@ import { AvailableSlotsRepository } from "@domain/repositories/AvailableSlots.re
 import { BookedClassesRepository } from "@domain/repositories/BookedClasses.repository";
 import { UsersRepository } from "@domain/repositories/Users.repository";
 import { AvailableSlot, BookedClass, Student, User } from "@prisma/client";
-import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.strategy";
-import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
-import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlots.strategy";
+import { AvailableSlotStrategy } from "@domain/strategies/AvailableSlot.strategy";
+import { BookedSlotStrategy } from "@domain/strategies/BookedSlot.strategy";
+import { SelectedSlotsStrategy } from "@domain/strategies/SelectedSlots.strategy";
 import { SlotAvailibilityStrategy } from "@domain/strategies/SlotAvailibilityStrategy.interface";
 import { VacationsRepository } from "@domain/repositories/Vacations.repostiroy";
 
@@ -81,9 +81,9 @@ describe("AvailableHoursService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStrategies = [
-      new IsSlotAvailableStrategy(),
-      new IsSlotBookedStrategy(),
-      new HandleSelectedSlotsStrategy(),
+      new AvailableSlotStrategy(),
+      new BookedSlotStrategy(),
+      new SelectedSlotsStrategy(),
     ];
     service = new AvailableSlotsService({
       strategies: mockStrategies,

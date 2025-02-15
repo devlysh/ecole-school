@@ -6,12 +6,12 @@ import {
 import logger from "@/lib/logger";
 import { AvailableSlot } from "@prisma/client";
 
-export class IsSlotAvailableStrategy implements SlotAvailibilityStrategy {
+export class AvailableSlotStrategy implements SlotAvailibilityStrategy {
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, dateTime } = context;
 
     if (!slot || !dateTime) {
-      logger.warn("Missing context in IsSlotAvailableStrategy");
+      logger.warn("Missing context in AvailableSlotStrategy");
       return true;
     }
 

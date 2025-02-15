@@ -4,20 +4,20 @@ import {
 } from "./SlotAvailibilityStrategy.interface";
 import logger from "@/lib/logger";
 
-export class HandleSelectedSlotsStrategy implements SlotAvailibilityStrategy {
+export class SelectedSlotsStrategy implements SlotAvailibilityStrategy {
   constructor() {}
 
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, selectedTeacherIds } = context;
 
     if (!slot) {
-      logger.warn("Missing slot in context in HandleSelectedSlotsStrategy");
+      logger.warn("Missing slot in context in SelectedSlotsStrategy");
       return false;
     }
 
     if (!selectedTeacherIds) {
       logger.warn(
-        "Missing selectedTeacherIds in context in HandleSelectedSlotsStrategy"
+        "Missing selectedTeacherIds in context in eSelectedSlotsStrategy"
       );
       return true;
     }

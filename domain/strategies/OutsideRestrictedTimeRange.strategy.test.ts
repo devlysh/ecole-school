@@ -1,12 +1,12 @@
 import {
-  IsOutsideRestrictedTimeRangeStrategy,
+  OutsideRestrictedTimeRangeStrategy,
   RestrictedTimeDirection,
   RestrictedTimeUnit,
-} from "./IsOutsideRestrictedTimeRange.strategy";
+} from "./OutsideRestrictedTimeRange.strategy";
 
 describe("BookingWindowStrategy", () => {
   it("should return true for a slot that is at least two days in the future", () => {
-    const strategy = new IsOutsideRestrictedTimeRangeStrategy(
+    const strategy = new OutsideRestrictedTimeRangeStrategy(
       2,
       RestrictedTimeUnit.DAYS,
       RestrictedTimeDirection.AFTER,
@@ -42,7 +42,7 @@ describe("BookingWindowStrategy", () => {
   });
 
   it("should return false for a slot that is less than two days in the past", () => {
-    const strategy = new IsOutsideRestrictedTimeRangeStrategy(
+    const strategy = new OutsideRestrictedTimeRangeStrategy(
       2,
       RestrictedTimeUnit.DAYS,
       RestrictedTimeDirection.BEFORE,
@@ -79,7 +79,7 @@ describe("BookingWindowStrategy", () => {
   });
 
   it("should return true for a slot that is at least two hours in the future", () => {
-    const strategy = new IsOutsideRestrictedTimeRangeStrategy(
+    const strategy = new OutsideRestrictedTimeRangeStrategy(
       2,
       RestrictedTimeUnit.HOURS,
       RestrictedTimeDirection.AFTER,
@@ -108,7 +108,7 @@ describe("BookingWindowStrategy", () => {
   });
 
   it("should return false for a slot that is less than two hours in the past", () => {
-    const strategy = new IsOutsideRestrictedTimeRangeStrategy(
+    const strategy = new OutsideRestrictedTimeRangeStrategy(
       2,
       RestrictedTimeUnit.HOURS,
       RestrictedTimeDirection.BEFORE,

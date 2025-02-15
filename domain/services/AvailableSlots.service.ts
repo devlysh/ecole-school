@@ -7,20 +7,20 @@ import {
   SlotAvailibilityContext,
   SlotAvailibilityStrategy,
 } from "@domain/strategies/SlotAvailibilityStrategy.interface";
-import { IsSlotAvailableStrategy } from "@domain/strategies/IsSlotAvailable.strategy";
-import { IsSlotBookedStrategy } from "@domain/strategies/IsSlotBooked.strategy";
-import { HandleSelectedSlotsStrategy } from "@domain/strategies/HandleSelectedSlots.strategy";
-import { IsAssignedTeacherStrategy } from "@domain/strategies/IsAssignedTeacher.strategy";
-import { IsOnVacationStrategy } from "@domain/strategies/IsOnVacation.strategy";
+import { AvailableSlotStrategy } from "@domain/strategies/AvailableSlot.strategy";
+import { BookedSlotStrategy } from "@domain/strategies/BookedSlot.strategy";
+import { SelectedSlotsStrategy } from "@domain/strategies/SelectedSlots.strategy";
+import { AssignedTeacherStrategy } from "@domain/strategies/AssignedTeacher.strategy";
+import { VacationStrategy } from "@domain/strategies/Vacation.strategy";
 import { VacationsRepository } from "@domain/repositories/Vacations.repostiroy";
 import {
-  IsAtPermittedTimeStrategy,
+  PermittedTimeStrategy,
   PermittedTimeDirection,
   PermittedTimeUnit,
-} from "@domain/strategies/IsAtPermittedTime.strategy";
-import { IsSlotRecurringStrategy } from "@domain/strategies/IsSlotRecurring.strategy";
-import { IsExTeachersSlotStrategy } from "@domain/strategies/IsExTeachersSlot.strategy";
-import { IsLanguageMatchingStrategy } from "@domain/strategies/IsLanguageMatching.strategy";
+} from "@domain/strategies/PermittedTime.strategy";
+import { RecurringSlotStrategy } from "@domain/strategies/RecurringSlot.strategy";
+import { TeachersSlotStrategy } from "@domain/strategies/TeachersSlot.strategy";
+import { LanguageMatchingStrategy } from "@domain/strategies/LanguageMatching.strategy";
 
 export interface AvailableSlotsServiceParams {
   userRepo?: UsersRepository;
@@ -182,7 +182,7 @@ export class AvailableSlotsService {
     selectedSlots: Date[]
   ): Set<number> {
     if (selectedSlots.length === 0) return new Set<number>();
-    const isSlotAvailStrategy = new IsSlotAvailableStrategy();
+    const isSlotAvailStrategy = new AvailableSlotStrategy();
 
     const teacherSlotsMap = availableSlots.reduce((acc, slot) => {
       if (!acc.has(slot.teacherId)) {
@@ -295,20 +295,20 @@ export class AvailableSlotsService {
 
   private getDefaultStrategies(config: Config): SlotAvailibilityStrategy[] {
     return [
-      new IsAtPermittedTimeStrategy(
+      new PermittedTimeStrategy(
         config.permittedTime.duration,
         config.permittedTime.unit,
         config.permittedTime.direction,
         config.permittedTime.date
       ),
-      new IsSlotAvailableStrategy(),
-      new IsSlotBookedStrategy(),
-      new HandleSelectedSlotsStrategy(),
-      new IsOnVacationStrategy(),
-      new IsExTeachersSlotStrategy(),
-      new IsAssignedTeacherStrategy(),
-      new IsSlotRecurringStrategy(),
-      new IsLanguageMatchingStrategy(),
+      new AvailableSlotStrategy(),
+      new BookedSlotStrategy(),
+      new SelectedSlotsStrategy(),
+      new VacationStrategy(),
+      new TeachersSlotStrategy(),
+      new AssignedTeacherStrategy(),
+      new RecurringSlotStrategy(),
+      new LanguageMatchingStrategy(),
     ];
   }
 

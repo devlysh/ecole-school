@@ -1,13 +1,13 @@
 import {
-  IsAtPermittedTimeStrategy,
+  PermittedTimeStrategy,
   PermittedTimeDirection,
   PermittedTimeUnit,
-} from "./IsAtPermittedTime.strategy";
+} from "./PermittedTime.strategy";
 
-describe("IsAtPermittedTimeStrategy", () => {
+describe("PermittedTimeStrategy", () => {
   describe("PermittedTimeDirection.AFTER", () => {
     it("should return true for a dateTime within the permitted time range (days after)", () => {
-      const strategy = new IsAtPermittedTimeStrategy(
+      const strategy = new PermittedTimeStrategy(
         2,
         PermittedTimeUnit.DAYS,
         PermittedTimeDirection.AFTER,
@@ -30,7 +30,7 @@ describe("IsAtPermittedTimeStrategy", () => {
     });
 
     it("should return false for a dateTime outside the permitted time range (days after)", () => {
-      const strategy = new IsAtPermittedTimeStrategy(
+      const strategy = new PermittedTimeStrategy(
         2,
         PermittedTimeUnit.DAYS,
         PermittedTimeDirection.AFTER,
@@ -63,7 +63,7 @@ describe("IsAtPermittedTimeStrategy", () => {
     });
 
     it("should return true for a dateTime within the permitted time range (hours after)", () => {
-      const strategy = new IsAtPermittedTimeStrategy(
+      const strategy = new PermittedTimeStrategy(
         5,
         PermittedTimeUnit.HOURS,
         PermittedTimeDirection.AFTER,
@@ -79,7 +79,7 @@ describe("IsAtPermittedTimeStrategy", () => {
     });
 
     it("should return false for a dateTime outside the permitted time range (hours after)", () => {
-      const strategy = new IsAtPermittedTimeStrategy(
+      const strategy = new PermittedTimeStrategy(
         5,
         PermittedTimeUnit.HOURS,
         PermittedTimeDirection.AFTER,
@@ -106,7 +106,7 @@ describe("IsAtPermittedTimeStrategy", () => {
 
   describe("PermittedTimeDirection.BEFORE", () => {
     it("should return true for a dateTime within the permitted time range (days before)", () => {
-      const strategy = new IsAtPermittedTimeStrategy(
+      const strategy = new PermittedTimeStrategy(
         2,
         PermittedTimeUnit.DAYS,
         PermittedTimeDirection.BEFORE,
@@ -129,7 +129,7 @@ describe("IsAtPermittedTimeStrategy", () => {
     });
 
     it("should return false for a dateTime outside the permitted time range (days before)", () => {
-      const strategy = new IsAtPermittedTimeStrategy(
+      const strategy = new PermittedTimeStrategy(
         2,
         PermittedTimeUnit.DAYS,
         PermittedTimeDirection.BEFORE,
@@ -162,7 +162,7 @@ describe("IsAtPermittedTimeStrategy", () => {
     });
 
     it("should return true for a dateTime within the permitted time range (hours before)", () => {
-      const strategy = new IsAtPermittedTimeStrategy(
+      const strategy = new PermittedTimeStrategy(
         5,
         PermittedTimeUnit.HOURS,
         PermittedTimeDirection.BEFORE,
@@ -178,7 +178,7 @@ describe("IsAtPermittedTimeStrategy", () => {
     });
 
     it("should return false for a dateTime outside the permitted time range (hours before)", () => {
-      const strategy = new IsAtPermittedTimeStrategy(
+      const strategy = new PermittedTimeStrategy(
         5,
         PermittedTimeUnit.HOURS,
         PermittedTimeDirection.BEFORE,
@@ -204,7 +204,7 @@ describe("IsAtPermittedTimeStrategy", () => {
   });
 
   it("should return true if dateTime is not provided", () => {
-    const strategy = new IsAtPermittedTimeStrategy(
+    const strategy = new PermittedTimeStrategy(
       2,
       PermittedTimeUnit.DAYS,
       PermittedTimeDirection.AFTER,
@@ -225,7 +225,7 @@ describe("IsAtPermittedTimeStrategy", () => {
   });
 
   it("should return true if  is not provided", () => {
-    const strategy = new IsAtPermittedTimeStrategy(
+    const strategy = new PermittedTimeStrategy(
       2,
       PermittedTimeUnit.DAYS,
       PermittedTimeDirection.AFTER,

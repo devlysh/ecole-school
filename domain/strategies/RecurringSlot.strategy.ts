@@ -5,13 +5,13 @@ import {
   SlotAvailibilityStrategy,
 } from "./SlotAvailibilityStrategy.interface";
 
-export class IsSlotRecurringStrategy implements SlotAvailibilityStrategy {
+export class RecurringSlotStrategy implements SlotAvailibilityStrategy {
   constructor() {}
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, isRecurrentSchedule } = context;
 
     if (!slot) {
-      logger.warn("Missing context in IsSlotRecurringStrategy");
+      logger.warn("Missing context in RecurringSlotStrategy");
       return true;
     }
 

@@ -1,7 +1,7 @@
 import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { CreditsRepository } from "@domain/repositories/Credits.repository";
-import { CreditService } from "@domain/services/Credit.service";
+import { CreditsService } from "@domain/services/Credits.service";
 import { EmailIsMissingError, UnauthorizedError } from "@/lib/errors";
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { UsersRepository } from "@domain/repositories/Users.repository";
@@ -21,7 +21,7 @@ export const GET = async () => {
       throw new UnauthorizedError("User is not a student");
     }
 
-    const creditService = new CreditService(new CreditsRepository());
+    const creditService = new CreditsService(new CreditsRepository());
 
     const creditCount = await creditService.getActiveCreditsCount(user.id);
 

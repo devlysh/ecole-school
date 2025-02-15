@@ -4,14 +4,14 @@ import {
   SlotAvailibilityStrategy,
 } from "./SlotAvailibilityStrategy.interface";
 
-export class IsAssignedTeacherStrategy implements SlotAvailibilityStrategy {
+export class AssignedTeacherStrategy implements SlotAvailibilityStrategy {
   constructor() {}
 
   isAvailable(context: SlotAvailibilityContext): boolean {
     const { slot, assignedTeacherId } = context;
 
     if (!slot) {
-      logger.warn("Missing context in IsAssignedTeacherStrategy");
+      logger.warn("Missing context in AssignedTeacherStrategy");
       return true;
     }
 

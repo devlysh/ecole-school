@@ -1,4 +1,4 @@
-import { BookedClassesRepository } from "../repositories/BookedClasses.repository";
+import { BookedClassesRepository } from "@domain/repositories/BookedClasses.repository";
 import { UsersRepository } from "@domain/repositories/Users.repository";
 import { StudentsRepository } from "@domain/repositories/Students.repository";
 import { AvailableSlotsService } from "./AvailableSlots.service";

@@ -13,7 +13,7 @@ export enum RestrictedTimeDirection {
   AFTER = "after",
 }
 
-export class IsOutsideRestrictedTimeRangeStrategy
+export class OutsideRestrictedTimeRangeStrategy
   implements SlotAvailibilityStrategy
 {
   constructor(
@@ -27,7 +27,7 @@ export class IsOutsideRestrictedTimeRangeStrategy
     const { dateTime } = context;
 
     if (!dateTime) {
-      logger.warn("Missing context in IsOutsideRestrictedTimeRangeStrategy");
+      logger.warn("Missing context in OutsideRestrictedTimeRangeStrategy");
       return false;
     }
 

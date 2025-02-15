@@ -1,7 +1,7 @@
 import { CreditsRepository } from "@domain/repositories/Credits.repository";
 import { Credit } from "@prisma/client";
 
-export class CreditService {
+export class CreditsService {
   constructor(private readonly creditRepository: CreditsRepository) {}
 
   public async addCredits(

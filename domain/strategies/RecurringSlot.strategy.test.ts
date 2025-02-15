@@ -1,9 +1,9 @@
-import { IsSlotRecurringStrategy } from "./IsSlotRecurring.strategy";
+import { RecurringSlotStrategy } from "./RecurringSlot.strategy";
 import { AvailableSlot } from "@prisma/client";
 
-describe("RecurringStrategy", () => {
+describe("RecurringSlotStrategy", () => {
   it("should validate recurring slots", () => {
-    const strategy = new IsSlotRecurringStrategy();
+    const strategy = new RecurringSlotStrategy();
     const recurringSlot: AvailableSlot = {
       id: 1,
       teacherId: 1,
@@ -17,7 +17,7 @@ describe("RecurringStrategy", () => {
   });
 
   it("should return true if the slot is not recurring", () => {
-    const strategy = new IsSlotRecurringStrategy();
+    const strategy = new RecurringSlotStrategy();
     const nonRecurringSlot: AvailableSlot = {
       id: 2,
       teacherId: 1,
@@ -34,7 +34,7 @@ describe("RecurringStrategy", () => {
   });
 
   it("should return false if the isRecurrentSchedule is true and rrule is falsy", () => {
-    const strategy = new IsSlotRecurringStrategy();
+    const strategy = new RecurringSlotStrategy();
     const nonRecurringSlot: AvailableSlot = {
       id: 2,
       teacherId: 1,
