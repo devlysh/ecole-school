@@ -16,7 +16,7 @@ export class CreditsRepository {
       where: {
         studentId,
         usedAt: null,
-        usedWithBookedClassId: null,
+        usedWithPaidClassId: null,
       },
     });
   }
@@ -33,14 +33,14 @@ export class CreditsRepository {
     });
   }
 
-  markAsUsed(creditId: number, bookedClass: number): Promise<Credit> {
+  markAsUsed(creditId: number, paidClassId: number): Promise<Credit> {
     return prisma.credit.update({
       where: {
         id: creditId,
       },
       data: {
         usedAt: new Date(),
-        usedWithBookedClassId: bookedClass,
+        usedWithPaidClassId: paidClassId,
       },
     });
   }

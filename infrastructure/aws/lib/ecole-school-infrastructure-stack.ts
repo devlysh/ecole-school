@@ -156,30 +156,25 @@ export class EcoleSchoolInfrastructureStack extends cdk.Stack {
       observabilityEnabled: true,
     };
 
-    // Lambda Function for Refreshing Booked Classes
-    const refreshBookedClassesLambda = new lambda.Function(
-      this,
-      "RefreshBookedClassesLambda",
-      {
-        runtime: lambda.Runtime.NODEJS_18_X,
-        handler: "lambda/refresh-booked-classes.handler",
-        code: lambda.Code.fromAsset("dist"),
-        vpc: vpc,
-        securityGroups: [dbSecurityGroup],
-        environment: {
-          DATABASE_URL: databaseUrl,
-        },
-      }
-    );
-
-    dbCredentialsSecret.grantRead(refreshBookedClassesLambda);
-
-    // EventBridge Rule for Lambda
-    const rule = new events.Rule(this, "HourlyRefreshRule", {
-      schedule: events.Schedule.expression("cron(0 * * * ? *)"),
+    const syncLambda = new lambda.Function(this, "SyncLambda", {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: "lambda/sync.handler",
+      code: lambda.Code.fromAsset("dist"),
+      vpc: vpc,
+      securityGroups: [dbSecurityGroup],
+      environment: {
+        DATABASE_URL: databaseUrl,
+      },
     });
 
-    rule.addTarget(new targets.LambdaFunction(refreshBookedClassesLambda));
+    dbCredentialsSecret.grantRead(syncLambda);
+
+    // EventBridge Rule for Lambda
+    const rule = new events.Rule(this, "HourlySyncRule", {
+      schedule: events.Schedule.expression("cron(55 * * * ? *)"),
+    });
+
+    rule.addTarget(new targets.LambdaFunction(syncLambda));
 
     // Outputs
     const logGroupName = `/aws/apprunner/${service.serviceName}/${service.serviceId}`;

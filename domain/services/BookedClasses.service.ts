@@ -11,7 +11,6 @@ import {
   UnauthorizedError,
   UserNotFoundError,
 } from "@/lib/errors";
-import logger from "@/lib/logger";
 
 export class BookedClassesService {
   private userRepository: UsersRepository;
@@ -26,11 +25,6 @@ export class BookedClassesService {
     this.bookedClassesRepository = new BookedClassesRepository();
     this.availableSlotsService = new AvailableSlotsService();
     this.availableSlotsRepository = new AvailableSlotsRepository();
-  }
-
-  public async refreshBookedClasses() {
-    const bookedClasses = await this.bookedClassesRepository.findAll();
-    logger.debug({ bookedClasses }, "Booked classes");
   }
 
   public async deleteAllBookedClassesById(studentId: number) {
@@ -227,6 +221,7 @@ export class BookedClassesService {
     );
     await this.bookedClassesRepository.create(singleClasses);
 
+    // creating a recurring class for future if the user doesn't want to delete future occurences
     if (!deleteFutureOccurences) {
       const nextWeekDate = addWeeks(classBeingDeletedDate, 1);
       const recurringClass: BookedClass = this.createRecurringClass(

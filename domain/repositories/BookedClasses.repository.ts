@@ -3,8 +3,8 @@ import { StudentClass } from "@/lib/types";
 import { BookedClass } from "@prisma/client";
 
 export class BookedClassesRepository {
-  create(bookedClasses: Omit<BookedClass, "id">[]) {
-    return prisma.bookedClass.createMany({ data: bookedClasses });
+  create(data: Omit<BookedClass, "id">[]) {
+    return prisma.bookedClass.createMany({ data });
   }
 
   findAll(): Promise<BookedClass[]> {

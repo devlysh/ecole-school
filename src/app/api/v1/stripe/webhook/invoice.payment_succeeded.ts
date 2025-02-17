@@ -1,12 +1,11 @@
 import logger from "@/lib/logger";
-import { CreditsRepository } from "@domain/repositories/Credits.repository";
 import { UsersRepository } from "@domain/repositories/Users.repository";
 import { CreditsService } from "@domain/services/Credits.service";
 import Stripe from "stripe";
 
 export async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   const userRepository = new UsersRepository();
-  const creditService = new CreditsService(new CreditsRepository());
+  const creditService = new CreditsService();
 
   const email = getEmail(invoice);
 
