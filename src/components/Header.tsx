@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/providers/AuthProvider";
 import { RoleName } from "@/lib/types";
-import logger from "@/lib/logger";
 import { CreditCountProvider } from "@/providers/CreditCountProvider";
 import CreditCountBadge from "./CreditCountBadge";
 

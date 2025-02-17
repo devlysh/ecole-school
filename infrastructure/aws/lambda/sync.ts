@@ -1,11 +1,13 @@
 import { SyncService } from "../../../domain/services/Sync.service";
+import logger from "../../../src/lib/logger";
 
 export const handler = async () => {
   try {
     const syncService = new SyncService();
     await syncService.sync();
-    console.log("Synced successfully.");
-  } catch (error) {
-    console.error("Error synchronizing", error);
+    logger.info("Synced successfully.");
+  } catch (err: unknown) {
+    logger.error(err, "Error synchronizing");
+    throw err;
   }
 };
