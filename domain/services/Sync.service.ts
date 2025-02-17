@@ -6,7 +6,7 @@ import { UnpaidClassesRepository } from "@domain/repositories/UnpaidClasses.repo
 import { BookedClass } from "@prisma/client";
 import { addHours, addWeeks, isSameHour, subDays } from "date-fns";
 
-const UNPAID_CLASS_LOOKBACK_DAYS = 7;
+const UNPAID_CLASS_LOOKBACK_DAYS = 2;
 const UNPAID_CLASS_LIMIT = 2;
 
 export class SyncService {
