@@ -67,6 +67,35 @@ model Language {
   @@map("languages")
 }
 
+model Student {
+  userId            Int    @id @map("user_id")
+  assignedTeacherId Int?   @map("assigned_teacher_id")
+  exTeacherIds      Int[]  @default([]) @map("ex_teacher_ids")
+  stripeCustomerId  String @unique @map("stripe_customer_id")
+
+  user             User              @relation(fields: [userId], references: [id])
+  teacher          Teacher?          @relation(fields: [assignedTeacherId], references: [userId])
+  bookedClasses    BookedClass[]
+  credits          Credit[]
+  studentLanguages StudentLanguage[]
+  PaidClass        PaidClass[]
+  UnpaidClass      UnpaidClass[]
+
+  @@index([assignedTeacherId], name: "idx_student_assigned_teacher_id")
+  @@map("students")
+}
+
+model StudentLanguage {
+  studentId  Int @map("student_id")
+  languageId Int @map("language_id")
+
+  student  Student  @relation(fields: [studentId], references: [userId])
+  language Language @relation(fields: [languageId], references: [id])
+
+  @@id([studentId, languageId])
+  @@map("student_languages")
+}
+
 model Teacher {
   userId Int @id @map("user_id")
 
@@ -76,6 +105,8 @@ model Teacher {
   availableSlots AvailableSlot[]
   bookedClasses  BookedClass[]
   vacations      Vacation[]
+  PaidClass      PaidClass[]
+  UnpaidClass    UnpaidClass[]
 
   @@map("teachers")
 }
@@ -91,15 +122,13 @@ model TeacherLanguage {
   @@map("teacher_languages")
 }
 
-model StudentLanguage {
-  studentId  Int @map("student_id")
-  languageId Int @map("language_id")
+model Vacation {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  teacherId Int      @map("teacher_id")
+  teacher   Teacher  @relation(fields: [teacherId], references: [userId])
 
-  student  Student  @relation(fields: [studentId], references: [userId])
-  language Language @relation(fields: [languageId], references: [id])
-
-  @@id([studentId, languageId])
-  @@map("student_languages")
+  @@map("vacations")
 }
 
 model AvailableSlot {
@@ -121,45 +150,41 @@ model BookedClass {
   teacher   Teacher  @relation(fields: [teacherId], references: [userId])
   teacherId Int      @map("teacher_id")
   recurring Boolean
-  credit    Credit[]
 
-  @@index([date, teacherId, studentId], name: "idx_booked_class_date_teacher_id_student_id")
   @@map("booked_classes")
 }
 
-model Vacation {
+model PaidClass {
   id        Int      @id @default(autoincrement())
   date      DateTime
-  teacherId Int      @map("teacher_id")
+  student   Student  @relation(fields: [studentId], references: [userId])
+  studentId Int      @map("student_id")
   teacher   Teacher  @relation(fields: [teacherId], references: [userId])
+  teacherId Int      @map("teacher_id")
+  credit    Credit[]
 
-  @@map("vacations")
+  @@map("paid_classes")
 }
 
-model Student {
-  userId            Int    @id @map("user_id")
-  assignedTeacherId Int?   @map("assigned_teacher_id")
-  exTeacherIds      Int[]  @default([]) @map("ex_teacher_ids")
-  stripeCustomerId  String @unique @map("stripe_customer_id")
+model UnpaidClass {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  student   Student  @relation(fields: [studentId], references: [userId])
+  studentId Int      @map("student_id")
+  teacher   Teacher  @relation(fields: [teacherId], references: [userId])
+  teacherId Int      @map("teacher_id")
 
-  user             User              @relation(fields: [userId], references: [id])
-  teacher          Teacher?          @relation(fields: [assignedTeacherId], references: [userId])
-  bookedClasses    BookedClass[]
-  credits          Credit[]
-  studentLanguages StudentLanguage[]
-
-  @@index([assignedTeacherId], name: "idx_student_assigned_teacher_id")
-  @@map("students")
+  @@map("unpaid_classes")
 }
 
 model Credit {
-  id                    Int          @id @default(autoincrement())
-  studentId             Int          @map("student_id")
-  student               Student      @relation(fields: [studentId], references: [userId])
-  addedAt               DateTime     @default(now()) @map("added_at")
-  usedAt                DateTime?    @map("used_at")
-  usedWithBookedClass   BookedClass? @relation(fields: [usedWithBookedClassId], references: [id])
-  usedWithBookedClassId Int?         @map("used_with_booked_class_id")
+  id                  Int        @id @default(autoincrement())
+  studentId           Int        @map("student_id")
+  student             Student    @relation(fields: [studentId], references: [userId])
+  addedAt             DateTime   @default(now()) @map("added_at")
+  usedAt              DateTime?  @map("used_at")
+  usedWithPaidClass   PaidClass? @relation(fields: [usedWithPaidClassId], references: [id])
+  usedWithPaidClassId Int?
 
   @@map("credits")
 }
