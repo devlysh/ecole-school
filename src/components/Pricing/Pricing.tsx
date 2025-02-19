@@ -14,17 +14,15 @@ import jwt from "jsonwebtoken";
 import { submitPlanRequest } from "@/app/api/v1/plans/request";
 import { toast } from "react-toastify";
 import { Language } from "@prisma/client";
+import { getLanguagesRequest } from "@/app/api/v1/languages/request";
+import { getCurrenciesRequest } from "@/app/api/v1/currencies/request";
+import { getPlansRequest } from "@/app/api/v1/stripe/plans/request";
 
-const Pricing = ({
-  languages,
-  currencies,
-  plans,
-}: {
-  languages: Language[];
-  currencies: Currency[];
-  plans: Plan[];
-}) => {
+const Pricing = () => {
   const router = useRouter();
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
 
   const defaultSelectedPrice = plans.find(
     (plan) => plan.currency === "usd" && plan.metadata.credits === 12
@@ -37,6 +35,22 @@ const Pricing = ({
     useState<Language["code"]>("en");
   const [selectedCurrency, setSelectedCurrency] =
     useState<Currency["code"]>("USD");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const [languages, currencies, plans] = await Promise.all([
+        getLanguagesRequest(),
+        getCurrenciesRequest(),
+        getPlansRequest(),
+      ]);
+
+      setLanguages(languages);
+      setCurrencies(currencies);
+      setPlans(plans);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     try {

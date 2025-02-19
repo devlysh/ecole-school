@@ -26,11 +26,7 @@ const PricingPage = async () => {
       redirect("/quiz");
     }
 
-    const { languages, currencies, plans } = await getPricingData();
-
-    return (
-      <Pricing languages={languages} currencies={currencies} plans={plans} />
-    );
+    return <Pricing />;
   } catch (err: unknown) {
     logger.error(err, "Error in PricingPage");
     redirect("/quiz");
@@ -38,11 +34,3 @@ const PricingPage = async () => {
 };
 
 export default PricingPage;
-
-const getPricingData = async () => {
-  const languages = await getLanguagesRequest();
-  const currencies = await getCurrenciesRequest();
-  const plans = await getPlansRequest();
-
-  return { languages, currencies, plans };
-};
