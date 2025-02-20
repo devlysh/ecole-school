@@ -2,6 +2,8 @@ import { handleErrorResponse } from "@/lib/errorUtils";
 import logger from "@/lib/logger";
 import { LanguagesRepository } from "@domain/repositories/Languages.repository";
 
+export const dynamic = "force-dynamic";
+
 export const GET = async () => {
   try {
     const languages = await new LanguagesRepository().findAll();

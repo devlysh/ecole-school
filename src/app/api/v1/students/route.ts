@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { UsersRepository } from "../../../../../domain/repositories/Users.repository";
 import Stripe from "stripe";
+import { verifyAccessToken } from "@/lib/jwt";
+import { UnauthorizedError } from "@/lib/errors";
+import { RoleName } from "@/lib/types";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2024-09-30.acacia",
@@ -19,8 +22,14 @@ type StudentRecord = {
   } | null;
 };
 
-export async function GET() {
+export const GET = async () => {
   try {
+    const decodedToken = await verifyAccessToken();
+
+    if (!decodedToken.roles.includes(RoleName.ADMIN)) {
+      throw new UnauthorizedError("You are not authorized to fetch teachers");
+    }
+
     const repo = new UsersRepository();
     const students = await repo.findAllStudents();
 
@@ -77,4 +86,4 @@ export async function GET() {
     console.error("Error in GET /students:", error);
     return NextResponse.error();
   }
-}
+};
