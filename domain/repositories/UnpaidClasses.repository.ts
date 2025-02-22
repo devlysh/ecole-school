@@ -4,10 +4,14 @@ import { UnpaidClass } from "@prisma/client";
 export class UnpaidClassesRepository {
   constructor() {}
 
-  create(studentId: number, teacherId: number): Promise<UnpaidClass> {
+  create(
+    studentId: number,
+    teacherId: number,
+    date: Date
+  ): Promise<UnpaidClass> {
     return prisma.unpaidClass.create({
       data: {
-        date: new Date(),
+        date,
         studentId,
         teacherId,
       },
