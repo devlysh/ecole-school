@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "booked_classes" ADD COLUMN     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

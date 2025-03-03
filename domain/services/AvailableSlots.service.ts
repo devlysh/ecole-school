@@ -21,6 +21,7 @@ import {
 import { RecurringSlotStrategy } from "@domain/strategies/RecurringSlot.strategy";
 import { TeachersSlotStrategy } from "@domain/strategies/TeachersSlot.strategy";
 import { LanguageMatchingStrategy } from "@domain/strategies/LanguageMatching.strategy";
+import { MIN_BOOKING_DAYS } from "@/lib/constants";
 
 export interface AvailableSlotsServiceParams {
   userRepo?: UsersRepository;
@@ -285,7 +286,7 @@ export class AvailableSlotsService {
   private getDefaultConfig(): Config {
     return {
       permittedTime: {
-        duration: 1,
+        duration: MIN_BOOKING_DAYS,
         unit: PermittedTimeUnit.DAYS,
         direction: PermittedTimeDirection.AFTER,
         date: new Date(),

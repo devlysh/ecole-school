@@ -145,6 +145,7 @@ model AvailableSlot {
 model BookedClass {
   id        Int      @id @default(autoincrement())
   date      DateTime
+  createdAt DateTime @default(now()) @map("created_at")
   student   Student  @relation(fields: [studentId], references: [userId])
   studentId Int      @map("student_id")
   teacher   Teacher  @relation(fields: [teacherId], references: [userId])

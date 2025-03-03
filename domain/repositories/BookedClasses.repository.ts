@@ -21,6 +21,7 @@ export class BookedClassesRepository {
       select: {
         id: true,
         date: true,
+        createdAt: true,
         recurring: true,
       },
     });

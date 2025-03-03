@@ -1,0 +1,4 @@
+export const MAX_BOOKING_DAYS = 31;
+export const MIN_BOOKING_DAYS = 2;
+export const MIN_MODIFY_BOOKING_DAYS = 3;
+export const RECENTLY_CREATED_BOOKING_MINUTES = 30;

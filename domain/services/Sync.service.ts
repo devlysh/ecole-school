@@ -97,6 +97,7 @@ export class SyncService {
             teacherId,
             date: nextOccurrence,
             recurring: true,
+            createdAt: now,
           },
         ]);
         logger.info(

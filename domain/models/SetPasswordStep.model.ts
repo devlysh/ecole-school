@@ -1,4 +1,4 @@
-import { FormFieldType, FormStep, StepType } from "./types";
+import { FormFieldType, FormStep, StepType } from "../../src/lib/types";
 
 export const setPasswordStep = {
   name: "password",

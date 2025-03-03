@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import { toast } from "react-toastify";
 import logger from "@/lib/logger";
 import { useStudentClasses } from "@/hooks/useStudentClasses";
@@ -16,6 +16,12 @@ import {
 } from "src/app/api/v1/booked-classes/[id]/request";
 import { determineBookedClassId } from "@/lib/utils";
 import useDeleteClass from "@/hooks/useDeleteClass";
+import { differenceInMinutes, addDays, isBefore } from "date-fns";
+import { StudentClass } from "@/lib/types";
+import {
+  MIN_MODIFY_BOOKING_DAYS,
+  RECENTLY_CREATED_BOOKING_MINUTES,
+} from "@/lib/constants";
 
 const AccountMyClassesStudent = () => {
   const creditCount = useCreditCount();
@@ -34,8 +40,34 @@ const AccountMyClassesStudent = () => {
   const { deleteFutureOccurences, setDeleteFutureOccurences } =
     useDeleteClass();
 
-  const handleRescheduleBooking = async () => {
+  const canModifyBooking = useCallback((selectedClass: StudentClass) => {
+    if (!selectedClass) return false;
+
+    const now = new Date();
+    const classDate = new Date(selectedClass.date);
+    const bookingTime = new Date(selectedClass.createdAt);
+
+    const isWithinMinBookingDays = isBefore(
+      classDate,
+      addDays(now, MIN_MODIFY_BOOKING_DAYS)
+    );
+    const wasRecentlyCreated =
+      differenceInMinutes(now, bookingTime) <= RECENTLY_CREATED_BOOKING_MINUTES;
+
+    return !(isWithinMinBookingDays && !wasRecentlyCreated);
+  }, []);
+
+  const handleRescheduleBooking = useCallback(async () => {
     if (!selectedClass || !rescheduleDate) return;
+
+    if (!canModifyBooking(selectedClass)) {
+      toast.error("Cannot reschedule classes within 3 days of the start time.");
+      logger.error(
+        { classDate: selectedClass.date, bookingTime: selectedClass.createdAt },
+        "Cannot reschedule classes within 3 days of the start time."
+      );
+      return;
+    }
 
     try {
       const bookedClassId = determineBookedClassId(selectedClass);
@@ -58,10 +90,25 @@ const AccountMyClassesStudent = () => {
     } finally {
       rescheduleClassModal.onClose();
     }
-  };
+  }, [
+    selectedClass,
+    rescheduleDate,
+    canModifyBooking,
+    fetchClasses,
+    rescheduleClassModal,
+  ]);
 
-  const handleDeleteBooking = async () => {
+  const handleDeleteBooking = useCallback(async () => {
     if (!selectedClass) return;
+
+    if (!canModifyBooking(selectedClass)) {
+      toast.error("Cannot cancel classes within 3 days of the start time.");
+      logger.error(
+        { classDate: selectedClass.date, bookingTime: selectedClass.createdAt },
+        "Cannot cancel classes within 3 days of the start time."
+      );
+      return;
+    }
 
     try {
       const bookedClassId = determineBookedClassId(selectedClass);
@@ -83,7 +130,14 @@ const AccountMyClassesStudent = () => {
     } finally {
       deleteClassModal.onClose();
     }
-  };
+  }, [
+    selectedClass,
+    canModifyBooking,
+    deleteFutureOccurences,
+    setClasses,
+    fetchClasses,
+    deleteClassModal,
+  ]);
 
   return (
     <div>

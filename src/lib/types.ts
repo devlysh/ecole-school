@@ -175,7 +175,10 @@ export interface Settings {
   // timeFormat: string;
 }
 
-export type StudentClass = Pick<BookedClass, "id" | "date" | "recurring">;
+export type StudentClass = Pick<
+  BookedClass,
+  "id" | "date" | "recurring" | "createdAt"
+>;
 
 export type TeacherClass = Pick<BookedClass, "id" | "date" | "recurring"> & {
   studentName: string;

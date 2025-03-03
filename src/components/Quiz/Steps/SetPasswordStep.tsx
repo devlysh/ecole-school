@@ -5,7 +5,7 @@ import { useCallback, useState, useEffect } from "react";
 import { setPasswordRequest } from "@/app/api/v1/password/request";
 import logger from "@/lib/logger";
 import { useRouter } from "next/navigation";
-import { setPasswordStep } from "@/lib/set-password-step.model";
+import { setPasswordStep } from "@domain/models/SetPasswordStep.model";
 import { TokenType } from "@/lib/types";
 import { toast } from "react-toastify";
 
