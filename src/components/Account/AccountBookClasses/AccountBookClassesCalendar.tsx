@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import { AvailableCalendarSlot } from "@/lib/types";
 import { addDays, format, startOfWeek, getDay } from "date-fns";
 
@@ -41,8 +47,13 @@ export const AccountBookClassesCalendar: React.FC<
 
   const [hourRange, setHourRange] = useState<number[]>(() => hours);
 
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
-    fetchAvailableSlots(weekStart, weekEnd);
+    if (isFirstRender.current) {
+      fetchAvailableSlots(weekStart, weekEnd);
+      isFirstRender.current = false;
+    }
   }, [weekStart, weekEnd, fetchAvailableSlots]);
 
   const handleWeekChange = useCallback(
