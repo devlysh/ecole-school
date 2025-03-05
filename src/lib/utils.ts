@@ -1,5 +1,6 @@
+import { MIN_BOOKING_DAYS } from "./constants";
 import { StudentClass, Plan, PlansMap, TeacherClass } from "./types";
-import { addMonths, addWeeks } from "date-fns";
+import { addDays, addMonths, addWeeks } from "date-fns";
 
 // Groups an array of plans by their currency and returns a map
 export const groupByCurrency = (plans: Plan[]): PlansMap => {
@@ -102,7 +103,9 @@ export const expandClasses = (classes: StudentClass[]) => {
 
 export const filterClasses = (classes: StudentClass[]) => {
   return classes.filter((classItem) => {
-    return new Date() < new Date(classItem.date);
+    return (
+      addDays(classItem.createdAt, MIN_BOOKING_DAYS) < new Date(classItem.date)
+    );
   });
 };
 

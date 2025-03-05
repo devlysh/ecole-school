@@ -1,3 +1,4 @@
+import { MIN_BOOKING_DAYS } from "@/lib/constants";
 import logger from "@/lib/logger";
 import prisma from "@/lib/prisma";
 import { BookedClassesRepository } from "@domain/repositories/BookedClasses.repository";
@@ -5,7 +6,14 @@ import { CreditsRepository } from "@domain/repositories/Credits.repository";
 import { PaidClassesRepository } from "@domain/repositories/PaidClasses.repository";
 import { UnpaidClassesRepository } from "@domain/repositories/UnpaidClasses.repository";
 import { BookedClass } from "@prisma/client";
-import { addHours, addWeeks, isSameHour, startOfHour, subDays } from "date-fns";
+import {
+  addDays,
+  addHours,
+  addWeeks,
+  isSameHour,
+  startOfHour,
+  subDays,
+} from "date-fns";
 
 const UNPAID_CLASS_LOOKBACK_DAYS = 2;
 const UNPAID_CLASS_LIMIT = 2;
@@ -37,8 +45,12 @@ export class SyncService {
     const nextHour = addHours(now, 1);
     const bookedClasses = await this.bookedClassesRepo.findAll();
 
-    return bookedClasses.filter(({ date, recurring }) => {
+    return bookedClasses.filter(({ date, recurring, createdAt }) => {
       if (recurring) {
+        if (addDays(createdAt, MIN_BOOKING_DAYS) < new Date(date)) {
+          return false;
+        }
+
         const sameWeekDay = date.getDay() === nextHour.getDay();
         const sameHourOfDay = date.getHours() === nextHour.getHours();
 
