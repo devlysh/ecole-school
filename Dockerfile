@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --force
 
 # Install Prisma CLI, dotenv-cli, and tsx globally
 RUN npm install -g prisma dotenv-cli tsx
