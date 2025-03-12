@@ -17,7 +17,7 @@ import {
 import { determineBookedClassId } from "@/lib/utils";
 import useDeleteClass from "@/hooks/useDeleteClass";
 import { differenceInMinutes, addDays, isBefore } from "date-fns";
-import { StudentClass } from "@/lib/types";
+import { DisplayBookedClass } from "@/lib/types";
 import {
   MIN_MODIFY_BOOKING_DAYS,
   RECENTLY_CREATED_BOOKING_MINUTES,
@@ -40,7 +40,7 @@ const AccountMyClassesStudent = () => {
   const { deleteFutureOccurences, setDeleteFutureOccurences } =
     useDeleteClass();
 
-  const canModifyBooking = useCallback((selectedClass: StudentClass) => {
+  const canModifyBooking = useCallback((selectedClass: DisplayBookedClass) => {
     if (!selectedClass) return false;
 
     const now = new Date();

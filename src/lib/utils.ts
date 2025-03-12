@@ -1,5 +1,5 @@
 import { MIN_BOOKING_DAYS } from "./constants";
-import { StudentClass, Plan, PlansMap, TeacherClass } from "./types";
+import { DisplayBookedClass, Plan, PlansMap, TeacherClass } from "./types";
 import { addDays, addMonths, addWeeks } from "date-fns";
 
 // Groups an array of plans by their currency and returns a map
@@ -57,15 +57,15 @@ export const getWeeklyOccurencesForPeriod = (
 };
 
 export const determineBookedClassId = (
-  selectedClass: StudentClass | TeacherClass
+  selectedClass: DisplayBookedClass | TeacherClass
 ) => {
   return selectedClass.recurring
     ? decodeClassId(selectedClass.id.toString()).bookedClassId
     : Number(selectedClass.id);
 };
 
-export const expandClasses = (classes: StudentClass[]) => {
-  return classes.flatMap((classItem: StudentClass) => {
+export const expandClasses = (classes: DisplayBookedClass[]) => {
+  return classes.flatMap((classItem: DisplayBookedClass) => {
     const classDate = new Date(classItem.date);
     const isRecurring = classItem.recurring === true;
     const classes = [];
@@ -101,7 +101,7 @@ export const expandClasses = (classes: StudentClass[]) => {
   });
 };
 
-export const filterClasses = (classes: StudentClass[]) => {
+export const filterClasses = (classes: DisplayBookedClass[]) => {
   return classes.filter((classItem) => {
     return (
       addDays(classItem.createdAt, MIN_BOOKING_DAYS) < new Date(classItem.date)
@@ -109,14 +109,14 @@ export const filterClasses = (classes: StudentClass[]) => {
   });
 };
 
-export const sortClasses = (classes: StudentClass[]) => {
+export const sortClasses = (classes: DisplayBookedClass[]) => {
   return classes.sort((a, b) => {
     return new Date(a.date).getTime() - new Date(b.date).getTime();
   });
 };
 
 export const markClassesWithCredit = (
-  classes: StudentClass[],
+  classes: DisplayBookedClass[],
   creditCount: number
 ) => {
   return classes.map((classItem, index) => {

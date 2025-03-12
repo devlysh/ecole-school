@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { StudentClass } from "@/lib/types";
+import { DisplayBookedClass } from "@/lib/types";
 import { BookedClass } from "@prisma/client";
 
 export class BookedClassesRepository {
@@ -15,7 +15,7 @@ export class BookedClassesRepository {
     return prisma.bookedClass.findUnique({ where: { id } });
   }
 
-  findByStudentId(studentId: number): Promise<StudentClass[]> {
+  findByStudentId(studentId: number): Promise<DisplayBookedClass[]> {
     return prisma.bookedClass.findMany({
       where: { studentId: studentId },
       select: {
@@ -29,12 +29,13 @@ export class BookedClassesRepository {
 
   findByTeacherId(
     teacherId: number
-  ): Promise<Pick<BookedClass, "id" | "date" | "recurring" | "studentId">[]> {
+  ): Promise<(DisplayBookedClass & { studentId: number })[]> {
     return prisma.bookedClass.findMany({
       where: { teacherId: teacherId },
       select: {
         id: true,
         date: true,
+        createdAt: true,
         recurring: true,
         studentId: true,
       },

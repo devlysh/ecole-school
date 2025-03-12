@@ -9,13 +9,13 @@ import {
   DatePicker,
 } from "@nextui-org/react";
 import { fromDate } from "@internationalized/date";
-import { StudentClass } from "@/lib/types";
+import { DisplayBookedClass } from "@/lib/types";
 
 interface RescheduleClassModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  selectedClass: StudentClass | null;
+  selectedClass: DisplayBookedClass | null;
   onChangeDate: (date: Date) => void;
 }
 

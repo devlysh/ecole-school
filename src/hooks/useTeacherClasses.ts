@@ -12,6 +12,7 @@ export const useTeacherClasses = () => {
   const fetchClasses = useCallback(async () => {
     try {
       let { teacher } = await fetchBookedClassesRequest();
+
       teacher = expandClasses(teacher);
       teacher = filterClasses(teacher);
       teacher = sortClasses(teacher);

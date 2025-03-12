@@ -1,7 +1,7 @@
 "use client";
 
 import logger from "@/lib/logger";
-import { StudentClass } from "@/lib/types";
+import { DisplayBookedClass } from "@/lib/types";
 import { useEffect, useState, useCallback } from "react";
 import { fetchBookedClassesRequest } from "src/app/api/v1/booked-classes/request";
 import { toast } from "react-toastify";
@@ -13,7 +13,7 @@ import {
 } from "@/lib/utils";
 
 export const useStudentClasses = (creditCount: number) => {
-  const [classes, setClasses] = useState<StudentClass[]>([]);
+  const [classes, setClasses] = useState<DisplayBookedClass[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchClasses = useCallback(async () => {

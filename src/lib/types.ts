@@ -175,7 +175,7 @@ export interface Settings {
   // timeFormat: string;
 }
 
-export type StudentClass = Pick<
+export type DisplayBookedClass = Pick<
   BookedClass,
   "id" | "date" | "recurring" | "createdAt"
 >;

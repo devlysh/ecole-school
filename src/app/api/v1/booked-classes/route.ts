@@ -3,11 +3,11 @@ import { verifyAccessToken } from "@/lib/jwt";
 import logger from "@/lib/logger";
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { EmailIsMissingError } from "@/lib/errors";
-import { StudentClass, TeacherClass, RoleName } from "@/lib/types";
+import { DisplayBookedClass, TeacherClass, RoleName } from "@/lib/types";
 import { UsersRepository } from "@domain/repositories/Users.repository";
 
 interface GetBookedClassesResponse {
-  student?: StudentClass[];
+  student?: DisplayBookedClass[];
   teacher?: TeacherClass[];
 }
 
@@ -46,6 +46,7 @@ export const GET = async () => {
       classes.teacher = teacherClasses.map((teacherClass) => ({
         id: teacherClass.id,
         date: teacherClass.date,
+        createdAt: teacherClass.createdAt,
         recurring: teacherClass.recurring,
         studentName:
           students.find((s) => s.id === teacherClass.studentId)?.name ?? "",

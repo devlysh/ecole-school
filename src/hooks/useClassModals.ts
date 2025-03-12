@@ -2,15 +2,15 @@
 
 import { useDisclosure } from "@nextui-org/react";
 import { useState, useCallback } from "react";
-import { StudentClass } from "@/lib/types";
+import { DisplayBookedClass } from "@/lib/types";
 
 const useClassModals = () => {
   const deleteClassModal = useDisclosure();
   const rescheduleClassModal = useDisclosure();
-  const [selectedClass, setSelectedClass] = useState<StudentClass | null>(null);
+  const [selectedClass, setSelectedClass] = useState<DisplayBookedClass | null>(null);
 
   const handleOpenDeleteBookingModal = useCallback(
-    (classItem: StudentClass) => {
+    (classItem: DisplayBookedClass) => {
       setSelectedClass(classItem);
       deleteClassModal.onOpen();
     },
@@ -23,7 +23,7 @@ const useClassModals = () => {
   }, [deleteClassModal]);
 
   const handleOpenRescheduleBookingModal = useCallback(
-    (classItem: StudentClass) => {
+    (classItem: DisplayBookedClass) => {
       setSelectedClass(classItem);
       rescheduleClassModal.onOpen();
     },
