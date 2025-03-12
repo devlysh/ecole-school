@@ -6,9 +6,22 @@ import { useAuth } from "@/providers/AuthProvider";
 import { RoleName } from "@/lib/types";
 import { CreditCountProvider } from "@/providers/CreditCountProvider";
 import CreditCountBadge from "./CreditCountBadge";
+import { fetchRolesRequest } from "@/app/api/v1/roles/request";
+import { useEffect, useMemo, useState } from "react";
 
-const Header: React.FC<{ roles: string[] }> = ({ roles }) => {
+const Header: React.FC = () => {
   const { isLoggedIn } = useAuth();
+  const [roles, setRoles] = useState<RoleName[]>([]);
+
+  const isStudent = useMemo(() => roles.includes(RoleName.STUDENT), [roles]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      const roles = await fetchRolesRequest();
+      setRoles(roles);
+    };
+    fetchRoles();
+  }, []);
 
   return (
     <header className="flex items-center justify-between max-w-screen-xl mx-auto p-4">
@@ -26,7 +39,7 @@ const Header: React.FC<{ roles: string[] }> = ({ roles }) => {
         <>
           <div className="flex w-full justify-end gap-4 px-8">
             <div>
-              {roles.includes(RoleName.STUDENT) && (
+              {isStudent && (
                 <CreditCountProvider>
                   <CreditCountBadge />
                 </CreditCountProvider>

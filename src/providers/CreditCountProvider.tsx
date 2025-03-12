@@ -12,7 +12,7 @@ import logger from "@/lib/logger";
 import { toast } from "react-toastify";
 
 interface CreditCountContextType {
-  creditCount: number;
+  creditCount: number | null;
   refreshCreditCount: () => void;
 }
 
@@ -25,7 +25,7 @@ interface CreditCountProviderProps {
 }
 
 export const CreditCountProvider = ({ children }: CreditCountProviderProps) => {
-  const [creditCount, setCreditCount] = useState(0);
+  const [creditCount, setCreditCount] = useState(null);
 
   const refreshCreditCount = async () => {
     try {

@@ -4,14 +4,14 @@ const CreditCountBadge = () => {
   const { creditCount } = useCreditCountContext();
 
   const creditWord =
-    creditCount.toString().endsWith("1") &&
-    !creditCount.toString().endsWith("11")
+    creditCount?.toString().endsWith("1") &&
+    !creditCount?.toString().endsWith("11")
       ? "credit"
       : "credits";
 
   return (
     <div>
-      {creditCount} {creditWord} left
+      {creditCount || "Loading"} {creditWord} left
     </div>
   );
 };

@@ -2,18 +2,22 @@ import React from "react";
 import AccountSidebar from "./AccountSidebar";
 import { redirect } from "next/navigation";
 import { verifyAccessToken } from "@/lib/jwt";
+import Header from "../Header";
 
 const AccountLayout = async ({ children }: { children: React.ReactNode }) => {
-  const { name, roles } = await verifyAccessToken();
+  const { name } = await verifyAccessToken();
 
-  if (!name || !roles) {
+  if (!name) {
     redirect("/logout");
   }
   return (
-    <div className="flex justify-center max-w-screen-xl mx-auto">
-      <AccountSidebar name={name} roles={roles} className="w-1/5" />
-      <main className="p-4 w-4/5">{children}</main>
-    </div>
+    <>
+      <Header />
+      <div className="flex justify-center max-w-screen-xl mx-auto">
+        <AccountSidebar name={name} className="w-1/5" />
+        <main className="p-4 w-4/5">{children}</main>
+      </div>
+    </>
   );
 };
 
