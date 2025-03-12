@@ -25,7 +25,7 @@ const ScheduleTeacherSection: React.FC<ScheduleTeacherSectionProps> = ({
             <Button
               onClick={() => {
                 deleteBookedClasses();
-                toast.success("Teacher classes deleted");
+                toast.success("Schedule removed");
               }}
               className="block w-full"
             >
