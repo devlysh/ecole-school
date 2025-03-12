@@ -7,7 +7,9 @@ import { DisplayBookedClass } from "@/lib/types";
 const useClassModals = () => {
   const deleteClassModal = useDisclosure();
   const rescheduleClassModal = useDisclosure();
-  const [selectedClass, setSelectedClass] = useState<DisplayBookedClass | null>(null);
+  const [selectedClass, setSelectedClass] = useState<DisplayBookedClass | null>(
+    null
+  );
 
   const handleOpenDeleteBookingModal = useCallback(
     (classItem: DisplayBookedClass) => {
