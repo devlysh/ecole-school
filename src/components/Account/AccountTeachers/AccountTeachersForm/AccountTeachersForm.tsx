@@ -237,7 +237,6 @@ const AccountTeachersForm: FC<AccountTeachersFormProps> = ({
             ))}
           </Select>
         </div>
-        {formik.values.timezone}
         <div className="w-full mt-4">
           <ScheduleCalendar
             email={email ?? ""}

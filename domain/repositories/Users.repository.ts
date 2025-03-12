@@ -261,13 +261,15 @@ export class UsersRepository {
     timezone: string,
     timeSlots: EventInput[],
     vacations: EventInput[],
-    teacherLanguages: Language[]
+    teacherLanguages: Language[],
+    passwordHash: string
   ): Promise<User> {
     return prisma.$transaction(async (tx) => {
       const updatedUser = await tx.user.update({
         where: { email },
         data: {
           name,
+          passwordHash,
           settings: { timezone },
           teacher: {
             update: {

@@ -8,6 +8,7 @@ import { BadRequestError, UnauthorizedError } from "@/lib/errors";
 import { handleErrorResponse } from "@/lib/errorUtils";
 import { verifyAccessToken } from "@/lib/jwt";
 import { UsersRepository } from "@domain/repositories/Users.repository";
+import bcrypt from "bcrypt";
 
 export const GET = async (
   request: Request,
@@ -37,12 +38,14 @@ export const PUT = async (
       throw new UnauthorizedError();
     }
 
-    const { name, timezone, timeSlots, vacations, languages } =
+    const { name, timezone, timeSlots, vacations, languages, password } =
       (await request.json()) as AddUpdateTeacherRequest;
 
     if (!name || !timezone) {
       throw new BadRequestError();
     }
+
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const updatedTeacher = await new UsersRepository().updateTeacherByEmail(
       params.email,
@@ -50,7 +53,8 @@ export const PUT = async (
       timezone,
       timeSlots,
       vacations,
-      languages
+      languages,
+      passwordHash
     );
 
     return Response.json(updatedTeacher, { status: 200 });
